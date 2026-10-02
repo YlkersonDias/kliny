@@ -8,7 +8,9 @@ public class Transaction
     public int UserId { get; set; }
     public string Description { get; set; } = string.Empty;
     public decimal Amount { get; set; }
-    public DateTime Date { get; set; }
+
+    // Só a data, sem hora: evita que o fuso mude o dia do lançamento nos relatórios.
+    public DateOnly Date { get; set; }
     public int? CategoryId { get; set; }
     public int? VaultId { get; set; }
 

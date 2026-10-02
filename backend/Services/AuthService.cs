@@ -1,19 +1,21 @@
 using Backend.Data;
 using Backend.DTOs.Auth;
+using Backend.Exceptions;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
-using MySqlConnector;
 
 namespace Backend.Services;
 
 public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthService
 {
+    private const string EmailInUseMessage = "Este e-mail já está cadastrado.";
+
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         var email = NormalizeEmail(request.Email);
 
         if (await db.Users.AnyAsync(u => u.Email == email))
-            throw new EmailAlreadyInUseException();
+            throw new ConflictException(EmailInUseMessage);
 
         var user = new User
         {
@@ -28,11 +30,9 @@ public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthSer
         {
             await db.SaveChangesAsync();
         }
-        // Dois cadastros simultâneos com o mesmo e-mail passam pela checagem acima;
-        // o índice único barra o segundo.
-        catch (DbUpdateException ex) when (ex.InnerException is MySqlException { ErrorCode: MySqlErrorCode.DuplicateKeyEntry })
+        catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            throw new EmailAlreadyInUseException();
+            throw new ConflictException(EmailInUseMessage);
         }
 
         return BuildResponse(user);

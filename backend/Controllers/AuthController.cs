@@ -16,15 +16,8 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status409Conflict)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        try
-        {
-            var response = await authService.RegisterAsync(request);
-            return CreatedAtAction(nameof(Me), response);
-        }
-        catch (EmailAlreadyInUseException ex)
-        {
-            return Problem(ex.Message, statusCode: StatusCodes.Status409Conflict);
-        }
+        var response = await authService.RegisterAsync(request);
+        return CreatedAtAction(nameof(Me), response);
     }
 
     [HttpPost("login")]

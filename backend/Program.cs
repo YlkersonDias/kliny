@@ -1,5 +1,6 @@
 using System.Text;
 using Backend.Data;
+using Backend.Exceptions;
 using Backend.Options;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
@@ -49,6 +50,12 @@ builder.Services.AddAuthorization();
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
+builder.Services.AddScoped<ICategoryService, CategoryService>();
+builder.Services.AddScoped<ITransactionService, TransactionService>();
+
+// Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
+builder.Services.AddProblemDetails();
+builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services.AddControllers();
 
@@ -56,6 +63,8 @@ builder.Services.AddControllers();
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
+
+app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())

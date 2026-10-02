@@ -55,3 +55,100 @@ Authorization: Bearer {{token}}
 
 ### Usuário logado sem token (401)
 GET {{baseUrl}}/api/auth/me
+
+############################## Categorias ##############################
+
+### Listar categorias (200)
+GET {{baseUrl}}/api/categories
+Authorization: Bearer {{token}}
+
+### Criar categoria (201)
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Alimentação"
+}
+
+### Criar categoria com nome repetido, ignorando maiúsculas e acentos (409)
+POST {{baseUrl}}/api/categories
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "alimentacao"
+}
+
+### Renomear categoria (200)
+PUT {{baseUrl}}/api/categories/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Mercado"
+}
+
+### Apagar categoria; as movimentações dela ficam sem categoria (204)
+DELETE {{baseUrl}}/api/categories/1
+Authorization: Bearer {{token}}
+
+############################ Movimentações #############################
+
+### Criar receita (201)
+POST {{baseUrl}}/api/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Salário",
+  "amount": 3500.00,
+  "date": "2026-10-01"
+}
+
+### Criar gasto com categoria (201)
+POST {{baseUrl}}/api/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Compras do mês",
+  "amount": -420.75,
+  "date": "2026-10-02",
+  "categoryId": 1
+}
+
+### Criar movimentação inválida: valor zero (400)
+POST {{baseUrl}}/api/transactions
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Inválida",
+  "amount": 0,
+  "date": "2026-10-02"
+}
+
+### Listar com filtros e paginação (200)
+# type: income, expense ou vault
+GET {{baseUrl}}/api/transactions?from=2026-10-01&to=2026-10-31&type=expense&page=1&pageSize=20
+Authorization: Bearer {{token}}
+
+### Detalhe (200)
+GET {{baseUrl}}/api/transactions/1
+Authorization: Bearer {{token}}
+
+### Atualizar (200)
+PUT {{baseUrl}}/api/transactions/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "description": "Salário de outubro",
+  "amount": 3600.00,
+  "date": "2026-10-01"
+}
+
+### Apagar (204)
+DELETE {{baseUrl}}/api/transactions/1
+Authorization: Bearer {{token}}

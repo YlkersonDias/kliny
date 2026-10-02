@@ -23,6 +23,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         modelBuilder.Entity<Category>(entity =>
         {
             entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+            // A collation do banco ignora maiúsculas e acentos: "Mercado" e "mercado" contam como iguais.
+            entity.HasIndex(c => new { c.UserId, c.Name }).IsUnique();
             entity.HasOne(c => c.User)
                 .WithMany(u => u.Categories)
                 .HasForeignKey(c => c.UserId)
