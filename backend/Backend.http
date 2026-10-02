@@ -211,3 +211,26 @@ Authorization: Bearer {{token}}
 ### Apagar cofre: só com saldo zero, e apaga também as movimentações dele (204 ou 409)
 DELETE {{baseUrl}}/api/vaults/1
 Authorization: Bearer {{token}}
+
+############################## Relatórios ##############################
+# from e to são obrigatórios. Nos relatórios, expense vem POSITIVO.
+
+### Resumo do período, com saldos no dia "to" (200)
+GET {{baseUrl}}/api/reports/summary?from=2026-10-01&to=2026-10-31
+Authorization: Bearer {{token}}
+
+### Gastos por categoria (200); type=income para receitas
+GET {{baseUrl}}/api/reports/by-category?from=2026-10-01&to=2026-10-31&type=expense
+Authorization: Bearer {{token}}
+
+### Linha do tempo por mês (200)
+GET {{baseUrl}}/api/reports/timeline?from=2026-01-01&to=2026-12-31&groupBy=month
+Authorization: Bearer {{token}}
+
+### Linha do tempo por dia, até 366 dias (200)
+GET {{baseUrl}}/api/reports/timeline?from=2026-10-01&to=2026-10-31&groupBy=day
+Authorization: Bearer {{token}}
+
+### Sem período (400)
+GET {{baseUrl}}/api/reports/summary
+Authorization: Bearer {{token}}
