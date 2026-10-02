@@ -35,6 +35,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
         {
             entity.Property(v => v.Name).HasMaxLength(100).IsRequired();
             entity.Property(v => v.Goal).HasPrecision(18, 2);
+            entity.HasIndex(v => new { v.UserId, v.Name }).IsUnique();
             entity.HasOne(v => v.User)
                 .WithMany(u => u.Vaults)
                 .HasForeignKey(v => v.UserId)

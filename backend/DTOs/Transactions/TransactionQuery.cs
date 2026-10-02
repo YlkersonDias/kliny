@@ -17,6 +17,10 @@ public class TransactionQuery : IValidatableObject
     public DateOnly? From { get; set; }
     public DateOnly? To { get; set; }
     public int? CategoryId { get; set; }
+
+    /// <summary>Extrato de um cofre: só as operações dele.</summary>
+    public int? VaultId { get; set; }
+
     public TransactionType? Type { get; set; }
 
     // Limite alto o bastante na prática e que impede o estouro do cálculo de Skip.

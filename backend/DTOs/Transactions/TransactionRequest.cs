@@ -5,9 +5,6 @@ namespace Backend.DTOs.Transactions;
 // Não tem VaultId: operações de cofre usam os endpoints de cofre.
 public class TransactionRequest : IValidatableObject
 {
-    // Maior valor absoluto que cabe em decimal(18,2).
-    private const decimal MaxAbsoluteAmount = 9_999_999_999_999_999.99m;
-
     [Required(ErrorMessage = "Informe a descrição.")]
     [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
     public string Description { get; set; } = string.Empty;
@@ -28,9 +25,7 @@ public class TransactionRequest : IValidatableObject
 
         if (amount == 0)
             yield return new ValidationResult("O valor não pode ser zero.", [nameof(Amount)]);
-        else if (decimal.Round(amount, 2) != amount)
-            yield return new ValidationResult("O valor deve ter no máximo duas casas decimais.", [nameof(Amount)]);
-        else if (Math.Abs(amount) > MaxAbsoluteAmount)
-            yield return new ValidationResult("O valor é grande demais.", [nameof(Amount)]);
+        else if (AmountRules.Validate(amount) is { } error)
+            yield return new ValidationResult(error, [nameof(Amount)]);
     }
 }

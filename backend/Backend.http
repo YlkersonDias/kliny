@@ -152,3 +152,62 @@ Content-Type: application/json
 ### Apagar (204)
 DELETE {{baseUrl}}/api/transactions/1
 Authorization: Bearer {{token}}
+
+################################ Cofres ################################
+
+### Listar cofres com saldo (200)
+GET {{baseUrl}}/api/vaults
+Authorization: Bearer {{token}}
+
+### Criar cofre (201)
+POST {{baseUrl}}/api/vaults
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Reserva de emergência",
+  "goal": 10000.00
+}
+
+### Detalhe com saldo (200)
+GET {{baseUrl}}/api/vaults/1
+Authorization: Bearer {{token}}
+
+### Alterar nome e meta (200)
+PUT {{baseUrl}}/api/vaults/1
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Reserva",
+  "goal": 12000.00
+}
+
+### Depositar; o valor é sempre positivo (200)
+POST {{baseUrl}}/api/vaults/1/deposit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 500.00,
+  "date": "2026-10-02"
+}
+
+### Retirar (200, ou 400 se passar do saldo)
+POST {{baseUrl}}/api/vaults/1/withdraw
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "amount": 150.00,
+  "date": "2026-10-03",
+  "description": "Conserto do carro"
+}
+
+### Extrato do cofre (200)
+GET {{baseUrl}}/api/transactions?vaultId=1
+Authorization: Bearer {{token}}
+
+### Apagar cofre: só com saldo zero, e apaga também as movimentações dele (204 ou 409)
+DELETE {{baseUrl}}/api/vaults/1
+Authorization: Bearer {{token}}

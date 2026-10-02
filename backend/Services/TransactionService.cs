@@ -24,6 +24,8 @@ public class TransactionService(AppDbContext db) : ITransactionService
             transactions = transactions.Where(t => t.Date <= to);
         if (query.CategoryId is { } categoryId)
             transactions = transactions.Where(t => t.CategoryId == categoryId);
+        if (query.VaultId is { } vaultId)
+            transactions = transactions.Where(t => t.VaultId == vaultId);
 
         transactions = query.Type switch
         {
