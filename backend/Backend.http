@@ -1,0 +1,57 @@
+@baseUrl = http://localhost:5228
+@token = cole_aqui_o_token_devolvido_no_cadastro_ou_login
+
+### Cadastro (201)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Usuário Teste",
+  "email": "teste@leafpay.local",
+  "password": "senha12345"
+}
+
+### Cadastro com e-mail repetido (409)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "Outro Usuário",
+  "email": "  TESTE@leafpay.local ",
+  "password": "senha12345"
+}
+
+### Cadastro inválido (400)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+
+{
+  "name": "",
+  "email": "nao-e-email",
+  "password": "curta"
+}
+
+### Login correto (200)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@leafpay.local",
+  "password": "senha12345"
+}
+
+### Login com senha errada (401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "teste@leafpay.local",
+  "password": "senhaerrada"
+}
+
+### Usuário logado (200)
+GET {{baseUrl}}/api/auth/me
+Authorization: Bearer {{token}}
+
+### Usuário logado sem token (401)
+GET {{baseUrl}}/api/auth/me
