@@ -57,7 +57,7 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Entrar" subtitle="Acesse sua conta para continuar.">
+    <AuthLayout title="Entrar" subtitle="Acesse sua conta para continuar." mascot>
       <form noValidate onSubmit={handleSubmit} className="space-y-4">
         {notice && !formError && <FormAlert variant="info">{notice}</FormAlert>}
         {formError && <FormAlert>{formError}</FormAlert>}
