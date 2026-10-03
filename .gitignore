@@ -10,7 +10,7 @@
 *.userosscache
 *.sln.docstates
 
-# --- Leaf Pay: Ajustes para Frontend (Vite/React) ---
+# --- Kliny: Ajustes para Frontend (Vite/React) ---
 dist/
 dist-ssr/
 *.local

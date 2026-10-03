@@ -7,7 +7,7 @@ Content-Type: application/json
 
 {
   "name": "Usuário Teste",
-  "email": "teste@leafpay.local",
+  "email": "teste@kliny.local",
   "password": "senha12345"
 }
 
@@ -17,7 +17,7 @@ Content-Type: application/json
 
 {
   "name": "Outro Usuário",
-  "email": "  TESTE@leafpay.local ",
+  "email": "  TESTE@kliny.local ",
   "password": "senha12345"
 }
 
@@ -36,7 +36,7 @@ POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "teste@leafpay.local",
+  "email": "teste@kliny.local",
   "password": "senha12345"
 }
 
@@ -45,7 +45,7 @@ POST {{baseUrl}}/api/auth/login
 Content-Type: application/json
 
 {
-  "email": "teste@leafpay.local",
+  "email": "teste@kliny.local",
   "password": "senhaerrada"
 }
 
