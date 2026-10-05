@@ -58,7 +58,8 @@ export function Modal({ title, onClose, children, initialFocusRef, size = 'md' }
           type="button"
           onClick={onClose}
           aria-label="Fechar"
-          className="-mr-2 -mt-1 rounded-lg p-2 text-muted transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
+          // 44 px no celular, 36 px a partir do md (como os outros botões só de ícone).
+          className="-mr-2 -mt-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary md:-mt-1 md:size-9"
         >
           <svg className="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" aria-hidden="true">
             <path d="M6 6l12 12M18 6 6 18" />

@@ -4,6 +4,7 @@ import { hasFutureEntries } from '../../lib/dashboard'
 import { formatDate } from '../../lib/dates'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { Icon } from '../ui/Icon'
+import { StatItem } from '../ui/StatItem'
 
 interface MonthSummaryCardProps {
   month: ReportPeriod
@@ -34,7 +35,7 @@ export function MonthSummaryCard({
   return (
     <section aria-labelledby="na-conta" className="rounded-2xl border border-border bg-surface p-5 sm:p-7">
       <p id="na-conta" className="text-sm text-muted">Na conta hoje</p>
-      <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums text-foreground sm:text-5xl">
+      <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums wrap-anywhere text-foreground sm:text-5xl">
         {formatBalance(todaySummary.accountBalance)}
       </p>
       {(todaySummary.vaultsBalance !== 0 || (vaultCount ?? 0) > 0) && (
@@ -52,31 +53,10 @@ export function MonthSummaryCard({
 
       <h2 className="text-lg font-semibold text-foreground">Este mês</h2>
       {/* Convenção dos relatórios: expense já vem positivo; formatOutflow só põe o "−". */}
-      <dl className="mt-3 grid grid-cols-1 gap-4 sm:grid-cols-3">
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-background text-income">
-            <Icon name="income" className="size-5" />
-          </span>
-          <div>
-            <dt className="text-sm text-muted">Entrou</dt>
-            <dd className="text-xl font-semibold tabular-nums text-income">{formatSigned(monthSummary.income)}</dd>
-          </div>
-        </div>
-        <div className="flex items-center gap-3">
-          <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-background text-expense">
-            <Icon name="expense" className="size-5" />
-          </span>
-          <div>
-            <dt className="text-sm text-muted">Saiu</dt>
-            <dd className="text-xl font-semibold tabular-nums text-expense">{formatOutflow(monthSummary.expense)}</dd>
-          </div>
-        </div>
-        <div className="flex items-center gap-3 sm:pl-2">
-          <div>
-            <dt className="text-sm text-muted">Sobrou</dt>
-            <dd className="text-xl font-semibold tabular-nums text-foreground">{formatSigned(monthSummary.net)}</dd>
-          </div>
-        </div>
+      <dl className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
+        <StatItem label="Entrou" value={formatSigned(monthSummary.income)} valueClass="text-income" icon={{ name: 'income', className: 'text-income' }} />
+        <StatItem label="Saiu" value={formatOutflow(monthSummary.expense)} valueClass="text-expense" icon={{ name: 'expense', className: 'text-expense' }} />
+        <StatItem label="Sobrou" value={formatSigned(monthSummary.net)} className="sm:pl-2" />
       </dl>
       {showFutureNote && (
         <p className="mt-3 text-sm text-muted">

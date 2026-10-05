@@ -5,7 +5,7 @@ import { CATEGORY_NAME_MAX, categoryNameError, validateCategoryName } from '../.
 import { Button } from '../ui/Button'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { FormAlert } from '../ui/FormAlert'
-import { Icon } from '../ui/Icon'
+import { IconButton } from '../ui/IconButton'
 import { Input } from '../ui/Input'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
@@ -206,19 +206,5 @@ function DeleteCategoryDialog({ category, onClose, onDeleted }: {
       <p>Apagar a categoria <strong className="font-semibold text-foreground">{category.name}</strong>?</p>
       <p className="mt-2">As movimentações desta categoria não serão apagadas: elas ficarão sem categoria.</p>
     </ConfirmDialog>
-  )
-}
-
-function IconButton({ icon, label, onClick }: { icon: 'edit' | 'trash'; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="rounded-lg p-2 text-muted transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
-    >
-      <Icon name={icon} className="size-4" />
-    </button>
   )
 }

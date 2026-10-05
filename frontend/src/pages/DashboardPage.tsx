@@ -43,7 +43,7 @@ export default function DashboardPage() {
         <div role="status" className="space-y-4">
           <span className="sr-only">Carregando…</span>
           <Placeholder className="h-80" />
-          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[3fr_2fr]">
+          <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
             <Placeholder className="h-72" />
             <Placeholder className="h-72" />
           </div>
@@ -71,7 +71,7 @@ export default function DashboardPage() {
       <div className="space-y-4">
         {monthSummary.isError || todaySummary.isError ? (
           <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
-            <FormAlert>{(monthSummary.error ?? todaySummary.error)?.message}</FormAlert>
+            <FormAlert>Não foi possível carregar o resumo do mês. {(monthSummary.error ?? todaySummary.error)?.message}</FormAlert>
             <Button
               variant="secondary"
               onClick={() => { void monthSummary.refetch(); void todaySummary.refetch() }}
@@ -103,7 +103,7 @@ export default function DashboardPage() {
           </MonthSummaryCard>
         )}
 
-        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[3fr_2fr]">
+        <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <RecentTransactions items={recent.data.items} />
           {vaults.isError ? (
             <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">

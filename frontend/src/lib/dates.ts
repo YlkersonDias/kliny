@@ -62,6 +62,14 @@ export function formatMonthYear(iso: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+// Instante da API (createdAt, em UTC com "Z") para a data local do navegador: "2026-10-06T01:30:00Z"
+// é 05/10/2026 no Brasil. Sem fuso no texto, trata como UTC (é como o backend grava).
+export function formatTimestampDate(timestamp: string): string {
+  const withZone = /(Z|[+-]\d{2}:\d{2})$/.test(timestamp) ? timestamp : `${timestamp}Z`
+  const date = new Date(withZone)
+  return Number.isNaN(date.getTime()) ? '' : formatDate(toIsoDate(date))
+}
+
 // "2026-10-02" vira "02/10/2026". Texto fora do formato volta como veio.
 export function formatDate(iso: string): string {
   const match = ISO_PATTERN.exec(iso)

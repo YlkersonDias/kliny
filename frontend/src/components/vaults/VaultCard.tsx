@@ -28,7 +28,7 @@ export function VaultCard({ vault, onOperation }: VaultCardProps) {
               {vault.name}
             </Link>
           </h2>
-          <p className="mt-0.5 text-2xl font-semibold tabular-nums text-foreground">{formatMoney(vault.balance)}</p>
+          <p className="mt-0.5 text-2xl font-semibold tabular-nums wrap-anywhere text-foreground">{formatMoney(vault.balance)}</p>
         </div>
       </div>
       <GoalProgress balance={vault.balance} goal={vault.goal} className="mt-4" />

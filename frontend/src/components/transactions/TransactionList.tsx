@@ -1,7 +1,7 @@
 import { Link } from 'react-router'
 import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
-import { Icon } from '../ui/Icon'
+import { IconButton } from '../ui/IconButton'
 import {
   TransactionAmount as Amount,
   TransactionCategory as CategoryLabel,
@@ -22,7 +22,7 @@ function Actions({ transaction, onEdit, onDelete }: { transaction: Transaction }
       <Link
         to={`/cofres/${transaction.vaultId}`}
         aria-label={`Ver cofre de ${transaction.description}`}
-        className="inline-block rounded px-2 py-1 text-sm font-semibold whitespace-nowrap text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+        className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold whitespace-nowrap text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary md:min-h-8"
       >
         Ver cofre
       </Link>
@@ -31,23 +31,9 @@ function Actions({ transaction, onEdit, onDelete }: { transaction: Transaction }
   const name = `${transaction.description} de ${formatDate(transaction.date)}`
   return (
     <div className="flex justify-end gap-1">
-      <ActionButton icon="edit" label={`Editar ${name}`} onClick={() => onEdit(transaction)} />
-      <ActionButton icon="trash" label={`Apagar ${name}`} onClick={() => onDelete(transaction)} />
+      <IconButton icon="edit" label={`Editar ${name}`} onClick={() => onEdit(transaction)} />
+      <IconButton icon="trash" label={`Apagar ${name}`} onClick={() => onDelete(transaction)} />
     </div>
-  )
-}
-
-function ActionButton({ icon, label, onClick }: { icon: 'edit' | 'trash'; label: string; onClick: () => void }) {
-  return (
-    <button
-      type="button"
-      onClick={onClick}
-      aria-label={label}
-      title={label}
-      className="rounded-lg p-2 text-muted transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary"
-    >
-      <Icon name={icon} className="size-4" />
-    </button>
   )
 }
 
@@ -55,7 +41,7 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
   return (
     <>
       {/* Desktop: tabela */}
-      <table className="hidden w-full text-left text-sm md:table">
+      <table className="hidden w-full text-left text-sm lg:table">
         <thead className="border-b border-border text-muted">
           <tr>
             <th scope="col" className="px-4 py-3 font-medium">Data</th>
@@ -86,7 +72,7 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
       </table>
 
       {/* Celular: cartões empilhados */}
-      <ul className="divide-y divide-border md:hidden">
+      <ul className="divide-y divide-border lg:hidden">
         {items.map((transaction) => (
           <li key={transaction.id} className="flex items-center gap-3 px-4 py-3">
             <KindIcon transaction={transaction} />

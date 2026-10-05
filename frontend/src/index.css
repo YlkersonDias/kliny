@@ -54,4 +54,11 @@
   body {
     @apply bg-background text-foreground antialiased;
   }
+
+  /* Títulos e <main> recebem foco por código ao trocar de página (useFocusOnRouteChange);
+     não são controles, então não mostram contorno. */
+  h1[tabindex="-1"]:focus,
+  main[tabindex="-1"]:focus {
+    outline: none;
+  }
 }

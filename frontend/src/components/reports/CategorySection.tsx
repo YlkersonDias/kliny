@@ -60,7 +60,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
             labelledBy="por-categoria"
             heightClass="h-64"
             chart={(
-              <div className="grid grid-cols-1 items-center gap-6 md:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
+              <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
                 <CategoryDonut slices={slices} total={total} totalLabel={`em ${noun}`} />
                 {/* Legenda visual (a tabela abaixo traz as mesmas informações para todos). */}
                 <ol className="min-w-0 divide-y divide-border">

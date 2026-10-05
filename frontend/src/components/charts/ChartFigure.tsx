@@ -23,7 +23,9 @@ export function ChartFigure({ labelledBy, chart, heightClass, caption, tableLabe
   return (
     <figure aria-labelledby={labelledBy} className="m-0">
       {before}
-      <div aria-hidden="true" className="mt-2">
+      {/* overflow-hidden: ao encolher a janela, o Recharts mantém a largura antiga por um instante
+          (até o ResponsiveContainer medir de novo) e empurrava a página para os lados. */}
+      <div aria-hidden="true" className="mt-2 overflow-hidden">
         <Suspense fallback={<div className={`${heightClass} rounded-lg bg-background motion-safe:animate-pulse`} />}>
           {chart}
         </Suspense>

@@ -61,7 +61,7 @@ export default function VaultsPage() {
       <>
         <div className="rounded-2xl border border-border bg-surface p-5">
           <p className="text-sm text-muted">Total guardado</p>
-          <p className="mt-1 text-3xl font-semibold tabular-nums text-foreground">
+          <p className="mt-1 text-3xl font-semibold tabular-nums wrap-anywhere text-foreground">
             {formatMoney(sumMoney(vaults.data.map((vault) => vault.balance)))}
           </p>
           <p className="mt-1 text-sm text-muted">

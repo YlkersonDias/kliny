@@ -1,6 +1,7 @@
 import { Route, Routes } from 'react-router'
 import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
+import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
@@ -11,6 +12,8 @@ import VaultDetailPage from './pages/VaultDetailPage'
 import VaultsPage from './pages/VaultsPage'
 
 export default function App() {
+  useFocusOnRouteChange()
+
   return (
     <Routes>
       <Route element={<PublicOnlyRoute />}>

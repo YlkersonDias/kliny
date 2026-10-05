@@ -13,6 +13,7 @@ import { VaultStatement } from '../components/vaults/VaultStatement'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useTransactions } from '../hooks/useTransactions'
 import { useVault } from '../hooks/useVaults'
+import { formatTimestampDate } from '../lib/dates'
 import { formatMoney } from '../lib/money'
 import { PAGE_SIZE, parsePage } from '../lib/transactionFilters'
 import { goalProgress } from '../lib/vaults'
@@ -109,10 +110,14 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-background text-vault">
               <Icon name="vault" />
             </span>
-            <h1 className="min-w-0 break-words text-2xl font-semibold text-foreground">{vault.name}</h1>
+            <div className="min-w-0">
+              <h1 className="break-words text-2xl font-semibold text-foreground">{vault.name}</h1>
+              {/* createdAt chega em UTC com "Z"; a data mostrada é a local. */}
+              <p className="text-sm text-muted">Criado em {formatTimestampDate(vault.createdAt)}</p>
+            </div>
           </div>
           <p className="mt-4 text-sm text-muted">Saldo</p>
-          <p className="text-3xl font-semibold tabular-nums text-foreground">{formatMoney(vault.balance)}</p>
+          <p className="text-3xl font-semibold tabular-nums wrap-anywhere text-foreground">{formatMoney(vault.balance)}</p>
         </div>
         {reached && (
           <div className="flex items-center gap-3">

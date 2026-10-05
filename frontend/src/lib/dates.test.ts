@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { currentMonthRange, formatDate, formatMonthYear, isValidIsoDate, today, toIsoDate } from './dates'
+import { currentMonthRange, formatDate, formatMonthYear, formatTimestampDate, isValidIsoDate, today, toIsoDate } from './dates'
 
 // O vite.config.ts fixa o fuso dos testes em America/Sao_Paulo (UTC-3).
 afterEach(() => {
@@ -68,6 +68,24 @@ describe('formatMonthYear', () => {
 
   it('anos de 0 a 99 não viram 19xx', () => {
     expect(formatMonthYear('0050-06-01')).toBe('Junho de 50')
+  })
+})
+
+describe('formatTimestampDate', () => {
+  it('converte o instante UTC para a data local (UTC-3)', () => {
+    expect(formatTimestampDate('2026-10-05T17:57:31.792524Z')).toBe('05/10/2026')
+    // 01h30 de 06/10 em UTC ainda é 22h30 de 05/10 no Brasil.
+    expect(formatTimestampDate('2026-10-06T01:30:00Z')).toBe('05/10/2026')
+    expect(formatTimestampDate('2026-10-06T03:00:00Z')).toBe('06/10/2026')
+  })
+
+  it('sem fuso no texto, trata como UTC', () => {
+    expect(formatTimestampDate('2026-10-06T01:30:00')).toBe('05/10/2026')
+  })
+
+  it('aceita deslocamento explícito e recusa texto inválido', () => {
+    expect(formatTimestampDate('2026-10-05T23:00:00-03:00')).toBe('05/10/2026')
+    expect(formatTimestampDate('ontem')).toBe('')
   })
 })
 
