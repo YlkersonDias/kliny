@@ -1,3 +1,4 @@
+import { Link } from 'react-router'
 import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
 import { formatSigned } from '../../lib/money'
@@ -49,10 +50,19 @@ function CategoryLabel({ transaction }: { transaction: Transaction }) {
   return <span className="text-foreground">{transaction.categoryName}</span>
 }
 
-// Operações de cofre não têm ações: só os endpoints de cofre as criam ou removem.
+// Operações de cofre não têm editar nem apagar: só os endpoints de cofre as criam ou removem.
+// No lugar, um link para o cofre.
 function Actions({ transaction, onEdit, onDelete }: { transaction: Transaction } & Omit<TransactionListProps, 'items'>) {
   if (transaction.vaultId !== null) {
-    return <span className="text-xs text-muted">Pelo cofre</span>
+    return (
+      <Link
+        to={`/cofres/${transaction.vaultId}`}
+        aria-label={`Ver cofre de ${transaction.description}`}
+        className="inline-block rounded px-2 py-1 text-sm font-semibold whitespace-nowrap text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+      >
+        Ver cofre
+      </Link>
+    )
   }
   const name = `${transaction.description} de ${formatDate(transaction.date)}`
   return (

@@ -11,11 +11,13 @@ interface ConfirmDialogProps {
   onCancel: () => void
   isLoading?: boolean
   error?: string | null
+  // Para exigir um passo a mais antes de confirmar (como marcar uma caixa).
+  confirmDisabled?: boolean
 }
 
 // Confirmação de ação destrutiva. O foco começa em "Cancelar", a opção segura.
 export function ConfirmDialog({
-  title, children, confirmLabel, onConfirm, onCancel, isLoading = false, error,
+  title, children, confirmLabel, onConfirm, onCancel, isLoading = false, error, confirmDisabled = false,
 }: ConfirmDialogProps) {
   const cancelRef = useRef<HTMLButtonElement>(null)
 
@@ -28,7 +30,7 @@ export function ConfirmDialog({
           <Button ref={cancelRef} variant="secondary" onClick={onCancel} disabled={isLoading}>
             Cancelar
           </Button>
-          <Button variant="danger" onClick={onConfirm} isLoading={isLoading}>
+          <Button variant="danger" onClick={onConfirm} isLoading={isLoading} disabled={confirmDisabled}>
             {confirmLabel}
           </Button>
         </div>

@@ -24,6 +24,12 @@ const TYPE_TO_API: Record<Exclude<TypeFilter, ''>, TransactionType> = {
   cofres: 'vault',
 }
 
+// "?pagina=": inteiro de 1 a PAGE_MAX; qualquer outra coisa vira 1.
+export function parsePage(value: string | null): number {
+  const page = Number(value ?? '1')
+  return Number.isInteger(page) && page >= 1 && page <= PAGE_MAX ? page : 1
+}
+
 function parseDate(params: URLSearchParams, key: string, fallback: string): string {
   const value = params.get(key)
   if (value === null) return fallback
@@ -34,13 +40,12 @@ function parseDate(params: URLSearchParams, key: string, fallback: string): stri
 export function parseFilters(params: URLSearchParams, defaultRange: DateRange): TransactionFilters {
   const type = params.get('tipo') ?? ''
   const category = params.get('categoria') ?? ''
-  const page = Number(params.get('pagina') ?? '1')
   const filters: TransactionFilters = {
     from: parseDate(params, 'de', defaultRange.from),
     to: parseDate(params, 'ate', defaultRange.to),
     category: category === 'sem' || /^[1-9]\d{0,9}$/.test(category) ? category : '',
     type: Object.hasOwn(TYPE_TO_API, type) ? (type as TypeFilter) : '',
-    page: Number.isInteger(page) && page >= 1 && page <= PAGE_MAX ? page : 1,
+    page: parsePage(params.get('pagina')),
   }
   // Operações de cofre não têm categoria: a combinação não faz sentido (e a API recusa "sem").
   if (filters.type === 'cofres') filters.category = ''

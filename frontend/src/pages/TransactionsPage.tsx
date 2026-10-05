@@ -9,6 +9,7 @@ import { Button } from '../components/ui/Button'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Icon } from '../components/ui/Icon'
+import { Pagination } from '../components/ui/Pagination'
 import { Spinner } from '../components/ui/Spinner'
 import { useCategories } from '../hooks/useCategories'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -118,33 +119,13 @@ export default function TransactionsPage() {
         >
           <TransactionList items={data.items} onEdit={(transaction) => setForm({ transaction })} onDelete={setDeleting} />
         </div>
-        <nav aria-label="Paginação" className="flex flex-wrap items-center justify-between gap-3 border-t border-border px-4 py-3">
-          <p className="text-sm text-muted" aria-live="polite">
-            Página {filters.page} de {lastPage} · {data.totalCount} {data.totalCount === 1 ? 'movimentação' : 'movimentações'}
-          </p>
-          {lastPage > 1 && (
-            <div className="flex gap-2">
-              <Button
-                variant="secondary"
-                className="px-3 py-2"
-                disabled={filters.page <= 1}
-                onClick={() => updateFilters({ page: filters.page - 1 })}
-              >
-                <Icon name="chevronLeft" className="size-4" />
-                Anterior
-              </Button>
-              <Button
-                variant="secondary"
-                className="px-3 py-2"
-                disabled={filters.page >= lastPage}
-                onClick={() => updateFilters({ page: filters.page + 1 })}
-              >
-                Próxima
-                <Icon name="chevronRight" className="size-4" />
-              </Button>
-            </div>
-          )}
-        </nav>
+        <Pagination
+          page={filters.page}
+          lastPage={lastPage}
+          totalCount={data.totalCount}
+          noun={['movimentação', 'movimentações']}
+          onPageChange={(page) => updateFilters({ page })}
+        />
       </>
     )
   }

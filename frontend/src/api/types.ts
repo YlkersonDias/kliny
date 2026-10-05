@@ -73,6 +73,32 @@ export interface TransactionQuery {
   pageSize?: number
 }
 
+// balance é calculado pela API (soma das movimentações do cofre com o sinal invertido).
+export interface Vault {
+  id: number
+  name: string
+  goal: number | null
+  balance: number
+  createdAt: string
+}
+
+export interface VaultRequest {
+  name: string
+  goal: number | null
+}
+
+// Depósito e retirada: amount sempre positivo; o endpoint define o sinal gravado.
+export interface VaultOperationRequest {
+  amount: number
+  date: string
+  description?: string
+}
+
+export interface VaultOperationResponse {
+  transaction: Transaction
+  balance: number
+}
+
 // Formato de erro do ASP.NET Core. `errors` só vem nas falhas de validação.
 export interface ProblemDetails {
   type?: string
