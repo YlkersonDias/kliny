@@ -13,9 +13,9 @@ export function WelcomeCard({ onStart }: { onStart: () => void }) {
     >
       {/* Decorativa: o título já diz tudo. */}
       <picture className="shrink-0">
-        <source srcSet="/mascote/kliny-acenando-512.webp" type="image/webp" />
+        <source srcSet="/mascote/kliny-apontando-512.webp" type="image/webp" />
         <img
-          src="/mascote/kliny-acenando-512.png"
+          src="/mascote/kliny-apontando-512.png"
           width={512}
           height={512}
           alt=""

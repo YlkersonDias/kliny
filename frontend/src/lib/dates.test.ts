@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { currentMonthRange, formatDate, formatMonthYear, formatTimestampDate, isValidIsoDate, today, toIsoDate } from './dates'
+import { currentMonthRange, formatDate, formatLongDate, formatMonthYear, formatTimestampDate, isValidIsoDate, today, toIsoDate } from './dates'
 
 // O vite.config.ts fixa o fuso dos testes em America/Sao_Paulo (UTC-3).
 afterEach(() => {
@@ -68,6 +68,27 @@ describe('formatMonthYear', () => {
 
   it('anos de 0 a 99 não viram 19xx', () => {
     expect(formatMonthYear('0050-06-01')).toBe('Junho de 50')
+  })
+})
+
+describe('formatLongDate', () => {
+  it('dia por extenso, sem zero à esquerda e sem dia da semana', () => {
+    expect(formatLongDate('2026-10-05')).toBe('5 de outubro de 2026')
+    expect(formatLongDate('2026-10-31')).toBe('31 de outubro de 2026')
+    expect(formatLongDate('2027-01-01')).toBe('1 de janeiro de 2027')
+    expect(formatLongDate('2028-02-29')).toBe('29 de fevereiro de 2028')
+  })
+
+  it('não muda o dia por causa do fuso', () => {
+    vi.useFakeTimers()
+    vi.setSystemTime(new Date(2026, 0, 31, 23, 30)) // já é 01/02 em UTC
+    expect(formatLongDate(today())).toBe('31 de janeiro de 2026')
+  })
+
+  it('anos de 0 a 99 não viram 19xx; texto inválido volta como veio', () => {
+    expect(formatLongDate('0050-06-15')).toBe('15 de junho de 50')
+    expect(formatLongDate('2026-02-30')).toBe('2026-02-30')
+    expect(formatLongDate('ontem')).toBe('ontem')
   })
 })
 

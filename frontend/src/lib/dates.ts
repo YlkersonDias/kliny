@@ -62,6 +62,17 @@ export function formatMonthYear(iso: string): string {
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
+const longDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+
+// "2026-10-05" vira "5 de outubro de 2026" (sem dia da semana). Como no formatMonthYear, o Date
+// é montado com números (hora local), nunca com o texto.
+export function formatLongDate(iso: string): string {
+  if (!isValidIsoDate(iso)) return iso
+  const date = new Date(2000, Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)))
+  date.setFullYear(Number(iso.slice(0, 4)))
+  return longDate.format(date)
+}
+
 // Instante da API (createdAt, em UTC com "Z") para a data local do navegador: "2026-10-06T01:30:00Z"
 // é 05/10/2026 no Brasil. Sem fuso no texto, trata como UTC (é como o backend grava).
 export function formatTimestampDate(timestamp: string): string {

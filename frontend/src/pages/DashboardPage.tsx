@@ -13,7 +13,7 @@ import { usePageTitle } from '../hooks/usePageTitle'
 import { useSummary, useTimeline } from '../hooks/useReports'
 import { useTransactions } from '../hooks/useTransactions'
 import { useVaults } from '../hooks/useVaults'
-import { currentMonthRange, formatMonthYear, today as getToday } from '../lib/dates'
+import { currentMonthRange, formatLongDate, today as getToday } from '../lib/dates'
 
 const RECENT_COUNT = 5
 const STARTING_BALANCE: TransactionPreset = { kind: 'income', description: 'Saldo inicial' }
@@ -123,7 +123,8 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">{formatMonthYear(today)}</h1>
+        {/* A data de hoje (o cartão é sobre hoje; o mês aparece em "Este mês"). */}
+        <h1 className="text-2xl font-semibold text-foreground">{formatLongDate(today)}</h1>
         {recent.data && recent.data.totalCount > 0 && (
           <Button onClick={() => setForm({})}>
             <Icon name="plus" className="size-4" />
