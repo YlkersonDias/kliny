@@ -1,5 +1,5 @@
 import { afterEach, describe, expect, it, vi } from 'vitest'
-import { currentMonthRange, formatDate, isValidIsoDate, today, toIsoDate } from './dates'
+import { currentMonthRange, formatDate, formatMonthYear, isValidIsoDate, today, toIsoDate } from './dates'
 
 // O vite.config.ts fixa o fuso dos testes em America/Sao_Paulo (UTC-3).
 afterEach(() => {
@@ -57,6 +57,18 @@ describe('isValidIsoDate', () => {
       expect(isValidIsoDate(text)).toBe(false)
     },
   )
+})
+
+describe('formatMonthYear', () => {
+  it('mês por extenso, com maiúscula, sem mudar o mês', () => {
+    expect(formatMonthYear('2026-10-01')).toBe('Outubro de 2026')
+    expect(formatMonthYear('2027-01-01')).toBe('Janeiro de 2027')
+    expect(formatMonthYear('2026-03-31')).toBe('Março de 2026')
+  })
+
+  it('anos de 0 a 99 não viram 19xx', () => {
+    expect(formatMonthYear('0050-06-01')).toBe('Junho de 50')
+  })
 })
 
 describe('formatDate', () => {

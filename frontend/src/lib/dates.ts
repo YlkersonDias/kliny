@@ -50,6 +50,18 @@ export function isValidIsoDate(text: string): boolean {
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month)
 }
 
+const monthYear = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' })
+
+// "2026-10-02" vira "Outubro de 2026". O Date é montado com números (hora local), nunca com o texto.
+export function formatMonthYear(iso: string): string {
+  const match = ISO_PATTERN.exec(iso)
+  if (!match) return iso
+  const date = new Date(2000, Number(match[2]) - 1, 1)
+  date.setFullYear(Number(match[1]))
+  const text = monthYear.format(date)
+  return text.charAt(0).toUpperCase() + text.slice(1)
+}
+
 // "2026-10-02" vira "02/10/2026". Texto fora do formato volta como veio.
 export function formatDate(iso: string): string {
   const match = ISO_PATTERN.exec(iso)

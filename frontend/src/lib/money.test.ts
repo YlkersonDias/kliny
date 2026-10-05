@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest'
-import { formatMoney, formatSigned, MONEY_MAX, parseMoneyInput, toInputText } from './money'
+import { formatMoney, formatOutflow, formatSigned, MONEY_MAX, parseMoneyInput, toInputText } from './money'
 
 // O Intl separa "R$" do número com espaço não separável.
 const NBSP = ' '
@@ -24,6 +24,13 @@ describe('formatSigned', () => {
 
   it('não põe sinal no zero', () => {
     expect(formatSigned(0)).toBe(`R$${NBSP}0,00`)
+  })
+})
+
+describe('formatOutflow', () => {
+  it('põe o − na saída que já vem positiva', () => {
+    expect(formatOutflow(2310.4)).toBe(`−R$${NBSP}2.310,40`)
+    expect(formatOutflow(0)).toBe(`R$${NBSP}0,00`)
   })
 })
 

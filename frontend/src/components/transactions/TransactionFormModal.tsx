@@ -50,8 +50,16 @@ function validate(values: Values): FieldErrors<Field> {
   return errors
 }
 
-function initialValues(transaction?: Transaction): Values {
-  if (!transaction) return { kind: 'expense', description: '', amount: '', date: today(), categoryId: '' }
+// Nova movimentação já preenchida (como o "Saldo inicial" da conta nova).
+export interface TransactionPreset {
+  kind: Kind
+  description: string
+}
+
+function initialValues(transaction?: Transaction, preset?: TransactionPreset): Values {
+  if (!transaction) {
+    return { kind: preset?.kind ?? 'expense', description: preset?.description ?? '', amount: '', date: today(), categoryId: '' }
+  }
   return {
     // Na edição, o tipo vem do sinal gravado e o valor aparece sempre positivo.
     kind: transaction.amount > 0 ? 'income' : 'expense',
@@ -65,12 +73,14 @@ function initialValues(transaction?: Transaction): Values {
 interface TransactionFormModalProps {
   // Sem transaction: nova movimentação.
   transaction?: Transaction
+  // Só para nova movimentação. Com preset, o foco começa no valor.
+  preset?: TransactionPreset
   onClose: () => void
 }
 
-export function TransactionFormModal({ transaction, onClose }: TransactionFormModalProps) {
+export function TransactionFormModal({ transaction, preset, onClose }: TransactionFormModalProps) {
   const isEdit = transaction !== undefined
-  const [values, setValues] = useState<Values>(() => initialValues(transaction))
+  const [values, setValues] = useState<Values>(() => initialValues(transaction, preset))
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreatingCategory, setIsCreatingCategory] = useState(false)
@@ -162,7 +172,7 @@ export function TransactionFormModal({ transaction, onClose }: TransactionFormMo
   return (
     <Modal
       title={isEdit ? 'Editar movimentação' : 'Nova movimentação'}
-      initialFocusRef={descriptionRef}
+      initialFocusRef={preset && !isEdit ? amountRef : descriptionRef}
       onClose={() => { if (!isPending) onClose() }}
     >
       <form noValidate onSubmit={handleSubmit} className="space-y-4">

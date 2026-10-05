@@ -99,6 +99,37 @@ export interface VaultOperationResponse {
   balance: number
 }
 
+// Relatórios: expense e vaultDeposits vêm POSITIVOS (ao contrário do banco) e net = income - expense.
+// Exibir como vieram; nunca inverter o expense de novo.
+export interface ReportPeriod {
+  from: string
+  to: string
+}
+
+export interface SummaryResponse {
+  from: string
+  to: string
+  // Movimento do período, sem operações de cofre.
+  income: number
+  expense: number
+  net: number
+  vaultDeposits: number
+  vaultWithdrawals: number
+  // Posição no dia `to`, somando tudo desde o primeiro lançamento.
+  accountBalance: number
+  vaultsBalance: number
+}
+
+export type TimelineGrouping = 'day' | 'month'
+
+// period: o dia, ou o primeiro dia do mês. Sem movimento, os valores vêm zerados.
+export interface TimelinePoint {
+  period: string
+  income: number
+  expense: number
+  net: number
+}
+
 // Formato de erro do ASP.NET Core. `errors` só vem nas falhas de validação.
 export interface ProblemDetails {
   type?: string

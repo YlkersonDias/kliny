@@ -24,6 +24,11 @@ export function formatSigned(value: number): string {
   return formatMoney(0)
 }
 
+// Saída que já vem positiva (o expense dos relatórios): só põe o "−" na frente, sem negar o número.
+export function formatOutflow(positive: number): string {
+  return positive === 0 ? formatMoney(0) : `−${formatMoney(positive)}`
+}
+
 // Texto para o campo de valor, sem "R$" e sempre positivo: 1234.5 vira "1.234,50".
 export function toInputText(value: number): string {
   return plain.format(Math.abs(normalize(value)))

@@ -1,53 +1,17 @@
 import { Link } from 'react-router'
 import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
-import { formatSigned } from '../../lib/money'
 import { Icon } from '../ui/Icon'
+import {
+  TransactionAmount as Amount,
+  TransactionCategory as CategoryLabel,
+  TransactionKindIcon as KindIcon,
+} from './TransactionParts'
 
 interface TransactionListProps {
   items: Transaction[]
   onEdit: (transaction: Transaction) => void
   onDelete: (transaction: Transaction) => void
-}
-
-type Kind = 'income' | 'expense' | 'vault'
-
-function kindOf(transaction: Transaction): Kind {
-  if (transaction.vaultId !== null) return 'vault'
-  return transaction.amount > 0 ? 'income' : 'expense'
-}
-
-const KIND = {
-  income: { label: 'Receita', text: 'text-income', icon: 'text-income' },
-  expense: { label: 'Gasto', text: 'text-expense', icon: 'text-expense' },
-  // Âmbar só no ícone; o texto usa vault-text, que tem contraste.
-  vault: { label: 'Cofre', text: 'text-vault-text', icon: 'text-vault' },
-} as const
-
-// Valor sempre com sinal e ícone: receita e gasto não dependem só da cor.
-function Amount({ transaction }: { transaction: Transaction }) {
-  const kind = KIND[kindOf(transaction)]
-  return (
-    <span className={`inline-flex items-center gap-1.5 font-semibold tabular-nums whitespace-nowrap ${kind.text}`}>
-      <span className="sr-only">{kind.label}: </span>
-      {formatSigned(transaction.amount)}
-    </span>
-  )
-}
-
-function KindIcon({ transaction }: { transaction: Transaction }) {
-  const kind = kindOf(transaction)
-  return (
-    <span className={`flex size-9 shrink-0 items-center justify-center rounded-full bg-background ${KIND[kind].icon}`}>
-      <Icon name={kind} className="size-5" />
-    </span>
-  )
-}
-
-function CategoryLabel({ transaction }: { transaction: Transaction }) {
-  if (transaction.vaultId !== null) return <span className="text-vault-text">Cofre</span>
-  if (transaction.categoryName === null) return <span className="text-muted">Sem categoria</span>
-  return <span className="text-foreground">{transaction.categoryName}</span>
 }
 
 // Operações de cofre não têm editar nem apagar: só os endpoints de cofre as criam ou removem.
