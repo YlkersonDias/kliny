@@ -22,8 +22,8 @@ export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLa
         <main className={`relative rounded-2xl bg-surface p-6 shadow-lg shadow-primary/10 sm:p-8 ${mascot ? 'mt-[46.3%]' : ''}`}>
           {mascot && (
             <img
-              src="/kliny-login-mascote.png"
-              srcSet="/kliny-login-mascote.png 1x, /kliny-login-mascote@2x.png 2x"
+              src="/mascote/kliny-login-mascote.png"
+              srcSet="/mascote/kliny-login-mascote.png 1x, /mascote/kliny-login-mascote@2x.png 2x"
               width={440}
               height={239}
               alt=""
