@@ -2,7 +2,8 @@
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
-import { APP_NAME } from './src/config/app'
+// Com a extensão: o carregador nativo de configuração do Vite não resolve import sem ela.
+import { APP_NAME } from './src/config/app.ts'
 
 // Substitui %APP_NAME% no index.html pela mesma constante usada nos componentes.
 function appName(): Plugin {
