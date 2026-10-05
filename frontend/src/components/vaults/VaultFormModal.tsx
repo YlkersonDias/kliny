@@ -3,8 +3,8 @@ import { ApiError } from '../../api/client'
 import type { Vault } from '../../api/types'
 import { useCreateVault, useUpdateVault } from '../../hooks/useVaults'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
-import { parseMoneyInput, toInputText } from '../../lib/money'
-import { goalReachedNotice } from '../../lib/vaults'
+import { toInputText } from '../../lib/money'
+import { goalReachedNotice, parseGoalInput } from '../../lib/vaults'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Input } from '../ui/Input'
@@ -28,12 +28,17 @@ function validate(values: Values): FieldErrors<Field> {
   if (!name) errors.name = 'Informe o nome do cofre.'
   else if (name.length > NAME_MAX) errors.name = `O nome do cofre deve ter no máximo ${NAME_MAX} caracteres.`
 
-  if (values.goal.trim()) {
-    const goal = parseMoneyInput(values.goal)
-    if (goal === null) errors.goal = 'Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.'
-    else if (goal === 0) errors.goal = 'A meta deve ser maior que zero.'
+  // Zero ou negativo não é erro: vira "sem meta", como o campo vazio (parseGoalInput).
+  if (parseGoalInput(values.goal) === 'invalid') {
+    errors.goal = 'Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.'
   }
   return errors
+}
+
+// Meta como número, ou null (sem meta ou valor inválido).
+function goalNumber(text: string): number | null {
+  const goal = parseGoalInput(text)
+  return typeof goal === 'number' ? goal : null
 }
 
 interface VaultFormModalProps {
@@ -76,8 +81,8 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
-    // Campo de meta vazio remove a meta.
-    const request = { name: values.name.trim(), goal: values.goal.trim() ? parseMoneyInput(values.goal) : null }
+    // Meta vazia, zero ou negativa: sem meta (goal: null).
+    const request = { name: values.name.trim(), goal: goalNumber(values.goal) }
     const options = {
       onSuccess: onClose,
       onError: (error: unknown) => {
@@ -120,7 +125,7 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
           placeholder="0,00"
           // Meta que o saldo já atinge é aceita; só avisa (na dica, ligada ao campo por aria-describedby).
           hint={isEdit
-            ? [goalReachedNotice(parseMoneyInput(values.goal), vault.balance), 'Deixe em branco para remover a meta.'].filter(Boolean).join(' ')
+            ? [goalReachedNotice(goalNumber(values.goal), vault.balance), 'Deixe em branco para remover a meta.'].filter(Boolean).join(' ')
             : 'Quanto você quer juntar neste cofre.'}
           value={values.goal}
           onChange={(text) => change('goal', text)}

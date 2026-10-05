@@ -1,5 +1,25 @@
 import { describe, expect, it } from 'vitest'
-import { goalProgress, goalReachedNotice, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+import { goalProgress, goalReachedNotice, parseGoalInput, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+
+describe('parseGoalInput', () => {
+  it('valor positivo vira a meta', () => {
+    expect(parseGoalInput('1.000')).toBe(1000)
+    expect(parseGoalInput('R$ 250,50')).toBe(250.5)
+    expect(parseGoalInput(' 0,01 ')).toBe(0.01)
+  })
+
+  it('vazio, zero e negativo contam como sem meta', () => {
+    for (const text of ['', '   ', '0', '0,00', 'R$ 0', '-10', '-0', '- 5,50', '−10', 'R$ -10', '-R$ 10']) {
+      expect(parseGoalInput(text)).toBeNull()
+    }
+  })
+
+  it('texto que não é valor continua inválido', () => {
+    for (const text of ['abc', '12.50', '0,001', '-abc', '--10']) {
+      expect(parseGoalInput(text)).toBe('invalid')
+    }
+  })
+})
 
 describe('goalReachedNotice', () => {
   it('avisa quando o saldo já atinge a meta (inclusive igual)', () => {

@@ -1,4 +1,4 @@
-import { formatMoney } from './money'
+import { formatMoney, parseMoneyInput } from './money'
 
 // Cálculos dos cofres que a API não devolve prontos.
 
@@ -28,6 +28,18 @@ export function goalProgress(balance: number, goal: number): GoalProgress {
     reached,
     remaining: reached ? 0 : (goalCents - balanceCents) / 100,
   }
+}
+
+// Meta digitada no formulário do cofre (decisão do usuário): vazio, zero ou negativo contam como
+// "sem meta" (null), igual a apagar o campo; texto que não é valor dá 'invalid'.
+export function parseGoalInput(text: string): number | null | 'invalid' {
+  const withoutCurrency = text.trim().replace(/^R\$\s*/, '')
+  if (!withoutCurrency) return null
+  // Hífen ou o sinal de menos tipográfico, antes ou depois do "R$".
+  const negative = /^[-−]/.test(withoutCurrency)
+  const value = parseMoneyInput(negative ? withoutCurrency.replace(/^[-−]\s*/, '') : withoutCurrency)
+  if (value === null) return 'invalid'
+  return negative || value === 0 ? null : value
 }
 
 // Aviso (não bloqueia) ao editar um cofre com uma meta que o saldo já atinge: ele vai aparecer
