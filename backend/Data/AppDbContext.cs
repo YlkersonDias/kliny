@@ -10,6 +10,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
     public DbSet<Vault> Vaults => Set<Vault>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
 
+    // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
+    // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
+    // Aqui todo DateTime é gravado em UTC e lido marcado como UTC. A coluna não muda.
+    protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
+    {
+        configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
+    }
+
+    private sealed class UtcDateTimeConverter() : Microsoft.EntityFrameworkCore.Storage.ValueConversion.ValueConverter<DateTime, DateTime>(
+        value => value.Kind == DateTimeKind.Local ? value.ToUniversalTime() : value,
+        value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
