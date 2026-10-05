@@ -1,4 +1,5 @@
-import { formatMoney, parseMoneyInput } from './money'
+import { formatDate } from './dates'
+import { formatMoney, formatSigned, parseMoneyInput } from './money'
 
 // Cálculos dos cofres que a API não devolve prontos.
 
@@ -48,6 +49,23 @@ export function goalReachedNotice(goal: number | null, balance: number): string 
   if (goal === null || goal <= 0 || balance <= 0) return undefined
   if (toCents(balance) < toCents(goal)) return undefined
   return `O cofre já tem ${formatMoney(balance)} guardados, o que já atinge esta meta. Ele vai aparecer como “Meta atingida”.`
+}
+
+// Saldo da conta com o "−" tipográfico quando negativo (a conta pode estar no vermelho).
+export function formatAccountBalance(value: number): string {
+  return value < 0 ? formatSigned(value) : formatMoney(value)
+}
+
+// Depósito acima do saldo da conta na data do depósito (mesma mensagem da API). Sem saldo,
+// orienta a lançar uma receita, para quem criou um cofre antes de lançar qualquer coisa.
+export function depositShortfallMessage(available: number, date: string): string {
+  const message = `Saldo insuficiente na conta. Disponível em ${formatDate(date)}: ${formatAccountBalance(available)}.`
+  return available <= 0 ? `${message} Lance uma receita antes de depositar.` : message
+}
+
+// Depósito cabe no saldo da conta? Em centavos, para 0,1 + 0,2 não dar diferença.
+export function exceedsAccountBalance(amount: number, available: number): boolean {
+  return toCents(amount) > toCents(available)
 }
 
 // Depósito e retirada só com data de hoje ou passada (a API também recusa data futura,

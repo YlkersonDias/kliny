@@ -1,5 +1,31 @@
 import { describe, expect, it } from 'vitest'
-import { goalProgress, goalReachedNotice, parseGoalInput, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+import {
+  depositShortfallMessage, exceedsAccountBalance, formatAccountBalance, goalProgress, goalReachedNotice, parseGoalInput,
+  sumMoney, vaultAmount, vaultOperationDateError,
+} from './vaults'
+
+describe('depósito e saldo da conta', () => {
+  it('mensagem com a data e o disponível', () => {
+    expect(depositShortfallMessage(1000, '2026-10-05')).toBe('Saldo insuficiente na conta. Disponível em 05/10/2026: R$ 1.000,00.')
+  })
+
+  it('sem saldo (zero ou negativo) orienta a lançar uma receita', () => {
+    expect(depositShortfallMessage(0, '2026-10-04')).toBe('Saldo insuficiente na conta. Disponível em 04/10/2026: R$ 0,00. Lance uma receita antes de depositar.')
+    expect(depositShortfallMessage(-50, '2026-10-05')).toBe('Saldo insuficiente na conta. Disponível em 05/10/2026: −R$ 50,00. Lance uma receita antes de depositar.')
+  })
+
+  it('compara em centavos; o saldo exato cabe', () => {
+    expect(exceedsAccountBalance(1000, 1000)).toBe(false)
+    expect(exceedsAccountBalance(1000.01, 1000)).toBe(true)
+    expect(exceedsAccountBalance(0.3, 0.1 + 0.2)).toBe(false)
+    expect(exceedsAccountBalance(1, -5)).toBe(true)
+  })
+
+  it('saldo negativo com o sinal tipográfico', () => {
+    expect(formatAccountBalance(-50)).toBe('−R$ 50,00')
+    expect(formatAccountBalance(50)).toBe('R$ 50,00')
+  })
+})
 
 describe('parseGoalInput', () => {
   it('valor positivo vira a meta', () => {

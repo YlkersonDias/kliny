@@ -1,11 +1,12 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { ApiError } from '../../api/client'
 import type { Vault } from '../../api/types'
+import { useSummary } from '../../hooks/useReports'
 import { useDepositToVault, useWithdrawFromVault } from '../../hooks/useVaults'
-import { isValidIsoDate, today } from '../../lib/dates'
+import { formatDate, isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
 import { formatMoney, parseMoneyInput, toInputText } from '../../lib/money'
-import { vaultOperationDateError } from '../../lib/vaults'
+import { depositShortfallMessage, exceedsAccountBalance, formatAccountBalance, vaultOperationDateError } from '../../lib/vaults'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Input } from '../ui/Input'
@@ -28,7 +29,9 @@ interface Values {
 
 const toCents = (value: number) => Math.round(value * 100)
 
-function validate(values: Values, operation: VaultOperation, balance: number): FieldErrors<Field> {
+// accountAvailable: saldo da conta na data do depósito; undefined enquanto carrega (ou se a consulta
+// falhar): aí só a API confere.
+function validate(values: Values, operation: VaultOperation, balance: number, accountAvailable?: number): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
 
   if (!values.amount.trim()) errors.amount = 'Informe o valor.'
@@ -39,6 +42,10 @@ function validate(values: Values, operation: VaultOperation, balance: number): F
     // A API confere de novo, com o saldo travado; aqui é só para avisar antes.
     else if (operation === 'withdraw' && toCents(amount) > toCents(balance)) {
       errors.amount = `Saldo insuficiente no cofre. Disponível: ${formatMoney(balance)}.`
+    }
+    // Depósito só com saldo na conta na data escolhida (a API confere de novo, com a conta travada).
+    else if (operation === 'deposit' && accountAvailable !== undefined && exceedsAccountBalance(amount, accountAvailable)) {
+      errors.amount = depositShortfallMessage(accountAvailable, values.date)
     }
   }
 
@@ -76,6 +83,22 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   const withdraw = useWithdrawFromVault()
   const mutation = isWithdraw ? withdraw : deposit
 
+  // Saldo da conta na data do depósito (summary com from = to = data: o accountBalance soma tudo
+  // até esse dia). Só consulta com uma data válida; ao trocar a data, a anterior fica até a nova chegar.
+  const dateOk = isValidIsoDate(values.date) && !vaultOperationDateError(values.date, today())
+  const account = useSummary({ from: values.date, to: values.date }, { enabled: !isWithdraw && dateOk, keepPrevious: true })
+  const accountAvailable = !isWithdraw && dateOk && account.data && !account.isPlaceholderData
+    ? account.data.accountBalance
+    : undefined
+  // Dica do valor no depósito: sempre visível, com o disponível na data escolhida.
+  const depositHint = !dateOk
+    ? 'O disponível na conta aparece depois de escolher a data.'
+    : accountAvailable !== undefined
+      ? `Disponível na conta ${values.date === today() ? 'hoje' : `em ${formatDate(values.date)}`}: ${formatAccountBalance(accountAvailable)}.`
+      : account.isError
+        ? 'Não foi possível consultar o saldo da conta; ele será conferido ao depositar.'
+        : 'Consultando o disponível na conta…'
+
   const title = isWithdraw ? `Retirar de ${vault.name}` : `Depositar em ${vault.name}`
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
@@ -87,14 +110,16 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
 
   function change(field: Field, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
-    setErrors((current) => ({ ...current, [field]: undefined }))
+    // O saldo disponível depende da data: trocar a data também limpa o erro do valor, que ficaria
+    // falando da data anterior (e escondendo a dica com o disponível da nova).
+    setErrors((current) => ({ ...current, [field]: undefined, ...(field === 'date' ? { amount: undefined } : {}) }))
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values, operation, vault.balance)
+    const fieldErrors = validate(values, operation, vault.balance, accountAvailable)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -141,9 +166,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
             ref={amountRef}
             label="Valor"
             placeholder="0,00"
-            hint={isWithdraw
-              ? `Disponível: ${formatMoney(vault.balance)}.`
-              : 'Não precisa ter o valor lançado na conta.'}
+            hint={isWithdraw ? `Disponível no cofre: ${formatMoney(vault.balance)}.` : depositHint}
             value={values.amount}
             onChange={(text) => change('amount', text)}
             error={errors.amount}
