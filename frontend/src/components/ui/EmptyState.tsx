@@ -1,7 +1,7 @@
 import type { ReactNode } from 'react'
 
 // Ilustrações em public/mascote/, cada uma em WebP com PNG de reserva.
-export type EmptyStateImage = 'sem-resultados' | 'erro' | 'cofre-vazio'
+export type EmptyStateImage = 'sem-resultados' | 'erro' | 'cofre-vazio' | 'sem-dados'
 
 interface EmptyStateProps {
   image: EmptyStateImage

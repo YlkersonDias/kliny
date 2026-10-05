@@ -3,7 +3,7 @@ import type { DaySpending } from '../../lib/dashboard'
 import { formatMoney } from '../../lib/money'
 
 // Carregado sob demanda (React.lazy): o Recharts fica fora do bundle inicial.
-// Só visual: o leitor de tela recebe o resumo em texto e a tabela do SpendingCard.
+// Só visual: o ChartFigure o esconde do leitor de tela e oferece o resumo e a tabela.
 // Cores pelos tokens (CSS), para o modo noturno só redefinir as variáveis.
 
 interface SpendingChartProps {
@@ -15,7 +15,7 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
   const lastDay = days.length > 0 ? days[days.length - 1].day : 1
 
   return (
-    <div aria-hidden="true" className="h-36">
+    <div className="h-36">
       <ResponsiveContainer width="100%" height="100%">
         <BarChart data={days} margin={{ top: 18, right: 4, bottom: 0, left: 4 }} barCategoryGap="15%" accessibilityLayer={false}>
           <XAxis

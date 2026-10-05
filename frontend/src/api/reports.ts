@@ -1,5 +1,7 @@
 import { apiRequest } from './client'
-import type { ReportPeriod, SummaryResponse, TimelineGrouping, TimelinePoint } from './types'
+import type {
+  CategoryReportType, CategoryTotal, ReportPeriod, SummaryResponse, TimelineGrouping, TimelinePoint,
+} from './types'
 
 // from e to são obrigatórios: o servidor não escolhe período porque não conhece o fuso do usuário.
 function periodQuery({ from, to }: ReportPeriod): string {
@@ -8,6 +10,11 @@ function periodQuery({ from, to }: ReportPeriod): string {
 
 export function getSummary(period: ReportPeriod, signal?: AbortSignal): Promise<SummaryResponse> {
   return apiRequest(`/reports/summary?${periodQuery(period)}`, { signal })
+}
+
+// Ordenado do maior total para o menor, sem operações de cofre.
+export function getByCategory(period: ReportPeriod, type: CategoryReportType, signal?: AbortSignal): Promise<CategoryTotal[]> {
+  return apiRequest(`/reports/by-category?${periodQuery(period)}&type=${type}`, { signal })
 }
 
 export function getTimeline(period: ReportPeriod, groupBy: TimelineGrouping, signal?: AbortSignal): Promise<TimelinePoint[]> {

@@ -28,6 +28,24 @@
   --color-muted: #475569;      /* slate-600 */
 }
 
+/*
+  Escala das categorias (gráfico de rosca dos Relatórios): do primary-hover ao surface-soft,
+  interpolada em OKLab. Posição 1 = maior total. Sem verde nem vermelho, que já são receita e
+  gasto. A cor não identifica a fatia sozinha (vizinhas ~1,35:1): o número e a legenda, sim.
+  "Outras" usa hachura de border com muted. Modo noturno (etapa 7): redefinir estes tokens.
+  "static": o Tailwind só gera as variáveis que encontra escritas no código, e estas são
+  montadas em tempo de execução (var(--color-category-N)); sem isso, as fatias saem pretas.
+*/
+@theme static {
+  --color-category-1: #30336b;
+  --color-category-2: #44487e;
+  --color-category-3: #5a5e90;
+  --color-category-4: #7175a3;
+  --color-category-5: #898cb6;
+  --color-category-6: #a2a3ca;
+  --color-category-7: #bbbbdd;
+}
+
 @layer base {
   html {
     color-scheme: light;

@@ -130,6 +130,18 @@ export interface TimelinePoint {
   net: number
 }
 
+export type CategoryReportType = 'expense' | 'income'
+
+// categoryId e categoryName nulos = sem categoria (o texto fica no frontend). total sempre
+// positivo, também para gastos; percentage com 2 casas (a soma pode não dar 100).
+export interface CategoryTotal {
+  categoryId: number | null
+  categoryName: string | null
+  total: number
+  count: number
+  percentage: number
+}
+
 // Formato de erro do ASP.NET Core. `errors` só vem nas falhas de validação.
 export interface ProblemDetails {
   type?: string
