@@ -188,6 +188,7 @@ Content-Type: application/json
 }
 
 ### Depositar; o valor é sempre positivo (200)
+# date: hoje ou passada; data futura responde 400 (vale também para a retirada)
 POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json
