@@ -134,6 +134,10 @@ Content-Type: application/json
 GET {{baseUrl}}/api/transactions?from=2026-10-01&to=2026-10-31&type=expense&page=1&pageSize=20
 Authorization: Bearer {{token}}
 
+### Só receitas e gastos sem categoria (200); com categoryId ou type=vault responde 400
+GET {{baseUrl}}/api/transactions?uncategorized=true
+Authorization: Bearer {{token}}
+
 ### Detalhe (200)
 GET {{baseUrl}}/api/transactions/1
 Authorization: Bearer {{token}}

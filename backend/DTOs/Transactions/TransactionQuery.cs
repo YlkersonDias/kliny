@@ -18,6 +18,9 @@ public class TransactionQuery : IValidatableObject
     public DateOnly? To { get; set; }
     public int? CategoryId { get; set; }
 
+    /// <summary>Só receitas e gastos sem categoria (operações de cofre ficam de fora, como nos relatórios).</summary>
+    public bool Uncategorized { get; set; }
+
     /// <summary>Extrato de um cofre: só as operações dele.</summary>
     public int? VaultId { get; set; }
 
@@ -34,5 +37,11 @@ public class TransactionQuery : IValidatableObject
     {
         if (From > To)
             yield return new ValidationResult("A data inicial não pode ser depois da data final.", [nameof(From), nameof(To)]);
+
+        if (Uncategorized && CategoryId is not null)
+            yield return new ValidationResult("Escolha uma categoria ou \"sem categoria\", não os dois.", [nameof(Uncategorized), nameof(CategoryId)]);
+
+        if (Uncategorized && (Type == TransactionType.Vault || VaultId is not null))
+            yield return new ValidationResult("Operações de cofre não têm categoria.", [nameof(Uncategorized)]);
     }
 }
