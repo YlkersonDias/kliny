@@ -1,0 +1,20 @@
+// Ícones de traço (24x24), sempre decorativos: o texto ao lado ou o aria-label dá o sentido.
+const ICONS = {
+  plus: 'M12 5v14M5 12h14',
+  edit: 'M4 20h4L19 9a2.8 2.8 0 0 0-4-4L4 16zM13.5 6.5l4 4',
+  trash: 'M4 7h16M10 11v6m4-6v6M6 7l1 12a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2l1-12M9 7V4h6v3',
+  tag: 'M3 12V4a1 1 0 0 1 1-1h8l9 9-9 9zM7.5 7.5h.01',
+  income: 'M12 19V5m-6 6 6-6 6 6',
+  expense: 'M12 5v14m-6-6 6 6 6-6',
+  vault: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm8 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM7 19v2m10-2v2',
+  chevronLeft: 'M15 6l-6 6 6 6',
+  chevronRight: 'M9 6l6 6-6 6',
+} as const
+
+export function Icon({ name, className = 'size-5' }: { name: keyof typeof ICONS; className?: string }) {
+  return (
+    <svg className={`shrink-0 ${className}`} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+      <path d={ICONS[name]} />
+    </svg>
+  )
+}

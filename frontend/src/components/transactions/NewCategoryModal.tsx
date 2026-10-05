@@ -1,0 +1,65 @@
+import { useRef, useState, type FormEvent } from 'react'
+import type { Category } from '../../api/types'
+import { useCreateCategory } from '../../hooks/useCategories'
+import { categoryNameError, validateCategoryName } from '../../lib/categories'
+import { Button } from '../ui/Button'
+import { FormAlert } from '../ui/FormAlert'
+import { Input } from '../ui/Input'
+import { Modal } from '../ui/Modal'
+
+interface NewCategoryModalProps {
+  onCreated: (category: Category) => void
+  onClose: () => void
+}
+
+// Atalho do formulário de movimentação: abre por cima dele, sem desmontá-lo,
+// então o que já foi digitado lá continua no lugar.
+export function NewCategoryModal({ onCreated, onClose }: NewCategoryModalProps) {
+  const [name, setName] = useState('')
+  const [error, setError] = useState<string>()
+  const [formError, setFormError] = useState<string | null>(null)
+  const inputRef = useRef<HTMLInputElement>(null)
+  const mutation = useCreateCategory()
+
+  function handleSubmit(event: FormEvent<HTMLFormElement>) {
+    event.preventDefault()
+    setFormError(null)
+
+    const validation = validateCategoryName(name)
+    if (validation) {
+      setError(validation)
+      inputRef.current?.focus()
+      return
+    }
+
+    mutation.mutate({ name: name.trim() }, {
+      onSuccess: onCreated,
+      onError: (apiError) => {
+        const { field, form } = categoryNameError(apiError)
+        setError(field)
+        setFormError(form)
+        if (field) inputRef.current?.focus()
+      },
+    })
+  }
+
+  return (
+    <Modal title="Nova categoria" size="sm" initialFocusRef={inputRef} onClose={() => { if (!mutation.isPending) onClose() }}>
+      <form noValidate onSubmit={handleSubmit} className="space-y-4">
+        {formError && <FormAlert>{formError}</FormAlert>}
+        <Input
+          ref={inputRef}
+          label="Nome"
+          autoComplete="off"
+          value={name}
+          onChange={(event) => { setName(event.target.value); setError(undefined) }}
+          error={error}
+        />
+        <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
+          <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>Cancelar</Button>
+          <Button type="submit" isLoading={mutation.isPending}>Criar categoria</Button>
+        </div>
+      </form>
+    </Modal>
+  )
+}

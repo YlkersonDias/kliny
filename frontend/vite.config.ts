@@ -1,3 +1,4 @@
+/// <reference types="vitest/config" />
 import { defineConfig, type Plugin } from 'vite'
 import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
@@ -25,5 +26,9 @@ export default defineConfig({
     proxy: {
       '/api': 'http://localhost:5228',
     },
+  },
+  test: {
+    // Fuso fixo: os testes de data devem dar o mesmo resultado em qualquer máquina.
+    env: { TZ: 'America/Sao_Paulo' },
   },
 })

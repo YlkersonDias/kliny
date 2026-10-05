@@ -24,6 +24,55 @@ export interface RegisterRequest {
   password: string
 }
 
+export interface PagedResponse<T> {
+  items: T[]
+  page: number
+  pageSize: number
+  totalCount: number
+}
+
+export interface Category {
+  id: number
+  name: string
+}
+
+export interface CategoryRequest {
+  name: string
+}
+
+// amount com o sinal do banco: positivo = receita, negativo = gasto.
+// Com vaultId, é uma operação de cofre (depósito negativo, retirada positiva).
+export interface Transaction {
+  id: number
+  description: string
+  amount: number
+  date: string // YYYY-MM-DD
+  categoryId: number | null
+  categoryName: string | null
+  vaultId: number | null
+}
+
+export interface TransactionRequest {
+  description: string
+  amount: number
+  date: string
+  categoryId: number | null
+}
+
+export type TransactionType = 'income' | 'expense' | 'vault'
+
+export interface TransactionQuery {
+  from?: string
+  to?: string
+  categoryId?: number
+  // Só receitas e gastos sem categoria. Não combina com categoryId, vaultId nem type=vault.
+  uncategorized?: boolean
+  vaultId?: number
+  type?: TransactionType
+  page?: number
+  pageSize?: number
+}
+
 // Formato de erro do ASP.NET Core. `errors` só vem nas falhas de validação.
 export interface ProblemDetails {
   type?: string

@@ -1,12 +1,14 @@
 import type { ComponentProps } from 'react'
 import { Spinner } from './Spinner'
 
-type Variant = 'primary' | 'secondary' | 'ghost'
+type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 const variants: Record<Variant, string> = {
   primary: 'bg-primary text-white hover:bg-primary-hover',
   secondary: 'border border-border bg-surface text-foreground hover:bg-background',
   ghost: 'text-muted hover:bg-background hover:text-foreground',
+  // Branco sobre danger tem 4,8:1; o hover escurece, então o contraste só aumenta.
+  danger: 'bg-danger text-white hover:brightness-90',
 }
 
 interface ButtonProps extends ComponentProps<'button'> {
