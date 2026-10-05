@@ -5,6 +5,7 @@ import { useDepositToVault, useWithdrawFromVault } from '../../hooks/useVaults'
 import { isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
 import { formatMoney, parseMoneyInput, toInputText } from '../../lib/money'
+import { vaultOperationDateError } from '../../lib/vaults'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Input } from '../ui/Input'
@@ -43,6 +44,7 @@ function validate(values: Values, operation: VaultOperation, balance: number): F
 
   if (!values.date) errors.date = 'Informe a data.'
   else if (!isValidIsoDate(values.date)) errors.date = 'Data inválida.'
+  else errors.date = vaultOperationDateError(values.date, today())
 
   if (values.description.trim().length > DESCRIPTION_MAX) {
     errors.description = `A descrição deve ter no máximo ${DESCRIPTION_MAX} caracteres.`
@@ -151,7 +153,8 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
             label="Data"
             type="date"
             min="0001-01-01"
-            max="9999-12-31"
+            max={today()}
+            hint="Hoje ou uma data passada."
             value={values.date}
             onChange={(event) => change('date', event.target.value)}
             error={errors.date}

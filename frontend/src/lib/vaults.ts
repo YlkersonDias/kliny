@@ -28,6 +28,12 @@ export function goalProgress(balance: number, goal: number): GoalProgress {
   }
 }
 
+// Depósito e retirada só com data de hoje ou passada (a API também recusa data futura,
+// com uma folga de fuso; aqui o limite é exato, pela data local). Datas como texto YYYY-MM-DD.
+export function vaultOperationDateError(date: string, today: string): string | undefined {
+  return date > today ? 'Operações de cofre não podem ter data futura.' : undefined
+}
+
 // Extrato do ponto de vista do cofre. No banco o depósito é negativo (sai da conta);
 // aqui ele aparece positivo (entra no cofre), e a retirada negativa.
 export function vaultAmount(accountAmount: number): number {

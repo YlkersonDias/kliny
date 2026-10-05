@@ -1,5 +1,19 @@
 import { describe, expect, it } from 'vitest'
-import { goalProgress, sumMoney, vaultAmount } from './vaults'
+import { goalProgress, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+
+describe('vaultOperationDateError', () => {
+  it('aceita hoje e datas passadas', () => {
+    expect(vaultOperationDateError('2026-10-05', '2026-10-05')).toBeUndefined()
+    expect(vaultOperationDateError('2026-10-04', '2026-10-05')).toBeUndefined()
+    expect(vaultOperationDateError('2020-01-15', '2026-10-05')).toBeUndefined()
+  })
+
+  it('recusa data futura, inclusive na virada de mês e de ano', () => {
+    expect(vaultOperationDateError('2026-10-06', '2026-10-05')).toBeDefined()
+    expect(vaultOperationDateError('2026-11-01', '2026-10-31')).toBeDefined()
+    expect(vaultOperationDateError('2027-01-01', '2026-12-31')).toBeDefined()
+  })
+})
 
 describe('sumMoney', () => {
   it('soma sem erro de ponto flutuante', () => {
