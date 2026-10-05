@@ -69,14 +69,34 @@ public class VaultService(AppDbContext db) : IVaultService
         int userId, int id, VaultOperationRequest request, bool isWithdrawal)
     {
         var amount = request.Amount!.Value;
+        var date = request.Date!.Value;
 
         await using var dbTransaction = await db.Database.BeginTransactionAsync();
+        // Depósito: trava a conta (linha do usuário) antes do cofre, para dois depósitos ao mesmo
+        // tempo, mesmo em cofres diferentes, não passarem juntos pela checagem do saldo da conta.
+        // Só o depósito trava o usuário, e sempre antes do cofre: a ordem é sempre a mesma.
+        if (!isWithdrawal)
+            await db.Database.ExecuteSqlAsync($"SELECT Id FROM Users WHERE Id = {userId} FOR UPDATE");
         var vault = await LockOwnedAsync(userId, id);
         var balance = await GetBalanceAsync(vault.Id);
 
         if (isWithdrawal && amount > balance)
             throw new BusinessRuleException(
                 $"Saldo insuficiente no cofre. Disponível: {balance.ToString("C", PtBr)}.");
+
+        if (!isWithdrawal)
+        {
+            // Só deposita o que a conta tem na data do depósito: soma de tudo desde o início da conta
+            // até essa data, inclusive operações de cofre (o depósito tira dinheiro da conta).
+            var available = await GetAccountBalanceAsync(userId, date);
+            if (amount > available)
+            {
+                var message = $"Saldo insuficiente na conta. Disponível em {date.ToString("dd/MM/yyyy", PtBr)}: {available.ToString("C", PtBr)}.";
+                if (available <= 0)
+                    message += " Lance uma receita antes de depositar.";
+                throw new BusinessRuleException(message);
+            }
+        }
 
         var description = string.IsNullOrWhiteSpace(request.Description)
             ? (isWithdrawal ? $"Retirada do cofre {vault.Name}" : $"Depósito no cofre {vault.Name}")
@@ -89,7 +109,7 @@ public class VaultService(AppDbContext db) : IVaultService
             Description = description,
             // Depósito é negativo (sai da conta); retirada é positiva (volta para a conta).
             Amount = isWithdrawal ? amount : -amount,
-            Date = request.Date!.Value,
+            Date = date,
         };
         db.Transactions.Add(transaction);
         await db.SaveChangesAsync();
@@ -118,6 +138,11 @@ public class VaultService(AppDbContext db) : IVaultService
     // Saldo = soma dos valores do cofre com o sinal invertido.
     private async Task<decimal> GetBalanceAsync(int vaultId) =>
         -(await db.Transactions.Where(t => t.VaultId == vaultId).SumAsync(t => (decimal?)t.Amount) ?? 0m);
+
+    // Saldo da conta no fim do dia: soma de todos os valores até a data (cumulativo, não reseta
+    // por mês). É o mesmo cálculo do accountBalance do relatório de resumo.
+    private async Task<decimal> GetAccountBalanceAsync(int userId, DateOnly date) =>
+        await db.Transactions.Where(t => t.UserId == userId && t.Date <= date).SumAsync(t => (decimal?)t.Amount) ?? 0m;
 
     private static void Apply(Vault vault, VaultRequest request)
     {
