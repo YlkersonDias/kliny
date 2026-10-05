@@ -1,4 +1,4 @@
-import { Outlet, useNavigate } from 'react-router'
+import { Link, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
 import { APP_NAME } from '../../config/app'
 import { Button } from '../ui/Button'
@@ -16,7 +16,17 @@ export function AppLayout() {
     navigate('/entrar', { replace: true })
   }
 
-  const brand = <span className="text-xl font-bold tracking-tight text-primary">{APP_NAME}</span>
+  // Marca clicável, levando ao início (no menu lateral e no cabeçalho do celular). O nome
+  // acessível começa pelo texto visível, como pede o WCAG 2.5.3.
+  const brand = (
+    <Link
+      to="/"
+      aria-label={`${APP_NAME}, página inicial`}
+      className="rounded-lg text-xl font-bold tracking-tight text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+    >
+      {APP_NAME}
+    </Link>
+  )
 
   return (
     <div className="min-h-dvh">
