@@ -1,5 +1,20 @@
 import { describe, expect, it } from 'vitest'
-import { goalProgress, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+import { goalProgress, goalReachedNotice, sumMoney, vaultAmount, vaultOperationDateError } from './vaults'
+
+describe('goalReachedNotice', () => {
+  it('avisa quando o saldo já atinge a meta (inclusive igual)', () => {
+    expect(goalReachedNotice(300, 500)).toBe('O cofre já tem R$ 500,00 guardados, o que já atinge esta meta. Ele vai aparecer como “Meta atingida”.')
+    expect(goalReachedNotice(500, 500)).toBeDefined()
+    expect(goalReachedNotice(0.3, 0.1 + 0.2)).toBeDefined() // centavos, sem erro de ponto flutuante
+  })
+
+  it('sem aviso quando a meta está acima do saldo, sem meta ou sem saldo', () => {
+    expect(goalReachedNotice(500.01, 500)).toBeUndefined()
+    expect(goalReachedNotice(null, 500)).toBeUndefined()
+    expect(goalReachedNotice(0, 500)).toBeUndefined()
+    expect(goalReachedNotice(300, 0)).toBeUndefined()
+  })
+})
 
 describe('vaultOperationDateError', () => {
   it('aceita hoje e datas passadas', () => {

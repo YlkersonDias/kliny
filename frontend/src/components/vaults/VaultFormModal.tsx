@@ -4,6 +4,7 @@ import type { Vault } from '../../api/types'
 import { useCreateVault, useUpdateVault } from '../../hooks/useVaults'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
 import { parseMoneyInput, toInputText } from '../../lib/money'
+import { goalReachedNotice } from '../../lib/vaults'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Input } from '../ui/Input'
@@ -117,7 +118,10 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
           ref={goalRef}
           label="Meta (opcional)"
           placeholder="0,00"
-          hint={isEdit ? 'Deixe em branco para remover a meta.' : 'Quanto você quer juntar neste cofre.'}
+          // Meta que o saldo já atinge é aceita; só avisa (na dica, ligada ao campo por aria-describedby).
+          hint={isEdit
+            ? [goalReachedNotice(parseMoneyInput(values.goal), vault.balance), 'Deixe em branco para remover a meta.'].filter(Boolean).join(' ')
+            : 'Quanto você quer juntar neste cofre.'}
           value={values.goal}
           onChange={(text) => change('goal', text)}
           error={errors.goal}

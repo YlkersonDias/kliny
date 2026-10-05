@@ -75,6 +75,7 @@ export default function VaultsPage() {
               key={vault.id}
               vault={vault}
               onOperation={(operation) => setDialog({ kind: 'operation', vault, operation })}
+              onEdit={() => setDialog({ kind: 'form', vault })}
             />
           ))}
         </div>

@@ -1,3 +1,5 @@
+import { formatMoney } from './money'
+
 // Cálculos dos cofres que a API não devolve prontos.
 
 // Centavos inteiros: somar números com casas decimais acumula erro (0,1 + 0,2).
@@ -26,6 +28,14 @@ export function goalProgress(balance: number, goal: number): GoalProgress {
     reached,
     remaining: reached ? 0 : (goalCents - balanceCents) / 100,
   }
+}
+
+// Aviso (não bloqueia) ao editar um cofre com uma meta que o saldo já atinge: ele vai aparecer
+// como "Meta atingida". Sem meta válida ou sem saldo, não há aviso.
+export function goalReachedNotice(goal: number | null, balance: number): string | undefined {
+  if (goal === null || goal <= 0 || balance <= 0) return undefined
+  if (toCents(balance) < toCents(goal)) return undefined
+  return `O cofre já tem ${formatMoney(balance)} guardados, o que já atinge esta meta. Ele vai aparecer como “Meta atingida”.`
 }
 
 // Depósito e retirada só com data de hoje ou passada (a API também recusa data futura,
