@@ -27,7 +27,9 @@ export function GoalProgress({ balance, goal, className = '' }: GoalProgressProp
           : `${progress.percent}% da meta de ${formatMoney(goal)}`}
         className="h-2 overflow-hidden rounded-full bg-background"
       >
-        <div className="h-full rounded-full bg-vault" style={{ width: `${progress.percent}%` }} />
+        {/* Âmbar até atingir; verde (income) quando atinge. Exceção à regra do âmbar de cofre,
+            decidida pelo usuário (ver "Exceções de cor dos cofres" no CLAUDE.md). */}
+        <div className={`h-full rounded-full ${progress.reached ? 'bg-income' : 'bg-vault'}`} style={{ width: `${progress.percent}%` }} />
       </div>
       <p className="mt-1.5 flex flex-wrap justify-between gap-x-3 text-sm text-muted tabular-nums">
         <span className="wrap-anywhere">Meta {formatMoney(goal)}</span>
