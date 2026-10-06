@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { MonthSummaryCard } from '../components/dashboard/MonthSummaryCard'
 import { RecentTransactions } from '../components/dashboard/RecentTransactions'
 import { SpendingSection } from '../components/dashboard/SpendingSection'
@@ -16,7 +17,6 @@ import { useVaults } from '../hooks/useVaults'
 import { currentMonthRange, formatLongDate, today as getToday } from '../lib/dates'
 
 const RECENT_COUNT = 5
-const STARTING_BALANCE: TransactionPreset = { kind: 'income', description: 'Saldo inicial' }
 
 // Bloco cinza do tamanho do conteúdo, enquanto carrega (sem pular a tela).
 function Placeholder({ className }: { className: string }) {
@@ -24,7 +24,8 @@ function Placeholder({ className }: { className: string }) {
 }
 
 export default function DashboardPage() {
-  usePageTitle('Início')
+  const { t } = useTranslation(['dashboard', 'transactions', 'common'])
+  usePageTitle(t('title'))
   // Período calculado no navegador (data local); a API não escolhe período.
   const month = currentMonthRange()
   const today = getToday()
@@ -41,7 +42,7 @@ export default function DashboardPage() {
     if (recent.isPending) {
       return (
         <div role="status" className="space-y-4">
-          <span className="sr-only">Carregando…</span>
+          <span className="sr-only">{t('common:loading')}</span>
           <Placeholder className="h-80" />
           <div className="grid grid-cols-1 gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
             <Placeholder className="h-72" />
@@ -56,27 +57,27 @@ export default function DashboardPage() {
           <EmptyState
             role="alert"
             image="erro"
-            title="Não foi possível carregar o resumo"
+            title={t('loadError')}
             description={recent.error.message}
-            action={<Button variant="secondary" onClick={() => recent.refetch()}>Tentar novamente</Button>}
+            action={<Button variant="secondary" onClick={() => recent.refetch()}>{t('common:actions.tryAgain')}</Button>}
           />
         </div>
       )
     }
     if (recent.data.totalCount === 0) {
-      return <WelcomeCard onStart={() => setForm({ preset: STARTING_BALANCE })} />
+      return <WelcomeCard onStart={() => setForm({ preset: { kind: 'income', description: t('startingBalance') } })} />
     }
 
     return (
       <div className="space-y-4">
         {monthSummary.isError || todaySummary.isError ? (
           <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
-            <FormAlert>Não foi possível carregar o resumo do mês. {(monthSummary.error ?? todaySummary.error)?.message}</FormAlert>
+            <FormAlert>{t('summaryError', { message: (monthSummary.error ?? todaySummary.error)?.message ?? '' })}</FormAlert>
             <Button
               variant="secondary"
               onClick={() => { void monthSummary.refetch(); void todaySummary.refetch() }}
             >
-              Tentar novamente
+              {t('common:actions.tryAgain')}
             </Button>
           </section>
         ) : !monthSummary.data || !todaySummary.data ? (
@@ -92,8 +93,8 @@ export default function DashboardPage() {
           >
             {timeline.isError ? (
               <div className="space-y-3">
-                <FormAlert>Não foi possível carregar os gastos por dia. {timeline.error.message}</FormAlert>
-                <Button variant="secondary" onClick={() => timeline.refetch()}>Tentar novamente</Button>
+                <FormAlert>{t('chartError', { message: timeline.error.message })}</FormAlert>
+                <Button variant="secondary" onClick={() => timeline.refetch()}>{t('common:actions.tryAgain')}</Button>
               </div>
             ) : timeline.data ? (
               <SpendingSection points={timeline.data} today={today} />
@@ -107,8 +108,8 @@ export default function DashboardPage() {
           <RecentTransactions items={recent.data.items} />
           {vaults.isError ? (
             <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
-              <FormAlert>Não foi possível carregar os cofres. {vaults.error.message}</FormAlert>
-              <Button variant="secondary" onClick={() => vaults.refetch()}>Tentar novamente</Button>
+              <FormAlert>{t('vaultsError', { message: vaults.error.message })}</FormAlert>
+              <Button variant="secondary" onClick={() => vaults.refetch()}>{t('common:actions.tryAgain')}</Button>
             </section>
           ) : vaults.data ? (
             <VaultsOverview vaults={vaults.data} />
@@ -128,7 +129,7 @@ export default function DashboardPage() {
         {recent.data && recent.data.totalCount > 0 && (
           <Button onClick={() => setForm({})}>
             <Icon name="plus" className="size-4" />
-            Nova movimentação
+            {t('transactions:newButton')}
           </Button>
         )}
       </div>

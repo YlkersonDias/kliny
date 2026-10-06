@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import type { DaySpending } from '../../lib/dashboard'
 import { formatMoney } from '../../lib/money'
@@ -12,6 +13,7 @@ interface SpendingChartProps {
 }
 
 export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
+  const { t } = useTranslation('dashboard')
   const lastDay = days.length > 0 ? days[days.length - 1].day : 1
 
   return (
@@ -28,8 +30,8 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
           />
           <Tooltip
             cursor={{ fill: 'var(--color-background)' }}
-            formatter={(value) => [formatMoney(Number(value)), 'Gasto']}
-            labelFormatter={(day) => `Dia ${day}`}
+            formatter={(value) => [formatMoney(Number(value)), t('spending.spent')]}
+            labelFormatter={(day) => t('spending.tooltipDay', { day })}
             contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)', fontSize: 13 }}
             labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
             itemStyle={{ color: 'var(--color-foreground)' }}
@@ -38,7 +40,7 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
             x={todayDay}
             stroke="var(--color-primary)"
             strokeDasharray="3 3"
-            label={{ value: 'hoje', position: 'top', fill: 'var(--color-primary)', fontSize: 12, fontWeight: 600 }}
+            label={{ value: t('spending.today'), position: 'top', fill: 'var(--color-primary)', fontSize: 12, fontWeight: 600 }}
           />
           <Bar dataKey="expense" radius={[3, 3, 0, 0]} minPointSize={2} isAnimationActive={false}>
             {days.map((day) => (

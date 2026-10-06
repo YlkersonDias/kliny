@@ -1,11 +1,12 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import { APP_NAME } from '../../config/app'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 
 // Conta sem nenhuma movimentação: orienta a lançar o "Saldo inicial",
 // já que a API não tem campo de saldo de abertura.
 export function WelcomeCard({ onStart }: { onStart: () => void }) {
+  const { t } = useTranslation('dashboard')
   return (
     <section
       aria-labelledby="comece"
@@ -24,22 +25,21 @@ export function WelcomeCard({ onStart }: { onStart: () => void }) {
         />
       </picture>
       <div>
-        <h2 id="comece" className="text-xl font-semibold text-foreground sm:text-2xl">Comece pelo dinheiro que você já tem</h2>
+        <h2 id="comece" className="text-xl font-semibold text-foreground sm:text-2xl">{t('welcome.title')}</h2>
         <p className="mt-2 max-w-prose text-muted">
-          Lance uma receita chamada “Saldo inicial” com o valor que está na sua conta hoje.
-          A partir dela, o {APP_NAME} calcula seu saldo.
+          {t('welcome.text')}
         </p>
-        <p className="mt-1 text-sm text-muted">Se a conta estiver no negativo, lance como gasto.</p>
+        <p className="mt-1 text-sm text-muted">{t('welcome.negative')}</p>
         <div className="mt-5 flex flex-col items-center gap-3 sm:flex-row">
           <Button onClick={onStart}>
             <Icon name="plus" className="size-4" />
-            Lançar saldo inicial
+            {t('welcome.start')}
           </Button>
           <Link
             to="/cofres"
             className="rounded px-2 py-2 text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
           >
-            Criar um cofre
+            {t('welcome.createVault')}
           </Link>
         </div>
       </div>

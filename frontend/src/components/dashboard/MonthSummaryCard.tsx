@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { ReportPeriod, SummaryResponse, TimelinePoint } from '../../api/types'
 import { hasFutureEntries } from '../../lib/dashboard'
 import { formatDate } from '../../lib/dates'
@@ -27,14 +28,13 @@ function formatBalance(value: number): string {
 export function MonthSummaryCard({
   month, today, monthSummary, todaySummary, points, vaultCount, children,
 }: MonthSummaryCardProps) {
+  const { t } = useTranslation('dashboard')
   const showFutureNote = hasFutureEntries(points, today, monthSummary, todaySummary)
-  const vaultsText = vaultCount === undefined
-    ? 'em cofres'
-    : `em ${vaultCount} ${vaultCount === 1 ? 'cofre' : 'cofres'}`
+  const vaultsText = vaultCount === undefined ? t('month.inVaults') : t('month.inVaultsCount', { count: vaultCount })
 
   return (
     <section aria-labelledby="na-conta" className="rounded-2xl border border-border bg-surface p-5 sm:p-7">
-      <p id="na-conta" className="text-sm text-muted">Na conta hoje</p>
+      <p id="na-conta" className="text-sm text-muted">{t('month.accountToday')}</p>
       <p className="mt-1 text-4xl font-semibold tracking-tight tabular-nums wrap-anywhere text-foreground sm:text-5xl">
         {formatBalance(todaySummary.accountBalance)}
       </p>
@@ -43,26 +43,28 @@ export function MonthSummaryCard({
           {/* Âmbar só no ícone. */}
           <Icon name="vault" className="size-4 text-vault" />
           <span>
-            e <strong className="font-semibold tabular-nums text-foreground">{formatMoney(todaySummary.vaultsBalance)}</strong>{' '}
-            guardados {vaultsText}
+            <Trans
+              t={t}
+              i18nKey="month.saved"
+              values={{ amount: formatMoney(todaySummary.vaultsBalance), where: vaultsText }}
+              components={{ strong: <strong className="font-semibold tabular-nums text-foreground" /> }}
+            />
           </span>
         </p>
       )}
 
       <div className="my-6 h-px bg-border" />
 
-      <h2 className="text-lg font-semibold text-foreground">Este mês</h2>
+      <h2 className="text-lg font-semibold text-foreground">{t('month.thisMonth')}</h2>
       {/* Convenção dos relatórios: expense já vem positivo; formatOutflow só põe o "−". */}
       <dl className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
-        <StatItem label="Entrou" value={formatSigned(monthSummary.income)} valueClass="text-income" icon={{ name: 'income', className: 'text-income' }} />
-        <StatItem label="Saiu" value={formatOutflow(monthSummary.expense)} valueClass="text-expense" icon={{ name: 'expense', className: 'text-expense' }} />
-        <StatItem label="Sobrou" value={formatSigned(monthSummary.net)} className="sm:pl-2" />
+        <StatItem label={t('month.in')} value={formatSigned(monthSummary.income)} valueClass="text-income" icon={{ name: 'income', className: 'text-income' }} />
+        <StatItem label={t('month.out')} value={formatOutflow(monthSummary.expense)} valueClass="text-expense" icon={{ name: 'expense', className: 'text-expense' }} />
+        <StatItem label={t('month.left')} value={formatSigned(monthSummary.net)} className="sm:pl-2" />
       </dl>
       {showFutureNote && (
         <p className="mt-3 text-sm text-muted">
-          Este mês inclui lançamentos com data depois de hoje. Eles já entram em “Entrou” e “Saiu”,
-          mas só contam em “Na conta” quando a data chegar: em {formatDate(month.to).slice(0, 5)}, o saldo
-          previsto é {formatBalance(monthSummary.accountBalance)}.
+          {t('month.futureNote', { date: formatDate(month.to).slice(0, 5), balance: formatBalance(monthSummary.accountBalance) })}
         </p>
       )}
 

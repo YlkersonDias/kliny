@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { Vault } from '../../api/types'
 import { formatMoney } from '../../lib/money'
@@ -9,21 +10,22 @@ const FOCUS = 'rounded underline-offset-2 hover:underline focus-visible:outline-
 const LINK = `text-sm font-semibold text-primary ${FOCUS}`
 
 export function VaultsOverview({ vaults }: { vaults: Vault[] }) {
+  const { t } = useTranslation('dashboard')
   const shown = vaults.slice(0, MAX_VAULTS)
 
   return (
     <section aria-labelledby="cofres-resumo" className="rounded-2xl border border-border bg-surface p-5">
       <div className="flex items-baseline justify-between gap-3">
-        <h2 id="cofres-resumo" className="text-lg font-semibold text-foreground">Cofres</h2>
+        <h2 id="cofres-resumo" className="text-lg font-semibold text-foreground">{t('vaults.title')}</h2>
         {vaults.length > 0 && (
           <Link to="/cofres" className={LINK}>
-            {vaults.length > MAX_VAULTS ? `Ver todos (${vaults.length})` : 'Ver cofres'}
+            {vaults.length > MAX_VAULTS ? t('vaults.seeAll', { count: vaults.length }) : t('vaults.seeVaults')}
           </Link>
         )}
       </div>
       {shown.length === 0 ? (
         <p className="mt-3 text-sm text-muted">
-          Nenhum cofre ainda. <Link to="/cofres" className={LINK}>Criar um cofre</Link>
+          {t('vaults.none')}{' '}<Link to="/cofres" className={LINK}>{t('vaults.create')}</Link>
         </p>
       ) : (
         <ul className="mt-4 space-y-5">
