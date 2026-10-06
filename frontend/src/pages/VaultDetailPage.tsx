@@ -26,35 +26,39 @@ function parseId(value: string | undefined): number | null {
   return id <= 2_147_483_647 ? id : null
 }
 
-const BACK_LINK = (
-  <Link
-    to="/cofres"
-    className="inline-flex items-center gap-1 rounded text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
-  >
-    <Icon name="chevronLeft" className="size-4" />
-    Cofres
-  </Link>
-)
+function BackLink() {
+  const { t } = useTranslation('vaults')
+  return (
+    <Link
+      to="/cofres"
+      className="inline-flex items-center gap-1 rounded text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
+    >
+      <Icon name="chevronLeft" className="size-4" />
+      {t('detail.back')}
+    </Link>
+  )
+}
 
 export default function VaultDetailPage() {
+  const { t } = useTranslation(['vaults', 'common'])
   const id = parseId(useParams().id)
   const vault = useVault(id ?? 0, { enabled: id !== null })
   const [dialog, setDialog] = useState<VaultDialog>(null)
   const navigate = useNavigate()
-  usePageTitle(vault.data?.name ?? 'Cofre')
+  usePageTitle(vault.data?.name ?? t('detail.pageTitle'))
 
   const isNotFound = id === null || (vault.error instanceof ApiError && vault.error.status === 404)
 
   if (isNotFound) {
     return (
       <>
-        {BACK_LINK}
+        <BackLink />
         <div className="mt-4 rounded-2xl border border-border bg-surface">
           <EmptyState
             image="sem-resultados"
-            title="Cofre não encontrado."
-            description="Ele pode ter sido apagado, ou o endereço está errado."
-            action={<Link to="/cofres" className="font-semibold text-primary underline-offset-2 hover:underline">Voltar para Cofres</Link>}
+            title={t('detail.notFoundTitle')}
+            description={t('detail.notFoundDescription')}
+            action={<Link to="/cofres" className="font-semibold text-primary underline-offset-2 hover:underline">{t('detail.backToVaults')}</Link>}
           />
         </div>
       </>
@@ -64,14 +68,14 @@ export default function VaultDetailPage() {
   if (vault.isError) {
     return (
       <>
-        {BACK_LINK}
+        <BackLink />
         <div className="mt-4 rounded-2xl border border-border bg-surface">
           <EmptyState
             role="alert"
             image="erro"
-            title="Não foi possível carregar o cofre"
+            title={t('detail.loadError')}
             description={vault.error.message}
-            action={<Button variant="secondary" onClick={() => vault.refetch()}>Tentar novamente</Button>}
+            action={<Button variant="secondary" onClick={() => vault.refetch()}>{t('common:actions.tryAgain')}</Button>}
           />
         </div>
       </>
@@ -81,10 +85,10 @@ export default function VaultDetailPage() {
   if (vault.isPending) {
     return (
       <>
-        {BACK_LINK}
+        <BackLink />
         <div className="mt-4 flex justify-center rounded-2xl border border-border bg-surface py-16 text-primary" role="status">
           <Spinner className="size-8" />
-          <span className="sr-only">Carregando cofre…</span>
+          <span className="sr-only">{t('detail.loading')}</span>
         </div>
       </>
     )
@@ -92,7 +96,7 @@ export default function VaultDetailPage() {
 
   return (
     <>
-      {BACK_LINK}
+      <BackLink />
       <VaultHeader vault={vault.data} onDialog={setDialog} />
       <Statement vault={vault.data} onDeposit={() => setDialog({ kind: 'operation', vault: vault.data, operation: 'deposit' })} />
       <VaultDialogs dialog={dialog} onChange={setDialog} onDeleted={() => navigate('/cofres', { replace: true })} />
@@ -101,6 +105,7 @@ export default function VaultDetailPage() {
 }
 
 function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: VaultDialog) => void }) {
+  const { t } = useTranslation(['vaults', 'common'])
   const reached = vault.goal !== null && goalProgress(vault.balance, vault.goal).reached
 
   return (
@@ -114,10 +119,10 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
             <div className="min-w-0">
               <h1 className="break-words text-2xl font-semibold text-foreground">{vault.name}</h1>
               {/* createdAt chega em UTC com "Z"; a data mostrada é a local. */}
-              <p className="text-sm text-muted">Criado em {formatTimestampDate(vault.createdAt)}</p>
+              <p className="text-sm text-muted">{t('detail.createdAt', { date: formatTimestampDate(vault.createdAt) })}</p>
             </div>
           </div>
-          <p className="mt-4 text-sm text-muted">Saldo</p>
+          <p className="mt-4 text-sm text-muted">{t('detail.balance')}</p>
           <p className="text-3xl font-semibold tabular-nums wrap-anywhere text-foreground">{formatMoney(vault.balance)}</p>
         </div>
         {reached && (
@@ -135,8 +140,8 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
               />
             </picture>
             <div>
-              <p className="font-semibold text-foreground">Meta atingida!</p>
-              <p className="text-sm text-muted">Você juntou {formatMoney(vault.goal!)} ou mais.</p>
+              <p className="font-semibold text-foreground">{t('detail.goalReached')}</p>
+              <p className="text-sm text-muted">{t('detail.goalReachedText', { goal: formatMoney(vault.goal!) })}</p>
             </div>
           </div>
         )}
@@ -147,19 +152,19 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
       <div className="mt-6 flex flex-wrap gap-2">
         <Button onClick={() => onDialog({ kind: 'operation', vault, operation: 'deposit' })}>
           <Icon name="income" className="size-4" />
-          Depositar
+          {t('common:actions.deposit')}
         </Button>
         <Button variant="secondary" onClick={() => onDialog({ kind: 'operation', vault, operation: 'withdraw' })}>
           <Icon name="expense" className="size-4" />
-          Retirar
+          {t('common:actions.withdraw')}
         </Button>
         <Button variant="secondary" onClick={() => onDialog({ kind: 'form', vault })}>
           <Icon name="edit" className="size-4" />
-          Editar
+          {t('common:actions.edit')}
         </Button>
         <Button variant="secondary" onClick={() => onDialog({ kind: 'delete', vault })}>
           <Icon name="trash" className="size-4" />
-          Apagar
+          {t('common:actions.delete')}
         </Button>
       </div>
     </section>
@@ -167,7 +172,7 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
 }
 
 function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }) {
-  const { t } = useTranslation(['vaults', 'transactions'])
+  const { t } = useTranslation(['vaults', 'transactions', 'common'])
   const [searchParams, setSearchParams] = useSearchParams()
   const page = parsePage(searchParams.get('pagina'))
   const statement = useTransactions({ vaultId: vault.id, page, pageSize: PAGE_SIZE })
@@ -189,9 +194,9 @@ function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }
         <EmptyState
           role="alert"
           image="erro"
-          title="Não foi possível carregar o extrato"
+          title={t('detail.statementError')}
           description={statement.error.message}
-          action={<Button variant="secondary" onClick={() => statement.refetch()}>Tentar novamente</Button>}
+          action={<Button variant="secondary" onClick={() => statement.refetch()}>{t('common:actions.tryAgain')}</Button>}
         />
       )
     }
@@ -199,7 +204,7 @@ function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }
       return (
         <div className="flex justify-center py-12 text-primary" role="status">
           <Spinner className="size-8" />
-          <span className="sr-only">Carregando extrato…</span>
+          <span className="sr-only">{t('detail.statementLoading')}</span>
         </div>
       )
     }
@@ -207,12 +212,12 @@ function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }
       return (
         <EmptyState
           image="cofre-vazio"
-          title="Nenhuma movimentação neste cofre."
-          description="Faça o primeiro depósito para começar a juntar."
+          title={t('detail.statementEmptyTitle')}
+          description={t('detail.statementEmptyDescription')}
           action={(
             <Button onClick={onDeposit}>
               <Icon name="income" className="size-4" />
-              Depositar
+              {t('common:actions.deposit')}
             </Button>
           )}
         />
@@ -239,9 +244,9 @@ function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }
   return (
     <section aria-labelledby="extrato" className="mt-4 overflow-hidden rounded-2xl border border-border bg-surface">
       <div className="border-b border-border px-4 py-4 sm:px-5">
-        <h2 id="extrato" className="text-lg font-semibold text-foreground">Extrato</h2>
+        <h2 id="extrato" className="text-lg font-semibold text-foreground">{t('detail.statement')}</h2>
         <p className="mt-1 text-sm text-muted">
-          Depósitos e retiradas não podem ser editados. Para corrigir, faça a operação inversa.
+          {t('detail.statementNote')}
         </p>
       </div>
       {renderContent()}

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
 import { formatSigned } from '../../lib/money'
@@ -11,6 +12,7 @@ import { Icon } from '../ui/Icon'
 // do cofre, e em Movimentações as operações de cofre continuam em âmbar (ver "Exceções de cor
 // dos cofres" no CLAUDE.md).
 export function VaultStatement({ items }: { items: Transaction[] }) {
+  const { t } = useTranslation('vaults')
   return (
     <ul className="divide-y divide-border">
       {items.map((transaction) => {
@@ -28,7 +30,7 @@ export function VaultStatement({ items }: { items: Transaction[] }) {
             </div>
             <div className={`shrink-0 text-right ${color}`}>
               <p className="font-semibold tabular-nums whitespace-nowrap">{formatSigned(amount)}</p>
-              <p className="text-sm">{isDeposit ? 'Depósito' : 'Retirada'}</p>
+              <p className="text-sm">{isDeposit ? t('detail.deposit') : t('detail.withdrawal')}</p>
             </div>
           </li>
         )

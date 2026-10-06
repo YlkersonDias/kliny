@@ -1,4 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/client'
 import type { Vault } from '../../api/types'
 import { useCreateVault, useUpdateVault } from '../../hooks/useVaults'
@@ -22,15 +24,15 @@ interface Values {
   goal: string // '' = sem meta
 }
 
-function validate(values: Values): FieldErrors<Field> {
+function validate(values: Values, t: TFunction<['vaults', 'common']>): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
   const name = values.name.trim()
-  if (!name) errors.name = 'Informe o nome do cofre.'
-  else if (name.length > NAME_MAX) errors.name = `O nome do cofre deve ter no máximo ${NAME_MAX} caracteres.`
+  if (!name) errors.name = t('form.nameRequired')
+  else if (name.length > NAME_MAX) errors.name = t('form.nameMax', { max: NAME_MAX })
 
   // Zero ou negativo não é erro: vira "sem meta", como o campo vazio (parseGoalInput).
   if (parseGoalInput(values.goal) === 'invalid') {
-    errors.goal = 'Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.'
+    errors.goal = t('common:validation.amountInvalid')
   }
   return errors
 }
@@ -48,6 +50,7 @@ interface VaultFormModalProps {
 }
 
 export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
+  const { t } = useTranslation(['vaults', 'common'])
   const isEdit = vault !== undefined
   const [values, setValues] = useState<Values>({
     name: vault?.name ?? '',
@@ -77,7 +80,7 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values)
+    const fieldErrors = validate(values, t)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -103,7 +106,7 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
 
   return (
     <Modal
-      title={isEdit ? 'Editar cofre' : 'Novo cofre'}
+      title={isEdit ? t('form.editTitle') : t('form.newTitle')}
       initialFocusRef={nameRef}
       onClose={() => { if (!isPending) onClose() }}
     >
@@ -111,29 +114,29 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
         {formError && <FormAlert>{formError}</FormAlert>}
         <Input
           ref={nameRef}
-          label="Nome"
+          label={t('form.name')}
           autoComplete="off"
           maxLength={NAME_MAX}
-          placeholder="Ex.: Reserva de emergência"
+          placeholder={t('form.namePlaceholder')}
           value={values.name}
           onChange={(event) => change('name', event.target.value)}
           error={errors.name}
         />
         <MoneyInput
           ref={goalRef}
-          label="Meta (opcional)"
-          placeholder="0,00"
+          label={t('form.goal')}
+          placeholder={t('common:amountPlaceholder')}
           // Meta que o saldo já atinge é aceita; só avisa (na dica, ligada ao campo por aria-describedby).
           hint={isEdit
-            ? [goalReachedNotice(goalNumber(values.goal), vault.balance), 'Deixe em branco para remover a meta.'].filter(Boolean).join(' ')
-            : 'Quanto você quer juntar neste cofre.'}
+            ? [goalReachedNotice(goalNumber(values.goal), vault.balance), t('form.goalHintRemove')].filter(Boolean).join(' ')
+            : t('form.goalHintNew')}
           value={values.goal}
           onChange={(text) => change('goal', text)}
           error={errors.goal}
         />
         <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose} disabled={isPending}>Cancelar</Button>
-          <Button type="submit" isLoading={isPending}>{isEdit ? 'Salvar alterações' : 'Criar cofre'}</Button>
+          <Button variant="secondary" onClick={onClose} disabled={isPending}>{t('common:actions.cancel')}</Button>
+          <Button type="submit" isLoading={isPending}>{isEdit ? t('form.submitEdit') : t('form.submitNew')}</Button>
         </div>
       </form>
     </Modal>

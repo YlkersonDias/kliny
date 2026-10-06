@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { Vault } from '../../api/types'
 import { formatMoney } from '../../lib/money'
@@ -15,6 +16,7 @@ interface VaultCardProps {
 }
 
 export function VaultCard({ vault, onOperation, onEdit }: VaultCardProps) {
+  const { t } = useTranslation(['vaults', 'common'])
   return (
     <article className="flex flex-col rounded-2xl border border-border bg-surface p-5">
       <div className="flex items-start gap-3">
@@ -35,19 +37,19 @@ export function VaultCard({ vault, onOperation, onEdit }: VaultCardProps) {
           <p className="mt-0.5 text-2xl font-semibold tabular-nums wrap-anywhere text-foreground">{formatMoney(vault.balance)}</p>
         </div>
         {/* No canto, longe de Depositar/Retirar; a margem negativa alinha o ícone à borda do cartão. */}
-        <IconButton icon="edit" label={`Editar ${vault.name}`} onClick={onEdit} className="-mr-2 -mt-2 md:-mr-1 md:-mt-1" />
+        <IconButton icon="edit" label={t('card.edit', { name: vault.name })} onClick={onEdit} className="-mr-2 -mt-2 md:-mr-1 md:-mt-1" />
       </div>
       <GoalProgress balance={vault.balance} goal={vault.goal} className="mt-4" />
       <div className="mt-auto flex gap-2 pt-5">
         <Button variant="secondary" className="flex-1 px-3 py-2" onClick={() => onOperation('deposit')}>
           <Icon name="income" className="size-4" />
-          Depositar
-          <span className="sr-only"> em {vault.name}</span>
+          {t('common:actions.deposit')}
+          <span className="sr-only">{' '}{t('card.depositTo', { name: vault.name })}</span>
         </Button>
         <Button variant="secondary" className="flex-1 px-3 py-2" onClick={() => onOperation('withdraw')}>
           <Icon name="expense" className="size-4" />
-          Retirar
-          <span className="sr-only"> de {vault.name}</span>
+          {t('common:actions.withdraw')}
+          <span className="sr-only">{' '}{t('card.withdrawFrom', { name: vault.name })}</span>
         </Button>
       </div>
     </article>

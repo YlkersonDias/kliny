@@ -1,4 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/client'
 import type { Vault } from '../../api/types'
 import { useSummary } from '../../hooks/useReports'
@@ -31,17 +33,19 @@ const toCents = (value: number) => Math.round(value * 100)
 
 // accountAvailable: saldo da conta na data do depósito; undefined enquanto carrega (ou se a consulta
 // falhar): aí só a API confere.
-function validate(values: Values, operation: VaultOperation, balance: number, accountAvailable?: number): FieldErrors<Field> {
+function validate(
+  values: Values, operation: VaultOperation, balance: number, accountAvailable: number | undefined, t: TFunction<['vaults', 'common']>,
+): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
 
-  if (!values.amount.trim()) errors.amount = 'Informe o valor.'
+  if (!values.amount.trim()) errors.amount = t('common:validation.amountRequired')
   else {
     const amount = parseMoneyInput(values.amount)
-    if (amount === null) errors.amount = 'Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.'
-    else if (amount === 0) errors.amount = 'O valor deve ser maior que zero.'
+    if (amount === null) errors.amount = t('common:validation.amountInvalid')
+    else if (amount === 0) errors.amount = t('common:validation.amountPositive')
     // A API confere de novo, com o saldo travado; aqui é só para avisar antes.
     else if (operation === 'withdraw' && toCents(amount) > toCents(balance)) {
-      errors.amount = `Saldo insuficiente no cofre. Disponível: ${formatMoney(balance)}.`
+      errors.amount = t('operation.insufficientVault', { balance: formatMoney(balance) })
     }
     // Depósito só com saldo na conta na data escolhida (a API confere de novo, com a conta travada).
     else if (operation === 'deposit' && accountAvailable !== undefined && exceedsAccountBalance(amount, accountAvailable)) {
@@ -49,12 +53,12 @@ function validate(values: Values, operation: VaultOperation, balance: number, ac
     }
   }
 
-  if (!values.date) errors.date = 'Informe a data.'
-  else if (!isValidIsoDate(values.date)) errors.date = 'Data inválida.'
+  if (!values.date) errors.date = t('common:validation.dateRequired')
+  else if (!isValidIsoDate(values.date)) errors.date = t('common:validation.dateInvalid')
   else errors.date = vaultOperationDateError(values.date, today())
 
   if (values.description.trim().length > DESCRIPTION_MAX) {
-    errors.description = `A descrição deve ter no máximo ${DESCRIPTION_MAX} caracteres.`
+    errors.description = t('common:validation.descriptionMax', { max: DESCRIPTION_MAX })
   }
   return errors
 }
@@ -68,6 +72,7 @@ interface VaultOperationModalProps {
 }
 
 export function VaultOperationModal({ vault, operation, initialAmount, onClose }: VaultOperationModalProps) {
+  const { t } = useTranslation(['vaults', 'common'])
   const isWithdraw = operation === 'withdraw'
   const [values, setValues] = useState<Values>({
     amount: initialAmount ? toInputText(initialAmount) : '',
@@ -92,14 +97,16 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
     : undefined
   // Dica do valor no depósito: sempre visível, com o disponível na data escolhida.
   const depositHint = !dateOk
-    ? 'O disponível na conta aparece depois de escolher a data.'
+    ? t('operation.pickDateFirst')
     : accountAvailable !== undefined
-      ? `Disponível na conta ${values.date === today() ? 'hoje' : `em ${formatDate(values.date)}`}: ${formatAccountBalance(accountAvailable)}.`
+      ? values.date === today()
+        ? t('operation.availableToday', { balance: formatAccountBalance(accountAvailable) })
+        : t('operation.availableOn', { date: formatDate(values.date), balance: formatAccountBalance(accountAvailable) })
       : account.isError
-        ? 'Não foi possível consultar o saldo da conta; ele será conferido ao depositar.'
-        : 'Consultando o disponível na conta…'
+        ? t('operation.accountError')
+        : t('operation.accountLoading')
 
-  const title = isWithdraw ? `Retirar de ${vault.name}` : `Depositar em ${vault.name}`
+  const title = isWithdraw ? t('operation.withdrawTitle', { name: vault.name }) : t('operation.depositTitle', { name: vault.name })
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
     setErrors(fieldErrors)
@@ -119,7 +126,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values, operation, vault.balance, accountAvailable)
+    const fieldErrors = validate(values, operation, vault.balance, accountAvailable, t)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -149,9 +156,9 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   if (isWithdraw && vault.balance <= 0) {
     return (
       <Modal title={title} size="sm" onClose={onClose}>
-        <p className="text-sm text-muted">Este cofre está sem saldo, então não há o que retirar.</p>
+        <p className="text-sm text-muted">{t('operation.emptyVault')}</p>
         <div className="mt-5 flex justify-end">
-          <Button variant="secondary" onClick={onClose}>Fechar</Button>
+          <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
         </div>
       </Modal>
     )
@@ -164,20 +171,20 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
         <div className="grid gap-4 sm:grid-cols-2">
           <MoneyInput
             ref={amountRef}
-            label="Valor"
-            placeholder="0,00"
-            hint={isWithdraw ? `Disponível no cofre: ${formatMoney(vault.balance)}.` : depositHint}
+            label={t('common:fields.amount')}
+            placeholder={t('common:amountPlaceholder')}
+            hint={isWithdraw ? t('operation.availableInVault', { balance: formatMoney(vault.balance) }) : depositHint}
             value={values.amount}
             onChange={(text) => change('amount', text)}
             error={errors.amount}
           />
           <Input
             ref={dateRef}
-            label="Data"
+            label={t('common:fields.date')}
             type="date"
             min="0001-01-01"
             max={today()}
-            hint="Hoje ou uma data passada."
+            hint={t('operation.dateHint')}
             value={values.date}
             onChange={(event) => change('date', event.target.value)}
             error={errors.date}
@@ -185,17 +192,17 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
         </div>
         <Input
           ref={descriptionRef}
-          label="Descrição (opcional)"
+          label={t('operation.description')}
           autoComplete="off"
           maxLength={DESCRIPTION_MAX}
-          placeholder={isWithdraw ? `Retirada do cofre ${vault.name}` : `Depósito no cofre ${vault.name}`}
+          placeholder={isWithdraw ? t('operation.withdrawPlaceholder', { name: vault.name }) : t('operation.depositPlaceholder', { name: vault.name })}
           value={values.description}
           onChange={(event) => change('description', event.target.value)}
           error={errors.description}
         />
         <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>Cancelar</Button>
-          <Button type="submit" isLoading={mutation.isPending}>{isWithdraw ? 'Retirar' : 'Depositar'}</Button>
+          <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>{t('common:actions.cancel')}</Button>
+          <Button type="submit" isLoading={mutation.isPending}>{isWithdraw ? t('common:actions.withdraw') : t('common:actions.deposit')}</Button>
         </div>
       </form>
     </Modal>

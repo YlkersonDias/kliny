@@ -1,3 +1,4 @@
+import i18n from '../i18n'
 import { formatDate } from './dates'
 import { formatMoney, formatSigned, parseMoneyInput } from './money'
 
@@ -48,7 +49,7 @@ export function parseGoalInput(text: string): number | null | 'invalid' {
 export function goalReachedNotice(goal: number | null, balance: number): string | undefined {
   if (goal === null || goal <= 0 || balance <= 0) return undefined
   if (toCents(balance) < toCents(goal)) return undefined
-  return `O cofre já tem ${formatMoney(balance)} guardados, o que já atinge esta meta. Ele vai aparecer como “Meta atingida”.`
+  return i18n.t('vaults:form.goalReachedNotice', { balance: formatMoney(balance) })
 }
 
 // Saldo da conta com o "−" tipográfico quando negativo (a conta pode estar no vermelho).
@@ -59,8 +60,8 @@ export function formatAccountBalance(value: number): string {
 // Depósito acima do saldo da conta na data do depósito (mesma mensagem da API). Sem saldo,
 // orienta a lançar uma receita, para quem criou um cofre antes de lançar qualquer coisa.
 export function depositShortfallMessage(available: number, date: string): string {
-  const message = `Saldo insuficiente na conta. Disponível em ${formatDate(date)}: ${formatAccountBalance(available)}.`
-  return available <= 0 ? `${message} Lance uma receita antes de depositar.` : message
+  const message = i18n.t('vaults:operation.accountShortfall', { date: formatDate(date), balance: formatAccountBalance(available) })
+  return available <= 0 ? `${message} ${i18n.t('vaults:operation.addIncomeFirst')}` : message
 }
 
 // Depósito cabe no saldo da conta? Em centavos, para 0,1 + 0,2 não dar diferença.
@@ -71,7 +72,7 @@ export function exceedsAccountBalance(amount: number, available: number): boolea
 // Depósito e retirada só com data de hoje ou passada (a API também recusa data futura,
 // com uma folga de fuso; aqui o limite é exato, pela data local). Datas como texto YYYY-MM-DD.
 export function vaultOperationDateError(date: string, today: string): string | undefined {
-  return date > today ? 'Operações de cofre não podem ter data futura.' : undefined
+  return date > today ? i18n.t('vaults:operation.futureDate') : undefined
 }
 
 // Extrato do ponto de vista do cofre. No banco o depósito é negativo (sai da conta);

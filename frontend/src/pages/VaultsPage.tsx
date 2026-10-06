@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from '../components/ui/Button'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Icon } from '../components/ui/Icon'
@@ -11,14 +12,15 @@ import { formatMoney } from '../lib/money'
 import { sumMoney } from '../lib/vaults'
 
 export default function VaultsPage() {
-  usePageTitle('Cofres')
+  const { t } = useTranslation(['vaults', 'common'])
+  usePageTitle(t('title'))
   const vaults = useVaults()
   const [dialog, setDialog] = useState<VaultDialog>(null)
 
   const newButton = (
     <Button onClick={() => setDialog({ kind: 'form' })}>
       <Icon name="plus" className="size-4" />
-      Novo cofre
+      {t('newButton')}
     </Button>
   )
 
@@ -27,7 +29,7 @@ export default function VaultsPage() {
       return (
         <div className="flex justify-center rounded-2xl border border-border bg-surface py-16 text-primary" role="status">
           <Spinner className="size-8" />
-          <span className="sr-only">Carregando cofres…</span>
+          <span className="sr-only">{t('loading')}</span>
         </div>
       )
     }
@@ -37,9 +39,9 @@ export default function VaultsPage() {
           <EmptyState
             role="alert"
             image="erro"
-            title="Não foi possível carregar os cofres"
+            title={t('loadError')}
             description={vaults.error.message}
-            action={<Button variant="secondary" onClick={() => vaults.refetch()}>Tentar novamente</Button>}
+            action={<Button variant="secondary" onClick={() => vaults.refetch()}>{t('common:actions.tryAgain')}</Button>}
           />
         </div>
       )
@@ -49,8 +51,8 @@ export default function VaultsPage() {
         <div className="rounded-2xl border border-border bg-surface">
           <EmptyState
             image="cofre-vazio"
-            title="Nenhum cofre ainda."
-            description="Crie um cofre para separar dinheiro para um objetivo, como uma reserva ou uma viagem."
+            title={t('empty.title')}
+            description={t('empty.description')}
             action={newButton}
           />
         </div>
@@ -60,12 +62,12 @@ export default function VaultsPage() {
     return (
       <>
         <div className="rounded-2xl border border-border bg-surface p-5">
-          <p className="text-sm text-muted">Total guardado</p>
+          <p className="text-sm text-muted">{t('totalSaved')}</p>
           <p className="mt-1 text-3xl font-semibold tabular-nums wrap-anywhere text-foreground">
             {formatMoney(sumMoney(vaults.data.map((vault) => vault.balance)))}
           </p>
           <p className="mt-1 text-sm text-muted">
-            {vaults.data.length} {vaults.data.length === 1 ? 'cofre' : 'cofres'}
+            {t('count', { count: vaults.data.length })}
           </p>
         </div>
         {/* grid-cols-1 (minmax(0, 1fr)): sem ele, um nome longo alarga a coluna além da tela. */}
@@ -86,7 +88,7 @@ export default function VaultsPage() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">Cofres</h1>
+        <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
         {newButton}
       </div>
       <div className="mt-6">{renderContent()}</div>

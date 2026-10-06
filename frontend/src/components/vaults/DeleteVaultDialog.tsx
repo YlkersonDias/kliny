@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { Trans, useTranslation } from 'react-i18next'
 import type { Vault } from '../../api/types'
 import { useDeleteVault } from '../../hooks/useVaults'
 import { formatMoney } from '../../lib/money'
@@ -15,20 +16,27 @@ interface DeleteVaultDialogProps {
 }
 
 export function DeleteVaultDialog({ vault, onClose, onDeleted, onWithdrawAll }: DeleteVaultDialogProps) {
+  const { t } = useTranslation(['vaults', 'common'])
   const [understood, setUnderstood] = useState(false)
   const mutation = useDeleteVault()
 
   if (vault.balance > 0) {
     return (
-      <Modal title="Apagar cofre" size="sm" onClose={onClose}>
+      <Modal title={t('delete.title')} size="sm" onClose={onClose}>
         <p className="text-sm text-muted">
-          <strong className="font-semibold text-foreground">{vault.name}</strong> ainda tem{' '}
-          <strong className="font-semibold text-foreground">{formatMoney(vault.balance)}</strong> guardados.
-          Retire todo o saldo antes de apagar o cofre.
+          <Trans
+            t={t}
+            i18nKey="delete.hasBalance"
+            values={{ balance: formatMoney(vault.balance) }}
+            components={{
+              name: <strong className="font-semibold text-foreground">{vault.name}</strong>,
+              strong: <strong className="font-semibold text-foreground" />,
+            }}
+          />
         </p>
         <div className="mt-5 flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose}>Fechar</Button>
-          <Button onClick={onWithdrawAll}>Retirar saldo</Button>
+          <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
+          <Button onClick={onWithdrawAll}>{t('delete.withdrawAll')}</Button>
         </div>
       </Modal>
     )
@@ -36,19 +44,18 @@ export function DeleteVaultDialog({ vault, onClose, onDeleted, onWithdrawAll }: 
 
   return (
     <ConfirmDialog
-      title="Apagar cofre"
-      confirmLabel="Apagar cofre"
+      title={t('delete.title')}
+      confirmLabel={t('delete.confirm')}
       isLoading={mutation.isPending}
       error={mutation.error?.message}
       confirmDisabled={!understood}
       onCancel={onClose}
       onConfirm={() => mutation.mutate(vault.id, { onSuccess: onDeleted })}
     >
-      <p>Apagar o cofre <strong className="font-semibold text-foreground">{vault.name}</strong>?</p>
-      <p className="mt-2">
-        O histórico de depósitos e retiradas deste cofre também será apagado. Essa ação não pode ser desfeita.
-        Os totais da conta não mudam, porque os depósitos e as retiradas se anulam.
+      <p>
+        <Trans t={t} i18nKey="delete.question" components={{ name: <strong className="font-semibold text-foreground">{vault.name}</strong> }} />
       </p>
+      <p className="mt-2">{t('delete.history')}</p>
       <label className="mt-4 flex cursor-pointer items-start gap-2 text-foreground">
         <input
           type="checkbox"
@@ -56,7 +63,7 @@ export function DeleteVaultDialog({ vault, onClose, onDeleted, onWithdrawAll }: 
           onChange={(event) => setUnderstood(event.target.checked)}
           className="mt-0.5 size-4 shrink-0 accent-primary"
         />
-        Entendo que o histórico será perdido.
+        {t('delete.understand')}
       </label>
     </ConfirmDialog>
   )
