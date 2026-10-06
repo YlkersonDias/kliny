@@ -7,6 +7,9 @@ import { formatMoney } from '../../lib/money'
 // Só visual: o ChartFigure o esconde do leitor de tela e oferece o resumo e a tabela.
 // Cores pelos tokens (CSS), para o modo noturno só redefinir as variáveis.
 
+// Rótulo "hoje" da linha tracejada (o texto vem do i18n).
+const TODAY_LABEL = { position: 'top', fill: 'var(--color-primary)', fontSize: 12, fontWeight: 600 } as const
+
 interface SpendingChartProps {
   days: DaySpending[]
   todayDay: number
@@ -40,7 +43,7 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
             x={todayDay}
             stroke="var(--color-primary)"
             strokeDasharray="3 3"
-            label={{ value: t('spending.today'), position: 'top', fill: 'var(--color-primary)', fontSize: 12, fontWeight: 600 }}
+            label={{ ...TODAY_LABEL, value: t('spending.today') }}
           />
           <Bar dataKey="expense" radius={[3, 3, 0, 0]} minPointSize={2} isAnimationActive={false}>
             {days.map((day) => (
