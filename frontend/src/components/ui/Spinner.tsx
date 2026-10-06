@@ -1,3 +1,5 @@
+import { useTranslation } from 'react-i18next'
+
 export function Spinner({ className = 'size-5' }: { className?: string }) {
   return (
     <svg className={`animate-spin ${className}`} viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -8,10 +10,11 @@ export function Spinner({ className = 'size-5' }: { className?: string }) {
 }
 
 export function FullPageSpinner() {
+  const { t } = useTranslation()
   return (
     <div className="flex min-h-dvh items-center justify-center text-primary" role="status">
       <Spinner className="size-8" />
-      <span className="sr-only">Carregando…</span>
+      <span className="sr-only">{t('loading')}</span>
     </div>
   )
 }

@@ -1,6 +1,7 @@
 import { useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
+import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/useAuth'
 import { AuthLayout } from '../components/layout/AuthLayout'
 import { Button } from '../components/ui/Button'
@@ -13,7 +14,8 @@ const FIELDS = ['email', 'password'] as const
 type Field = (typeof FIELDS)[number]
 
 export default function LoginPage() {
-  usePageTitle('Entrar')
+  const { t } = useTranslation('auth')
+  usePageTitle(t('login.title'))
   const { signIn, notice } = useAuth()
   const location = useLocation()
   const [values, setValues] = useState<Record<Field, string>>({ email: '', password: '' })
@@ -41,8 +43,8 @@ export default function LoginPage() {
 
     const email = values.email.trim()
     const fieldErrors: FieldErrors<Field> = {}
-    if (!email) fieldErrors.email = 'Informe o e-mail.'
-    if (!values.password) fieldErrors.password = 'Informe a senha.'
+    if (!email) fieldErrors.email = t('validation.emailRequired')
+    if (!values.password) fieldErrors.password = t('validation.passwordRequired')
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -57,14 +59,14 @@ export default function LoginPage() {
   }
 
   return (
-    <AuthLayout title="Entrar" subtitle="Acesse sua conta para continuar." mascot>
+    <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')} mascot>
       <form noValidate onSubmit={handleSubmit} className="space-y-4">
         {notice && !formError && <FormAlert variant="info">{notice}</FormAlert>}
         {formError && <FormAlert>{formError}</FormAlert>}
 
         <Input
           ref={emailRef}
-          label="E-mail"
+          label={t('fields.email')}
           type="email"
           autoComplete="email"
           value={values.email}
@@ -73,7 +75,7 @@ export default function LoginPage() {
         />
         <Input
           ref={passwordRef}
-          label="Senha"
+          label={t('fields.password')}
           type="password"
           autoComplete="current-password"
           value={values.password}
@@ -82,14 +84,14 @@ export default function LoginPage() {
         />
 
         <Button type="submit" className="w-full" isLoading={mutation.isPending}>
-          {mutation.isPending ? 'Entrando…' : 'Entrar'}
+          {mutation.isPending ? t('login.submitting') : t('login.submit')}
         </Button>
       </form>
 
       <p className="mt-6 text-center text-sm text-muted">
-        Ainda não tem conta?{' '}
+        {t('login.noAccount')}{' '}
         <Link to="/cadastro" state={location.state} className="font-semibold text-primary underline-offset-2 hover:underline">
-          Criar conta
+          {t('login.createAccount')}
         </Link>
       </p>
     </AuthLayout>

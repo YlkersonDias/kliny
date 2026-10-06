@@ -1,4 +1,5 @@
 import { useEffect, useId, useRef, type ReactNode, type RefObject } from 'react'
+import { useTranslation } from 'react-i18next'
 
 interface ModalProps {
   title: string
@@ -13,6 +14,7 @@ interface ModalProps {
 // do Esc e de prender o foco. Fica aberto enquanto estiver montado; para fechar,
 // quem usa deixa de renderizar. Clicar fora não fecha, para não perder o que foi digitado.
 export function Modal({ title, onClose, children, initialFocusRef, size = 'md' }: ModalProps) {
+  const { t } = useTranslation()
   const dialogRef = useRef<HTMLDialogElement>(null)
   const titleId = useId()
   // Lido no efeito: um onClose novo a cada render não deve reabrir o dialog.
@@ -57,7 +59,7 @@ export function Modal({ title, onClose, children, initialFocusRef, size = 'md' }
         <button
           type="button"
           onClick={onClose}
-          aria-label="Fechar"
+          aria-label={t('actions.close')}
           // 44 px no celular, 36 px a partir do md (como os outros botões só de ícone).
           className="-mr-2 -mt-2 flex size-11 shrink-0 items-center justify-center rounded-lg text-muted transition-colors hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary md:-mt-1 md:size-9"
         >

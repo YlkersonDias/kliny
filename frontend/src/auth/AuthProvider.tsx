@@ -1,12 +1,11 @@
 import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import * as authApi from '../api/auth'
+import i18n from '../i18n'
 import { setUnauthorizedHandler } from '../api/client'
 import type { AuthResponse, LoginRequest, RegisterRequest } from '../api/types'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
-
-const EXPIRED_MESSAGE = 'Sua sessão expirou. Entre novamente.'
 
 // setTimeout aceita no máximo ~24,8 dias; acima disso o temporizador dispara na hora.
 const MAX_TIMEOUT = 2_147_483_647
@@ -25,7 +24,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     queryClient.clear()
   }, [queryClient])
 
-  const expire = useCallback(() => endSession(EXPIRED_MESSAGE), [endSession])
+  const expire = useCallback(() => endSession(i18n.t('errors:sessionExpired')), [endSession])
 
   // Registrado antes da validação abaixo, para o 401 do /me já encerrar a sessão.
   useEffect(() => {

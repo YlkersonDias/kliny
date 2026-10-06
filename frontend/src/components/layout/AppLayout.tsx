@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
 import { APP_NAME } from '../../config/app'
@@ -9,6 +10,7 @@ import { NavIcon, Navigation } from './Navigation'
 const LOGOUT_ICON = 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10'
 
 export function AppLayout() {
+  const { t } = useTranslation('layout')
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
 
@@ -23,7 +25,7 @@ export function AppLayout() {
   const brand = (
     <Link
       to="/"
-      aria-label={`${APP_NAME}, página inicial`}
+      aria-label={t('homeLink')}
       className="rounded-lg text-xl font-bold tracking-tight text-primary focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
     >
       {APP_NAME}
@@ -36,7 +38,7 @@ export function AppLayout() {
     return (
       <NavLink
         to="/configuracoes"
-        aria-label={`${user?.name ?? ''}, configurações`}
+        aria-label={t('settingsLink', { name: user?.name ?? '' })}
         title={user?.name}
         className={({ isActive }) =>
           `flex min-w-0 items-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary ${layout} ${
@@ -56,7 +58,7 @@ export function AppLayout() {
         href="#conteudo"
         className="sr-only focus:not-sr-only focus:fixed focus:left-4 focus:top-4 focus:z-50 focus:rounded-lg focus:bg-surface focus:px-4 focus:py-2 focus:shadow"
       >
-        Pular para o conteúdo
+        {t('skipToContent')}
       </a>
 
       {/* Desktop: menu lateral */}
@@ -72,7 +74,7 @@ export function AppLayout() {
           </div>
           <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
-            Sair
+            {t('signOut')}
           </Button>
         </div>
       </aside>
@@ -85,7 +87,7 @@ export function AppLayout() {
           <ThemeToggle />
           <Button variant="ghost" className="px-2" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
-            Sair
+            {t('signOut')}
           </Button>
         </div>
       </header>

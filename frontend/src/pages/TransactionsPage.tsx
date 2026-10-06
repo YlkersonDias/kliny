@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { Transaction } from '../api/types'
 import { CategoryManagerModal } from '../components/transactions/CategoryManagerModal'
@@ -21,6 +22,7 @@ import {
 } from '../lib/transactionFilters'
 
 export default function TransactionsPage() {
+  const { t } = useTranslation('transactions')
   usePageTitle('Movimentações')
   const [searchParams, setSearchParams] = useSearchParams()
   const month = currentMonthRange()
@@ -122,8 +124,7 @@ export default function TransactionsPage() {
         <Pagination
           page={filters.page}
           lastPage={lastPage}
-          totalCount={data.totalCount}
-          noun={['movimentação', 'movimentações']}
+          itemsLabel={t('count', { count: data.totalCount })}
           onPageChange={(page) => updateFilters({ page })}
         />
       </>

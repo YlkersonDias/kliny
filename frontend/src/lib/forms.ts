@@ -1,4 +1,5 @@
 import { ApiError } from '../api/client'
+import i18n from '../i18n'
 
 export type FieldErrors<F extends string> = Partial<Record<F, string>>
 
@@ -8,7 +9,7 @@ export function splitApiError<F extends string>(
   fields: readonly F[],
 ): { fieldErrors: FieldErrors<F>; formError: string | null } {
   if (!(error instanceof ApiError)) {
-    return { fieldErrors: {}, formError: 'Não foi possível concluir a operação. Tente novamente.' }
+    return { fieldErrors: {}, formError: i18n.t('errors:genericRetry') }
   }
 
   const fieldErrors: FieldErrors<F> = {}

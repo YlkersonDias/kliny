@@ -1,10 +1,11 @@
+import { useTranslation } from 'react-i18next'
 import { NavLink } from 'react-router'
 
-const items = [
-  { to: '/', label: 'Início', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
-  { to: '/movimentacoes', label: 'Movimentações', icon: 'M7 20V4M3 8l4-4 4 4M17 4v16m4-4-4 4-4-4' },
-  { to: '/cofres', label: 'Cofres', icon: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm8 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM7 19v2m10-2v2' },
-  { to: '/relatorios', label: 'Relatórios', icon: 'M4 20V10m6 10V4m6 16v-7M3 20h18' },
+const items: { to: string; label: 'home' | 'transactions' | 'vaults' | 'reports'; icon: string }[] = [
+  { to: '/', label: 'home', icon: 'M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z' },
+  { to: '/movimentacoes', label: 'transactions', icon: 'M7 20V4M3 8l4-4 4 4M17 4v16m4-4-4 4-4-4' },
+  { to: '/cofres', label: 'vaults', icon: 'M4 5h16a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V6a1 1 0 0 1 1-1zm8 4a3 3 0 1 0 0 6 3 3 0 0 0 0-6zM7 19v2m10-2v2' },
+  { to: '/relatorios', label: 'reports', icon: 'M4 20V10m6 10V4m6 16v-7M3 20h18' },
 ]
 
 export function NavIcon({ path }: { path: string }) {
@@ -17,10 +18,11 @@ export function NavIcon({ path }: { path: string }) {
 
 // Menu lateral no desktop e barra inferior no celular.
 export function Navigation({ variant }: { variant: 'sidebar' | 'bar' }) {
+  const { t } = useTranslation('layout')
   const isBar = variant === 'bar'
 
   return (
-    <nav aria-label="Menu principal">
+    <nav aria-label={t('nav.label')}>
       <ul className={isBar ? 'grid grid-cols-4' : 'space-y-1'}>
         {items.map((item) => (
           <li key={item.to}>
@@ -39,7 +41,7 @@ export function Navigation({ variant }: { variant: 'sidebar' | 'bar' }) {
               }}
             >
               <NavIcon path={item.icon} />
-              {item.label}
+              {t(`nav.${item.label}`)}
             </NavLink>
           </li>
         ))}

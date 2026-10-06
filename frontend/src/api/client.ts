@@ -1,4 +1,5 @@
 import { getSessionToken } from '../auth/session'
+import i18n from '../i18n'
 import type { ProblemDetails } from './types'
 
 export class ApiError extends Error {
@@ -50,7 +51,7 @@ export async function apiRequest<T>(
     })
   } catch (error) {
     if (error instanceof DOMException && error.name === 'AbortError') throw error
-    throw new ApiError(0, 'Não foi possível conectar ao servidor. Verifique sua conexão e tente novamente.')
+    throw new ApiError(0, i18n.t('errors:network'))
   }
 
   if (!response.ok) {
@@ -90,18 +91,18 @@ function toApiError(status: number, problem: ProblemDetails | null): ApiError {
   }
 
   const hasFieldErrors = Object.keys(fieldErrors).length > 0
-  const detail = problem?.detail ?? (hasFieldErrors ? 'Confira os campos destacados.' : defaultMessage(status))
+  const detail = problem?.detail ?? (hasFieldErrors ? i18n.t('errors:checkFields') : defaultMessage(status))
   return new ApiError(status, detail, fieldErrors)
 }
 
 function defaultMessage(status: number): string {
-  if (status >= 500) return 'Erro no servidor. Tente novamente em instantes.'
+  if (status >= 500) return i18n.t('errors:server')
   switch (status) {
-    case 400: return 'Dados inválidos.'
-    case 401: return 'Sua sessão expirou. Entre novamente.'
-    case 403: return 'Você não tem permissão para isso.'
-    case 404: return 'Registro não encontrado.'
-    case 409: return 'Os dados entram em conflito com um registro existente.'
-    default: return 'Não foi possível concluir a operação.'
+    case 400: return i18n.t('errors:badRequest')
+    case 401: return i18n.t('errors:sessionExpired')
+    case 403: return i18n.t('errors:forbidden')
+    case 404: return i18n.t('errors:notFound')
+    case 409: return i18n.t('errors:conflict')
+    default: return i18n.t('errors:generic')
   }
 }

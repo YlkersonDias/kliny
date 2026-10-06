@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link, useNavigate, useParams, useSearchParams } from 'react-router'
 import { ApiError } from '../api/client'
 import type { Vault } from '../api/types'
@@ -166,6 +167,7 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
 }
 
 function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }) {
+  const { t } = useTranslation(['vaults', 'transactions'])
   const [searchParams, setSearchParams] = useSearchParams()
   const page = parsePage(searchParams.get('pagina'))
   const statement = useTransactions({ vaultId: vault.id, page, pageSize: PAGE_SIZE })
@@ -227,8 +229,7 @@ function Statement({ vault, onDeposit }: { vault: Vault; onDeposit: () => void }
         <Pagination
           page={page}
           lastPage={lastPage}
-          totalCount={data.totalCount}
-          noun={['movimentação', 'movimentações']}
+          itemsLabel={t('transactions:count', { count: data.totalCount })}
           onPageChange={(next) => goToPage(next)}
         />
       </>

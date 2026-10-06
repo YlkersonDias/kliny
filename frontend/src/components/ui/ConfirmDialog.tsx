@@ -1,4 +1,5 @@
 import { useRef, type ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Button } from './Button'
 import { FormAlert } from './FormAlert'
 import { Modal } from './Modal'
@@ -19,6 +20,7 @@ interface ConfirmDialogProps {
 export function ConfirmDialog({
   title, children, confirmLabel, onConfirm, onCancel, isLoading = false, error, confirmDisabled = false,
 }: ConfirmDialogProps) {
+  const { t } = useTranslation()
   const cancelRef = useRef<HTMLButtonElement>(null)
 
   return (
@@ -28,7 +30,7 @@ export function ConfirmDialog({
         <div className="text-sm text-muted">{children}</div>
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
           <Button ref={cancelRef} variant="secondary" onClick={onCancel} disabled={isLoading}>
-            Cancelar
+            {t('actions.cancel')}
           </Button>
           <Button variant="danger" onClick={onConfirm} isLoading={isLoading} disabled={confirmDisabled}>
             {confirmLabel}
