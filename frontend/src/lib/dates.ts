@@ -1,6 +1,10 @@
 // Datas como texto YYYY-MM-DD, igual à API.
 // Nunca usar new Date("2026-10-02"): o JavaScript lê como meia-noite UTC e,
 // no Brasil, isso mostra o dia anterior. "Hoje" usa a data local do navegador.
+// Exibição no formato do idioma da tela (dd/mm/aaaa ou mm/dd/yyyy); cada função aceita o idioma.
+
+import { currentLanguage } from '../i18n'
+import type { Language } from './language'
 
 export interface DateRange {
   from: string
@@ -50,39 +54,48 @@ export function isValidIsoDate(text: string): boolean {
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month)
 }
 
-const monthYear = new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' })
+const monthYear: Record<Language, Intl.DateTimeFormat> = {
+  'pt-BR': new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }),
+  'en-US': new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }),
+}
 
-// "2026-10-02" vira "Outubro de 2026". O Date é montado com números (hora local), nunca com o texto.
-export function formatMonthYear(iso: string): string {
+// "2026-10-02" vira "Outubro de 2026" ("October 2026"). O Date é montado com números (hora local),
+// nunca com o texto.
+export function formatMonthYear(iso: string, language: Language = currentLanguage()): string {
   const match = ISO_PATTERN.exec(iso)
   if (!match) return iso
   const date = new Date(2000, Number(match[2]) - 1, 1)
   date.setFullYear(Number(match[1]))
-  const text = monthYear.format(date)
+  const text = monthYear[language].format(date)
   return text.charAt(0).toUpperCase() + text.slice(1)
 }
 
-const longDate = new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' })
+const longDate: Record<Language, Intl.DateTimeFormat> = {
+  'pt-BR': new Intl.DateTimeFormat('pt-BR', { day: 'numeric', month: 'long', year: 'numeric' }),
+  'en-US': new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
+}
 
-// "2026-10-05" vira "5 de outubro de 2026" (sem dia da semana). Como no formatMonthYear, o Date
+// "2026-10-05" vira "5 de outubro de 2026" ("October 5, 2026"), sem dia da semana. Como no formatMonthYear, o Date
 // é montado com números (hora local), nunca com o texto.
-export function formatLongDate(iso: string): string {
+export function formatLongDate(iso: string, language: Language = currentLanguage()): string {
   if (!isValidIsoDate(iso)) return iso
   const date = new Date(2000, Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)))
   date.setFullYear(Number(iso.slice(0, 4)))
-  return longDate.format(date)
+  return longDate[language].format(date)
 }
 
 // Instante da API (createdAt, em UTC com "Z") para a data local do navegador: "2026-10-06T01:30:00Z"
 // é 05/10/2026 no Brasil. Sem fuso no texto, trata como UTC (é como o backend grava).
-export function formatTimestampDate(timestamp: string): string {
+export function formatTimestampDate(timestamp: string, language: Language = currentLanguage()): string {
   const withZone = /(Z|[+-]\d{2}:\d{2})$/.test(timestamp) ? timestamp : `${timestamp}Z`
   const date = new Date(withZone)
-  return Number.isNaN(date.getTime()) ? '' : formatDate(toIsoDate(date))
+  return Number.isNaN(date.getTime()) ? '' : formatDate(toIsoDate(date), language)
 }
 
-// "2026-10-02" vira "02/10/2026". Texto fora do formato volta como veio.
-export function formatDate(iso: string): string {
+// "2026-10-02" vira "02/10/2026" (em inglês, "10/02/2026"). Texto fora do formato volta como veio.
+export function formatDate(iso: string, language: Language = currentLanguage()): string {
   const match = ISO_PATTERN.exec(iso)
-  return match ? `${match[3]}/${match[2]}/${match[1]}` : iso
+  if (!match) return iso
+  const [, year, month, day] = match
+  return language === 'en-US' ? `${month}/${day}/${year}` : `${day}/${month}/${year}`
 }

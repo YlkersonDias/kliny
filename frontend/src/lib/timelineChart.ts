@@ -1,5 +1,7 @@
 import type { TimelineGrouping, TimelinePoint } from '../api/types'
+import { currentLanguage } from '../i18n'
 import { formatDate, formatMonthYear } from './dates'
+import type { Language } from './language'
 
 // Linha do tempo dos Relatórios: expense já vem positivo (convenção dos relatórios).
 
@@ -10,12 +12,18 @@ export function periodLabel(period: string, grouping: TimelineGrouping): string 
   return grouping === 'day' ? formatDate(period) : formatMonthYear(period)
 }
 
-const SHORT_MONTHS = ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez']
+// Sem o ponto que o Intl põe em português ("out."): o eixo tem pouco espaço.
+const SHORT_MONTHS: Record<Language, string[]> = {
+  'pt-BR': ['jan', 'fev', 'mar', 'abr', 'mai', 'jun', 'jul', 'ago', 'set', 'out', 'nov', 'dez'],
+  'en-US': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
+}
 
-// Rótulo curto do eixo ("05/10" ou "out/26").
-export function axisLabel(period: string, grouping: TimelineGrouping): string {
-  if (grouping === 'day') return `${period.slice(8, 10)}/${period.slice(5, 7)}`
-  return `${SHORT_MONTHS[Number(period.slice(5, 7)) - 1]}/${period.slice(2, 4)}`
+// Rótulo curto do eixo ("05/10" ou "out/26"; em inglês, "10/05" ou "Oct/26").
+export function axisLabel(period: string, grouping: TimelineGrouping, language: Language = currentLanguage()): string {
+  const day = period.slice(8, 10)
+  const month = period.slice(5, 7)
+  if (grouping === 'day') return language === 'en-US' ? `${month}/${day}` : `${day}/${month}`
+  return `${SHORT_MONTHS[language][Number(month) - 1]}/${period.slice(2, 4)}`
 }
 
 export interface TimelineSummary {

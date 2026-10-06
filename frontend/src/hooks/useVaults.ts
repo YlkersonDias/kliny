@@ -3,6 +3,7 @@ import {
   createVault, deleteVault, depositToVault, getVault, listVaults, updateVault, withdrawFromVault,
 } from '../api/vaults'
 import type { Vault, VaultOperationRequest, VaultRequest } from '../api/types'
+import { currentLanguage } from '../i18n'
 import { transactionKeys } from './useTransactions'
 
 export const vaultKeys = {
@@ -11,9 +12,9 @@ export const vaultKeys = {
   detail: (id: number) => ['vaults', 'detail', id] as const,
 }
 
-// A API ordena pela collation do banco; aqui a ordem segue o português, como nas categorias.
+// A API ordena pela collation do banco; aqui a ordem segue o idioma da tela, como nas categorias.
 function sortByName(vaults: Vault[]): Vault[] {
-  return [...vaults].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+  return [...vaults].sort((a, b) => a.name.localeCompare(b.name, currentLanguage()))
 }
 
 // Sem paginação: o GET /api/vaults traz todos os cofres do usuário.

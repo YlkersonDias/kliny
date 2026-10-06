@@ -27,3 +27,10 @@ describe('summarizeTimeline', () => {
     expect(summarizeTimeline([point('2026-10-01', 10, 0)], 'day').maxExpense).toBeNull()
   })
 })
+
+describe('rótulos em inglês', () => {
+  it('mês antes do dia e meses em inglês', () => {
+    expect(axisLabel('2026-10-05', 'day', 'en-US')).toBe('10/05')
+    expect(axisLabel('2027-01-01', 'month', 'en-US')).toBe('Jan/27')
+  })
+})

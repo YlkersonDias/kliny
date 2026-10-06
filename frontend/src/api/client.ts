@@ -1,5 +1,5 @@
 import { getSessionToken } from '../auth/session'
-import i18n from '../i18n'
+import i18n, { currentLanguage } from '../i18n'
 import type { ProblemDetails } from './types'
 
 export class ApiError extends Error {
@@ -37,7 +37,8 @@ export async function apiRequest<T>(
   { method = 'GET', body, auth = true, signal }: RequestOptions = {},
 ): Promise<T> {
   const token = auth ? getSessionToken() : null
-  const headers = new Headers({ Accept: 'application/json' })
+  // Accept-Language: a API responde as mensagens de erro no idioma da tela.
+  const headers = new Headers({ Accept: 'application/json', 'Accept-Language': currentLanguage() })
   if (token) headers.set('Authorization', `Bearer ${token}`)
   if (body !== undefined) headers.set('Content-Type', 'application/json')
 

@@ -1,15 +1,16 @@
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createCategory, deleteCategory, listCategories, updateCategory } from '../api/categories'
 import type { Category, CategoryRequest } from '../api/types'
+import { currentLanguage } from '../i18n'
 import { transactionKeys } from './useTransactions'
 
 export const categoryKeys = {
   all: ['categories'] as const,
 }
 
-// A API ordena pela collation do banco; aqui a ordem segue o português (acentos junto da letra).
+// A API ordena pela collation do banco; aqui a ordem segue o idioma da tela (acentos junto da letra).
 function sortByName(categories: Category[]): Category[] {
-  return [...categories].sort((a, b) => a.name.localeCompare(b.name, 'pt-BR'))
+  return [...categories].sort((a, b) => a.name.localeCompare(b.name, currentLanguage()))
 }
 
 export function useCategories() {

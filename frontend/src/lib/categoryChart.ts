@@ -1,5 +1,6 @@
 import type { CategoryTotal } from '../api/types'
-import i18n from '../i18n'
+import i18n, { currentLanguage } from '../i18n'
+import type { Language } from './language'
 
 // Fatias do gráfico de rosca por categoria. A API já manda do maior total para o menor.
 // No máximo 7 fatias: com mais categorias, as 6 maiores e "Outras", que soma o resto.
@@ -7,6 +8,16 @@ import i18n from '../i18n'
 export const MAX_SLICES = 7
 
 const toCents = (value: number) => Math.round(value * 100)
+
+const PERCENT: Record<Language, Intl.NumberFormat> = {
+  'pt-BR': new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+  'en-US': new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
+}
+
+// Percentual com uma casa, sem o "%" (fica no texto traduzido): 12,5 ou 12.5.
+export function formatPercent(value: number, language: Language = currentLanguage()): string {
+  return PERCENT[language].format(value)
+}
 
 export interface CategorySlice {
   key: string

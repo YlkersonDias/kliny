@@ -1,6 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import type { CategoryTotal } from '../api/types'
-import { categoryName, toSlices, totalOf } from './categoryChart'
+import { categoryName, formatPercent, toSlices, totalOf } from './categoryChart'
 
 const row = (id: number | null, name: string | null, total: number, count = 1): CategoryTotal => ({
   categoryId: id, categoryName: name, total, count, percentage: 0,
@@ -50,5 +50,13 @@ describe('totalOf e categoryName', () => {
   it('soma em centavos e dá nome à linha sem categoria', () => {
     expect(totalOf([row(1, 'A', 0.1), row(2, 'B', 0.2)])).toBe(0.3)
     expect(categoryName(row(null, null, 1))).toBe('Sem categoria')
+  })
+})
+
+describe('formatPercent', () => {
+  it('uma casa, com o separador do idioma', () => {
+    expect(formatPercent(12.345, 'pt-BR')).toBe('12,3')
+    expect(formatPercent(12.345, 'en-US')).toBe('12.3')
+    expect(formatPercent(100, 'en-US')).toBe('100.0')
   })
 })

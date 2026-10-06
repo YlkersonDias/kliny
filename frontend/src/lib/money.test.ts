@@ -81,3 +81,36 @@ describe('parseMoneyInput', () => {
     expect(parseMoneyInput(text)).toBeNull()
   })
 })
+
+describe('em inglês', () => {
+  it('formata em reais com o separador americano', () => {
+    expect(formatMoney(1234.56, 'en-US')).toBe('R$1,234.56')
+    expect(formatMoney(-0, 'en-US')).toBe('R$0.00')
+    expect(formatSigned(3500, 'en-US')).toBe('+R$3,500.00')
+    expect(formatSigned(-50.5, 'en-US')).toBe('−R$50.50')
+    expect(formatOutflow(2310.4, 'en-US')).toBe('−R$2,310.40')
+    expect(toInputText(-1234.5, 'en-US')).toBe('1,234.50')
+  })
+
+  it.each([
+    ['1,234.56', 1234.56],
+    ['1234.56', 1234.56],
+    ['1234.5', 1234.5],
+    ['0.01', 0.01],
+    ['1,000,000', 1_000_000],
+    ['R$1,234.56', 1234.56],
+    ['R$ 12.30', 12.3],
+  ])('lê %s', (text, expected) => {
+    expect(parseMoneyInput(text, 'en-US')).toBe(expected)
+  })
+
+  it.each(['1.234,56', '1234,56', '1,5', '12,34,567', '1.2.3', '1.234', '-10', '1.234.56'])('recusa %s', (text) => {
+    expect(parseMoneyInput(text, 'en-US')).toBeNull()
+  })
+
+  it('volta para o mesmo número', () => {
+    for (const value of [0.01, 12.3, 1234.56, 1_000_000, MONEY_MAX]) {
+      expect(parseMoneyInput(toInputText(value, 'en-US'), 'en-US')).toBe(value)
+    }
+  })
+})

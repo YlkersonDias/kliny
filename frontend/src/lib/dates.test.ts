@@ -120,3 +120,12 @@ describe('formatDate', () => {
     expect(formatDate('ontem')).toBe('ontem')
   })
 })
+
+describe('datas em inglês', () => {
+  it('usa mm/dd/yyyy e os nomes dos meses em inglês', () => {
+    expect(formatDate('2026-10-02', 'en-US')).toBe('10/02/2026')
+    expect(formatMonthYear('2026-10-02', 'en-US')).toBe('October 2026')
+    expect(formatLongDate('2026-10-05', 'en-US')).toBe('October 5, 2026')
+    expect(formatTimestampDate('2026-10-06T01:30:00Z', 'en-US')).toBe('10/05/2026')
+  })
+})

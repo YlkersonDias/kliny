@@ -1,14 +1,12 @@
 import { lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CategoryReportType, CategoryTotal } from '../../api/types'
-import { categoryName, toSlices, totalOf } from '../../lib/categoryChart'
+import { categoryName, formatPercent, toSlices, totalOf } from '../../lib/categoryChart'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { ChartFigure } from '../charts/ChartFigure'
 import { ChoiceChip } from '../ui/ChoiceChip'
 
 const CategoryDonut = lazy(() => import('./CategoryDonut'))
-
-const PCT = new Intl.NumberFormat('pt-BR', { minimumFractionDigits: 1, maximumFractionDigits: 1 })
 
 interface CategorySectionProps {
   type: CategoryReportType
@@ -68,7 +66,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
                         {slice.name}
                       </span>
                       <span className="text-right font-semibold text-foreground">{signed(type, slice.total)}</span>
-                      <span className="min-w-[4.5ch] text-right text-muted">{t('category.percent', { value: PCT.format(slice.percentage) })}</span>
+                      <span className="min-w-[4.5ch] text-right text-muted">{t('category.percent', { value: formatPercent(slice.percentage) })}</span>
                     </li>
                   ))}
                 </ol>
@@ -77,7 +75,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
             caption={(
               <>
                 {t(isExpense ? 'category.captionExpense' : 'category.captionIncome', { total: formatMoney(total), count: rows.length })}
-                {top && <>{' '}{t('category.top', { name: top.name, percent: PCT.format(top.percentage) })}</>}
+                {top && <>{' '}{t('category.top', { name: top.name, percent: formatPercent(top.percentage) })}</>}
                 {slices.some((slice) => slice.isOther) && (
                   <>{' '}{t('category.grouped', { grouped: slices[slices.length - 1].groupedCount })}</>
                 )}
@@ -104,7 +102,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
                         {categoryName(row)}
                       </th>
                       <td className="py-1.5 pr-3 text-right text-foreground">{signed(type, row.total)}</td>
-                      <td className="py-1.5 pr-3 text-right text-muted">{t('category.percent', { value: PCT.format(total === 0 ? 0 : (row.total / total) * 100) })}</td>
+                      <td className="py-1.5 pr-3 text-right text-muted">{t('category.percent', { value: formatPercent(total === 0 ? 0 : (row.total / total) * 100) })}</td>
                       <td className="py-1.5 text-right text-muted">{row.count}</td>
                     </tr>
                   ))}
