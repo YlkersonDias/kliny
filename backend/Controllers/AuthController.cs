@@ -13,6 +13,8 @@ namespace Backend.Controllers;
 [Route("api/auth")]
 public class AuthController(IAuthService authService) : ControllerBase
 {
+    // Público: as únicas rotas sem login (o Program.cs exige login em todo o resto).
+    [AllowAnonymous]
     [HttpPost("register")]
     [EnableRateLimiting(RateLimitingSetup.RegisterPolicy)]
     [ProducesResponseType<AuthResponse>(StatusCodes.Status201Created)]
@@ -26,6 +28,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     }
 
     // Por IP aqui; por e-mail no AuthService (LoginThrottle).
+    [AllowAnonymous]
     [HttpPost("login")]
     [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
     [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]

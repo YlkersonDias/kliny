@@ -11,15 +11,17 @@ namespace Backend.Tests;
 
 // A API inteira em memória, com o IAuthService trocado por um falso: não precisa de MySQL.
 // Cada teste cria a sua, para os limites começarem do zero.
-public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null) : WebApplicationFactory<Program>
+public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null, string environment = "Testing")
+    : WebApplicationFactory<Program>
 {
     // Cabeçalho só dos testes: define o IP de origem da requisição.
     public const string ClientIpHeader = "X-Test-Client-Ip";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Fora de Development: não lê o user-secrets da máquina (no CI ele nem existe).
-        builder.UseEnvironment("Testing");
+        // Por padrão fora de Development: não lê o user-secrets da máquina (no CI ele nem existe).
+        // Development só para o que só existe lá (o OpenAPI).
+        builder.UseEnvironment(environment);
         builder.UseSetting("Jwt:Key", new string('k', 64));
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
             builder.UseSetting(key, value);

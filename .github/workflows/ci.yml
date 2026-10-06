@@ -19,6 +19,20 @@ jobs:
     name: Backend (build e testes)
     runs-on: ubuntu-latest
     timeout-minutes: 15
+    # MySQL descartável, só para os testes de dono do recurso e de cofre (backend.Tests/MySqlApi.cs).
+    # A senha vale só para este container, que some no fim do job: não é segredo.
+    services:
+      mysql:
+        image: mysql:8.4
+        env:
+          MYSQL_ROOT_PASSWORD: kliny-ci
+        ports:
+          - 3306:3306
+        options: >-
+          --health-cmd="mysqladmin ping -h 127.0.0.1 -uroot -pkliny-ci"
+          --health-interval=5s
+          --health-timeout=5s
+          --health-retries=30
     steps:
       - uses: actions/checkout@v7
 
@@ -32,9 +46,12 @@ jobs:
       - name: Compilar
         run: dotnet build Kliny.sln --no-restore --configuration Release
 
-      # Os testes não usam MySQL nem user-secrets (ver backend.Tests/TestApp.cs).
+      # Sem user-secrets. Os testes com MySQL criam e apagam o próprio banco (kliny_test_<guid>);
+      # sem esta variável no CI eles falham, para não passarem pulados sem ninguém ver.
       - name: Testar
         run: dotnet test --solution Kliny.sln --no-build --configuration Release
+        env:
+          KLINY_TEST_MYSQL: Server=127.0.0.1;Port=3306;User=root;Password=kliny-ci;AllowPublicKeyRetrieval=true
 
   frontend:
     name: Frontend (lint, testes e build)

@@ -49,7 +49,9 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         };
     });
 
-builder.Services.AddAuthorization();
+// Todo endpoint exige login, salvo os marcados com [AllowAnonymous] (só cadastro e login).
+// Um controller novo sem [Authorize] continua protegido. O OpenAPI também exige login.
+builder.Services.AddAuthorization(options => options.FallbackPolicy = options.DefaultPolicy);
 
 // Limite de tentativas no login e no cadastro (seção RateLimits do appsettings.json).
 builder.Services.AddAppRateLimiting(builder.Configuration);
