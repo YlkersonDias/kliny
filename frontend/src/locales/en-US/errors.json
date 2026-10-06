@@ -1,0 +1,12 @@
+{
+  "network": "Couldn't connect to the server. Check your connection and try again.",
+  "checkFields": "Check the highlighted fields.",
+  "server": "Server error. Try again in a moment.",
+  "badRequest": "Invalid data.",
+  "sessionExpired": "Your session has expired. Please sign in again.",
+  "forbidden": "You don't have permission to do this.",
+  "notFound": "Record not found.",
+  "conflict": "The data conflicts with an existing record.",
+  "generic": "Couldn't complete the operation.",
+  "genericRetry": "Couldn't complete the operation. Try again."
+}

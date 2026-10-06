@@ -1,0 +1,56 @@
+{
+  "title": "Home",
+  "startingBalance": "Starting balance",
+  "loadError": "Couldn't load the summary",
+  "summaryError": "Couldn't load this month's summary. {{message}}",
+  "chartError": "Couldn't load daily spending. {{message}}",
+  "vaultsError": "Couldn't load the vaults. {{message}}",
+  "month": {
+    "accountToday": "In your account today",
+    "saved": "and <strong>{{amount}}</strong> saved {{where}}",
+    "inVaults": "in vaults",
+    "inVaultsCount_zero": "in {{count}} vaults",
+    "inVaultsCount_one": "in {{count}} vault",
+    "inVaultsCount_other": "in {{count}} vaults",
+    "thisMonth": "This month",
+    "in": "Money in",
+    "out": "Money out",
+    "left": "Left over",
+    "futureNote": "This month includes entries dated after today. They already count in “Money in” and “Money out”, but only count in “In your account” when their date arrives: on {{date}}, the projected balance is {{balance}}."
+  },
+  "spending": {
+    "title": "Daily spending",
+    "noneThisMonth": "No spending this month.",
+    "summary_zero": "So far, you've spent {{total}} over {{count}} days.",
+    "summary_one": "So far, you've spent {{total}} over {{count}} day.",
+    "summary_other": "So far, you've spent {{total}} over {{count}} days.",
+    "max": "Biggest spending: day {{day}}, {{amount}}.",
+    "noneUntilToday": "No spending so far.",
+    "future": "There is {{amount}} in spending dated after today.",
+    "tableLabel": "View daily spending as a table",
+    "tableCaption": "Daily spending this month",
+    "day": "Day",
+    "spent": "Spent",
+    "afterToday": "(after today)",
+    "tooltipDay": "Day {{day}}",
+    "today": "today"
+  },
+  "recent": {
+    "title": "Recent transactions",
+    "seeAll": "See all"
+  },
+  "vaults": {
+    "title": "Vaults",
+    "seeAll": "See all ({{count}})",
+    "seeVaults": "See vaults",
+    "none": "No vaults yet.",
+    "create": "Create a vault"
+  },
+  "welcome": {
+    "title": "Start with the money you already have",
+    "text": "Add an income called “Starting balance” with the amount in your account today. From there, {{appName}} calculates your balance.",
+    "negative": "If your account is overdrawn, add it as an expense.",
+    "start": "Add starting balance",
+    "createVault": "Create a vault"
+  }
+}

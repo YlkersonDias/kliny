@@ -1,0 +1,70 @@
+{
+  "title": "Transactions",
+  "newButton": "New transaction",
+  "manageCategories": "Manage categories",
+  "listLabel": "Transaction list",
+  "loading": "Loading transactions…",
+  "loadError": "Couldn't load the transactions",
+  "adjustPeriod": "Adjust the period to see the transactions.",
+  "count_zero": "{{count}} transactions",
+  "count_one": "{{count}} transaction",
+  "count_other": "{{count}} transactions",
+  "empty": {
+    "filteredTitle": "No transactions match these filters.",
+    "filteredDescription": "Try another category, type or period.",
+    "clearFilters": "Clear filters",
+    "monthTitle": "No transactions this month.",
+    "monthDescription": "Add an income or an expense to get started.",
+    "periodTitle": "No transactions in this period.",
+    "periodDescription": "Choose another period or add a new transaction."
+  },
+  "filters": {
+    "label": "Filters",
+    "category": "Category",
+    "allCategories": "All",
+    "vaultHasNoCategory": "Vault operations have no category.",
+    "type": "Type",
+    "allTypes": "All",
+    "income": "Income",
+    "expense": "Expenses",
+    "vault": "Vaults",
+    "clear": "Clear filters"
+  },
+  "list": {
+    "date": "Date",
+    "description": "Description",
+    "category": "Category",
+    "amount": "Amount",
+    "actions": "Actions",
+    "seeVault": "See vault",
+    "seeVaultOf": "See vault for {{description}}",
+    "itemName": "{{description}} on {{date}}",
+    "edit": "Edit {{name}}",
+    "delete": "Delete {{name}}"
+  },
+  "kind": {
+    "income": "Income",
+    "expense": "Expense",
+    "vault": "Vault"
+  },
+  "amountKind": "{{kind}}:",
+  "form": {
+    "newTitle": "New transaction",
+    "editTitle": "Edit transaction",
+    "type": "Type",
+    "description": "Description",
+    "amountHint": "Always positive: the type defines whether it comes in or goes out.",
+    "category": "Category (optional)",
+    "categoriesError": "Couldn't load the categories.",
+    "newCategory": "New category",
+    "submitNew": "Add",
+    "submitEdit": "Save changes",
+    "descriptionRequired": "Enter a description."
+  },
+  "delete": {
+    "title": "Delete transaction",
+    "confirm": "Delete",
+    "question": "Delete <name/> on {{date}}?",
+    "irreversible": "This action can't be undone."
+  }
+}

@@ -1,0 +1,91 @@
+{
+  "title": "Vaults",
+  "newButton": "New vault",
+  "loading": "Loading vaults…",
+  "loadError": "Couldn't load the vaults",
+  "empty": {
+    "title": "No vaults yet.",
+    "description": "Create a vault to set money aside for a goal, like an emergency fund or a trip."
+  },
+  "totalSaved": "Total saved",
+  "count_zero": "{{count}} vaults",
+  "count_one": "{{count}} vault",
+  "count_other": "{{count}} vaults",
+  "card": {
+    "edit": "Edit {{name}}",
+    "depositTo": "to {{name}}",
+    "withdrawFrom": "from {{name}}"
+  },
+  "goal": {
+    "none": "No goal",
+    "progressLabel": "Goal progress",
+    "reachedValue": "Goal of {{goal}} reached",
+    "progressValue": "{{percent}}% of the {{goal}} goal",
+    "line": "Goal {{goal}}",
+    "reached": "Reached",
+    "percent": "{{percent}}%"
+  },
+  "detail": {
+    "back": "Vaults",
+    "pageTitle": "Vault",
+    "notFoundTitle": "Vault not found.",
+    "notFoundDescription": "It may have been deleted, or the address is wrong.",
+    "backToVaults": "Back to Vaults",
+    "loadError": "Couldn't load the vault",
+    "loading": "Loading vault…",
+    "createdAt": "Created on {{date}}",
+    "balance": "Balance",
+    "goalReached": "Goal reached!",
+    "goalReachedText": "You've saved {{goal}} or more.",
+    "statement": "Statement",
+    "statementNote": "Deposits and withdrawals can't be edited. To fix one, make the opposite operation.",
+    "statementError": "Couldn't load the statement",
+    "statementLoading": "Loading statement…",
+    "statementEmptyTitle": "No transactions in this vault.",
+    "statementEmptyDescription": "Make the first deposit to start saving.",
+    "deposit": "Deposit",
+    "withdrawal": "Withdrawal"
+  },
+  "form": {
+    "newTitle": "New vault",
+    "editTitle": "Edit vault",
+    "name": "Name",
+    "namePlaceholder": "E.g.: Emergency fund",
+    "goal": "Goal (optional)",
+    "goalHintNew": "How much you want to save in this vault.",
+    "goalHintRemove": "Leave blank to remove the goal.",
+    "goalReachedNotice": "The vault already has {{balance}} saved, which already reaches this goal. It will show as “Goal reached”.",
+    "submitNew": "Create vault",
+    "submitEdit": "Save changes",
+    "nameRequired": "Enter the vault name.",
+    "nameMax": "The vault name must be at most {{max}} characters."
+  },
+  "operation": {
+    "depositTitle": "Deposit to {{name}}",
+    "withdrawTitle": "Withdraw from {{name}}",
+    "insufficientVault": "Insufficient vault balance. Available: {{balance}}.",
+    "accountShortfall": "Insufficient account balance. Available on {{date}}: {{balance}}.",
+    "addIncomeFirst": "Add income before depositing.",
+    "futureDate": "Vault operations cannot have a future date.",
+    "pickDateFirst": "The amount available in your account appears after you choose the date.",
+    "availableToday": "Available in your account today: {{balance}}.",
+    "availableOn": "Available in your account on {{date}}: {{balance}}.",
+    "accountError": "Couldn't check your account balance; it will be checked when you deposit.",
+    "accountLoading": "Checking the amount available in your account…",
+    "availableInVault": "Available in the vault: {{balance}}.",
+    "dateHint": "Today or a past date.",
+    "description": "Description (optional)",
+    "depositPlaceholder": "Deposit to vault {{name}}",
+    "withdrawPlaceholder": "Withdrawal from vault {{name}}",
+    "emptyVault": "This vault has no balance, so there's nothing to withdraw."
+  },
+  "delete": {
+    "title": "Delete vault",
+    "hasBalance": "<name/> still has <strong>{{balance}}</strong> saved. Withdraw the whole balance before deleting the vault.",
+    "withdrawAll": "Withdraw balance",
+    "confirm": "Delete vault",
+    "question": "Delete the vault <name/>?",
+    "history": "This vault's deposit and withdrawal history will also be deleted. This action can't be undone. Your account totals don't change, because deposits and withdrawals cancel each other out.",
+    "understand": "I understand the history will be lost."
+  }
+}

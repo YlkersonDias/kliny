@@ -1,0 +1,44 @@
+{
+  "actions": {
+    "cancel": "Cancel",
+    "close": "Close",
+    "tryAgain": "Try again",
+    "add": "Add",
+    "save": "Save",
+    "saveChanges": "Save changes",
+    "delete": "Delete",
+    "edit": "Edit",
+    "deposit": "Deposit",
+    "withdraw": "Withdraw"
+  },
+  "loading": "Loading…",
+  "fields": {
+    "from": "From",
+    "to": "To",
+    "date": "Date",
+    "amount": "Amount",
+    "name": "Name"
+  },
+  "amountPlaceholder": "0.00",
+  "uncategorized": "Uncategorized",
+  "validation": {
+    "dateRequired": "Enter the date.",
+    "dateInvalid": "Invalid date.",
+    "amountRequired": "Enter the amount.",
+    "amountInvalid": "Invalid amount. Use the format 1,234.56, with up to 2 decimal places.",
+    "amountPositive": "The amount must be greater than zero.",
+    "descriptionMax": "The description must be at most {{max}} characters.",
+    "rangeInverted": "The end date cannot be before the start date."
+  },
+  "pagination": {
+    "label": "Pagination",
+    "summary": "Page {{page}} of {{lastPage}} · {{items}}",
+    "previous": "Previous",
+    "next": "Next"
+  },
+  "notFound": {
+    "title": "Page not found",
+    "description": "The address may be wrong, or the page no longer exists.",
+    "backHome": "Back to home"
+  }
+}

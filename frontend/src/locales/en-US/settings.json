@@ -1,0 +1,14 @@
+{
+  "title": "Settings",
+  "appearance": "Appearance",
+  "theme": {
+    "legend": "Theme",
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System",
+    "systemHint": "Follows the operating system theme, currently {{current}}.",
+    "currentDark": "dark",
+    "currentLight": "light",
+    "choiceHint": "This choice applies to this browser."
+  }
+}

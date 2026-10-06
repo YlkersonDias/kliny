@@ -1,0 +1,27 @@
+{
+  "validation": {
+    "nameRequired": "Enter the category name.",
+    "nameMax": "The category name must be at most {{max}} characters."
+  },
+  "newModal": {
+    "title": "New category",
+    "name": "Name",
+    "submit": "Create category"
+  },
+  "manager": {
+    "title": "Manage categories",
+    "newLabel": "New category",
+    "yours": "Your categories",
+    "loading": "Loading categories…",
+    "empty": "No categories yet. Create the first one above.",
+    "rename": "Rename {{name}}",
+    "delete": "Delete {{name}}",
+    "newName": "New name for {{name}}"
+  },
+  "delete": {
+    "title": "Delete category",
+    "confirm": "Delete",
+    "question": "Delete the category <name/>?",
+    "note": "Transactions in this category won't be deleted: they'll become uncategorized."
+  }
+}

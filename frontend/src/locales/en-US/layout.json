@@ -1,0 +1,18 @@
+{
+  "skipToContent": "Skip to content",
+  "homeLink": "{{appName}}, home page",
+  "settingsLink": "{{name}}, settings",
+  "signOut": "Sign out",
+  "nav": {
+    "label": "Main menu",
+    "home": "Home",
+    "transactions": "Transactions",
+    "vaults": "Vaults",
+    "reports": "Reports"
+  },
+  "theme": {
+    "label": "Dark mode",
+    "on": "Dark mode on",
+    "off": "Dark mode off"
+  }
+}
