@@ -19,15 +19,17 @@ export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLa
       <div className="w-full max-w-sm">
         {/*
           O mascote fica fora do fluxo, então a margem reserva o espaço dele acima do cartão.
-          Percentuais de margem são relativos à largura do cartão: a imagem (440x239) ocupa
-          91,7% da largura, ou seja 49,8% de altura, menos os 3,54% que descem sobre a borda.
+          Percentuais de margem são relativos à largura do cartão: a imagem (415x239, já sem a
+          margem transparente do PNG original, que escondia o canto arredondado do cartão por
+          baixo das patas) ocupa 91,7% da largura, ou seja 52,8% de altura, menos os 3,54% que
+          descem sobre a borda.
         */}
-        <main className={`relative rounded-2xl bg-surface p-6 shadow-lg shadow-primary/10 sm:p-8 ${mascot ? 'mt-[46.3%]' : ''}`}>
+        <main className={`relative rounded-2xl bg-surface p-6 shadow-lg shadow-primary/10 sm:p-8 ${mascot ? 'mt-[49.3%]' : ''}`}>
           {mascot && (
             <img
               src="/mascote/kliny-login-mascote.png"
               srcSet="/mascote/kliny-login-mascote.png 1x, /mascote/kliny-login-mascote@2x.png 2x"
-              width={440}
+              width={415}
               height={239}
               alt=""
               draggable={false}
