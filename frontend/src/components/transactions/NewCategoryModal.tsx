@@ -1,4 +1,5 @@
 import { useRef, useState, type FormEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { Category } from '../../api/types'
 import { useCreateCategory } from '../../hooks/useCategories'
 import { categoryNameError, validateCategoryName } from '../../lib/categories'
@@ -15,6 +16,7 @@ interface NewCategoryModalProps {
 // Atalho do formulário de movimentação: abre por cima dele, sem desmontá-lo,
 // então o que já foi digitado lá continua no lugar.
 export function NewCategoryModal({ onCreated, onClose }: NewCategoryModalProps) {
+  const { t } = useTranslation(['categories', 'common'])
   const [name, setName] = useState('')
   const [error, setError] = useState<string>()
   const [formError, setFormError] = useState<string | null>(null)
@@ -44,20 +46,20 @@ export function NewCategoryModal({ onCreated, onClose }: NewCategoryModalProps) 
   }
 
   return (
-    <Modal title="Nova categoria" size="sm" initialFocusRef={inputRef} onClose={() => { if (!mutation.isPending) onClose() }}>
+    <Modal title={t('newModal.title')} size="sm" initialFocusRef={inputRef} onClose={() => { if (!mutation.isPending) onClose() }}>
       <form noValidate onSubmit={handleSubmit} className="space-y-4">
         {formError && <FormAlert>{formError}</FormAlert>}
         <Input
           ref={inputRef}
-          label="Nome"
+          label={t('newModal.name')}
           autoComplete="off"
           value={name}
           onChange={(event) => { setName(event.target.value); setError(undefined) }}
           error={error}
         />
         <div className="flex flex-col-reverse gap-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>Cancelar</Button>
-          <Button type="submit" isLoading={mutation.isPending}>Criar categoria</Button>
+          <Button variant="secondary" onClick={onClose} disabled={mutation.isPending}>{t('common:actions.cancel')}</Button>
+          <Button type="submit" isLoading={mutation.isPending}>{t('newModal.submit')}</Button>
         </div>
       </form>
     </Modal>

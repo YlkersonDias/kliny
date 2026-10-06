@@ -1,4 +1,5 @@
 import { ApiError } from '../api/client'
+import i18n from '../i18n'
 import { splitApiError } from './forms'
 
 // Mesma regra do CategoryRequest da API.
@@ -6,8 +7,8 @@ export const CATEGORY_NAME_MAX = 100
 
 export function validateCategoryName(name: string): string | undefined {
   const trimmed = name.trim()
-  if (!trimmed) return 'Informe o nome da categoria.'
-  if (trimmed.length > CATEGORY_NAME_MAX) return `O nome da categoria deve ter no máximo ${CATEGORY_NAME_MAX} caracteres.`
+  if (!trimmed) return i18n.t('categories:validation.nameRequired')
+  if (trimmed.length > CATEGORY_NAME_MAX) return i18n.t('categories:validation.nameMax', { max: CATEGORY_NAME_MAX })
   return undefined
 }
 

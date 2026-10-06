@@ -1,4 +1,6 @@
 import { useRef, useState, type FormEvent } from 'react'
+import type { TFunction } from 'i18next'
+import { useTranslation } from 'react-i18next'
 import type { Category, Transaction } from '../../api/types'
 import { useCategories } from '../../hooks/useCategories'
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactions'
@@ -30,22 +32,22 @@ interface Values {
 // Mesma regra do TransactionRequest da API (StringLength(255), conferido no backend).
 const DESCRIPTION_MAX = 255
 
-function validate(values: Values): FieldErrors<Field> {
+function validate(values: Values, t: TFunction<['transactions', 'common']>): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
   const description = values.description.trim()
 
-  if (!description) errors.description = 'Informe a descrição.'
-  else if (description.length > DESCRIPTION_MAX) errors.description = `A descrição deve ter no máximo ${DESCRIPTION_MAX} caracteres.`
+  if (!description) errors.description = t('form.descriptionRequired')
+  else if (description.length > DESCRIPTION_MAX) errors.description = t('common:validation.descriptionMax', { max: DESCRIPTION_MAX })
 
-  if (!values.amount.trim()) errors.amount = 'Informe o valor.'
+  if (!values.amount.trim()) errors.amount = t('common:validation.amountRequired')
   else {
     const amount = parseMoneyInput(values.amount)
-    if (amount === null) errors.amount = 'Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.'
-    else if (amount === 0) errors.amount = 'O valor deve ser maior que zero.'
+    if (amount === null) errors.amount = t('common:validation.amountInvalid')
+    else if (amount === 0) errors.amount = t('common:validation.amountPositive')
   }
 
-  if (!values.date) errors.date = 'Informe a data.'
-  else if (!isValidIsoDate(values.date)) errors.date = 'Data inválida.'
+  if (!values.date) errors.date = t('common:validation.dateRequired')
+  else if (!isValidIsoDate(values.date)) errors.date = t('common:validation.dateInvalid')
 
   return errors
 }
@@ -79,6 +81,7 @@ interface TransactionFormModalProps {
 }
 
 export function TransactionFormModal({ transaction, preset, onClose }: TransactionFormModalProps) {
+  const { t } = useTranslation(['transactions', 'common'])
   const isEdit = transaction !== undefined
   const [values, setValues] = useState<Values>(() => initialValues(transaction, preset))
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
@@ -121,7 +124,7 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values)
+    const fieldErrors = validate(values, t)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -171,7 +174,7 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
 
   return (
     <Modal
-      title={isEdit ? 'Editar movimentação' : 'Nova movimentação'}
+      title={isEdit ? t('form.editTitle') : t('form.newTitle')}
       initialFocusRef={preset && !isEdit ? amountRef : descriptionRef}
       onClose={() => { if (!isPending) onClose() }}
     >
@@ -179,16 +182,16 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
         {formError && <FormAlert>{formError}</FormAlert>}
 
         <fieldset>
-          <legend className="mb-1.5 text-sm font-medium text-foreground">Tipo</legend>
+          <legend className="mb-1.5 text-sm font-medium text-foreground">{t('form.type')}</legend>
           <div className="flex gap-2">
-            {kindOption('income', 'Receita')}
-            {kindOption('expense', 'Gasto')}
+            {kindOption('income', t('kind.income'))}
+            {kindOption('expense', t('kind.expense'))}
           </div>
         </fieldset>
 
         <Input
           ref={descriptionRef}
-          label="Descrição"
+          label={t('form.description')}
           autoComplete="off"
           maxLength={DESCRIPTION_MAX}
           value={values.description}
@@ -199,16 +202,16 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
         <div className="grid gap-4 sm:grid-cols-2">
           <MoneyInput
             ref={amountRef}
-            label="Valor"
-            placeholder="0,00"
-            hint="Sempre positivo: o tipo define se entra ou sai."
+            label={t('common:fields.amount')}
+            placeholder={t('common:amountPlaceholder')}
+            hint={t('form.amountHint')}
             value={values.amount}
             onChange={(text) => change('amount', text)}
             error={errors.amount}
           />
           <Input
             ref={dateRef}
-            label="Data"
+            label={t('common:fields.date')}
             type="date"
             min="0001-01-01"
             max="9999-12-31"
@@ -221,12 +224,12 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
         <div>
           <Select
             ref={categoryRef}
-            label="Categoria (opcional)"
+            label={t('form.category')}
             value={categoryValue}
             onChange={(event) => change('categoryId', event.target.value)}
-            error={errors.categoryId ?? (categories.isError ? 'Não foi possível carregar as categorias.' : undefined)}
+            error={errors.categoryId ?? (categories.isError ? t('form.categoriesError') : undefined)}
           >
-            <option value="">Sem categoria</option>
+            <option value="">{t('common:uncategorized')}</option>
             {categoryOptions.map((category) => (
               <option key={category.id} value={category.id}>{category.name}</option>
             ))}
@@ -237,14 +240,14 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
             className="mt-2 inline-flex items-center gap-1 rounded text-sm font-semibold text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary"
           >
             <Icon name="plus" className="size-4" />
-            Nova categoria
+            {t('form.newCategory')}
           </button>
         </div>
 
         <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
-          <Button variant="secondary" onClick={onClose} disabled={isPending}>Cancelar</Button>
+          <Button variant="secondary" onClick={onClose} disabled={isPending}>{t('common:actions.cancel')}</Button>
           <Button type="submit" isLoading={isPending}>
-            {isEdit ? 'Salvar alterações' : 'Adicionar'}
+            {isEdit ? t('form.submitEdit') : t('form.submitNew')}
           </Button>
         </div>
       </form>

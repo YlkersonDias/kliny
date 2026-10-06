@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import type { Category } from '../../api/types'
 import type { TransactionFilters, TypeFilter } from '../../lib/transactionFilters'
 import { Button } from '../ui/Button'
@@ -14,13 +15,14 @@ interface TransactionFiltersBarProps {
 }
 
 export function TransactionFiltersBar({ filters, categories, rangeError, canClear, onChange, onClear }: TransactionFiltersBarProps) {
+  const { t } = useTranslation(['transactions', 'common'])
   const isVault = filters.type === 'cofres'
 
   return (
-    <section aria-label="Filtros" className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
+    <section aria-label={t('filters.label')} className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
       <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
         <Input
-          label="De"
+          label={t('common:fields.from')}
           type="date"
           min="0001-01-01"
           max="9999-12-31"
@@ -28,7 +30,7 @@ export function TransactionFiltersBar({ filters, categories, rangeError, canClea
           onChange={(event) => onChange({ from: event.target.value })}
         />
         <Input
-          label="Até"
+          label={t('common:fields.to')}
           type="date"
           min="0001-01-01"
           max="9999-12-31"
@@ -37,35 +39,35 @@ export function TransactionFiltersBar({ filters, categories, rangeError, canClea
           error={rangeError}
         />
         <Select
-          label="Categoria"
+          label={t('filters.category')}
           value={filters.category}
           disabled={isVault}
-          title={isVault ? 'Operações de cofre não têm categoria.' : undefined}
+          title={isVault ? t('filters.vaultHasNoCategory') : undefined}
           onChange={(event) => onChange({ category: event.target.value })}
         >
-          <option value="">Todas</option>
-          <option value="sem">Sem categoria</option>
+          <option value="">{t('filters.allCategories')}</option>
+          <option value="sem">{t('common:uncategorized')}</option>
           {categories.map((category) => (
             <option key={category.id} value={category.id}>{category.name}</option>
           ))}
         </Select>
         <Select
-          label="Tipo"
+          label={t('filters.type')}
           value={filters.type}
           onChange={(event) => {
             const type = event.target.value as TypeFilter
             onChange(type === 'cofres' ? { type, category: '' } : { type })
           }}
         >
-          <option value="">Todos</option>
-          <option value="receitas">Receitas</option>
-          <option value="gastos">Gastos</option>
-          <option value="cofres">Cofres</option>
+          <option value="">{t('filters.allTypes')}</option>
+          <option value="receitas">{t('filters.income')}</option>
+          <option value="gastos">{t('filters.expense')}</option>
+          <option value="cofres">{t('filters.vault')}</option>
         </Select>
       </div>
       {canClear && (
         <div className="mt-3 flex justify-end">
-          <Button variant="ghost" className="px-3 py-2" onClick={onClear}>Limpar filtros</Button>
+          <Button variant="ghost" className="px-3 py-2" onClick={onClear}>{t('filters.clear')}</Button>
         </div>
       )}
     </section>

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
@@ -17,38 +18,40 @@ interface TransactionListProps {
 // Operações de cofre não têm editar nem apagar: só os endpoints de cofre as criam ou removem.
 // No lugar, um link para o cofre.
 function Actions({ transaction, onEdit, onDelete }: { transaction: Transaction } & Omit<TransactionListProps, 'items'>) {
+  const { t } = useTranslation('transactions')
   if (transaction.vaultId !== null) {
     return (
       <Link
         to={`/cofres/${transaction.vaultId}`}
-        aria-label={`Ver cofre de ${transaction.description}`}
+        aria-label={t('list.seeVaultOf', { description: transaction.description })}
         className="inline-flex min-h-11 items-center rounded px-2 text-sm font-semibold whitespace-nowrap text-primary underline-offset-2 hover:underline focus-visible:outline-2 focus-visible:outline-primary md:min-h-8"
       >
-        Ver cofre
+        {t('list.seeVault')}
       </Link>
     )
   }
-  const name = `${transaction.description} de ${formatDate(transaction.date)}`
+  const name = t('list.itemName', { description: transaction.description, date: formatDate(transaction.date) })
   return (
     <div className="flex justify-end gap-1">
-      <IconButton icon="edit" label={`Editar ${name}`} onClick={() => onEdit(transaction)} />
-      <IconButton icon="trash" label={`Apagar ${name}`} onClick={() => onDelete(transaction)} />
+      <IconButton icon="edit" label={t('list.edit', { name })} onClick={() => onEdit(transaction)} />
+      <IconButton icon="trash" label={t('list.delete', { name })} onClick={() => onDelete(transaction)} />
     </div>
   )
 }
 
 export function TransactionList({ items, onEdit, onDelete }: TransactionListProps) {
+  const { t } = useTranslation('transactions')
   return (
     <>
       {/* Desktop: tabela */}
       <table className="hidden w-full text-left text-sm lg:table">
         <thead className="border-b border-border text-muted">
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">Data</th>
-            <th scope="col" className="px-4 py-3 font-medium">Descrição</th>
-            <th scope="col" className="px-4 py-3 font-medium">Categoria</th>
-            <th scope="col" className="px-4 py-3 text-right font-medium">Valor</th>
-            <th scope="col" className="px-4 py-3 text-right font-medium"><span className="sr-only">Ações</span></th>
+            <th scope="col" className="px-4 py-3 font-medium">{t('list.date')}</th>
+            <th scope="col" className="px-4 py-3 font-medium">{t('list.description')}</th>
+            <th scope="col" className="px-4 py-3 font-medium">{t('list.category')}</th>
+            <th scope="col" className="px-4 py-3 text-right font-medium">{t('list.amount')}</th>
+            <th scope="col" className="px-4 py-3 text-right font-medium"><span className="sr-only">{t('list.actions')}</span></th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">

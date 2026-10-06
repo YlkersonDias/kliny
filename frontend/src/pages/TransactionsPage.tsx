@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { Transaction } from '../api/types'
 import { CategoryManagerModal } from '../components/transactions/CategoryManagerModal'
@@ -22,8 +22,8 @@ import {
 } from '../lib/transactionFilters'
 
 export default function TransactionsPage() {
-  const { t } = useTranslation('transactions')
-  usePageTitle('Movimentações')
+  const { t } = useTranslation(['transactions', 'common'])
+  usePageTitle(t('title'))
   const [searchParams, setSearchParams] = useSearchParams()
   const month = currentMonthRange()
   const categories = useCategories()
@@ -63,22 +63,22 @@ export default function TransactionsPage() {
   const newButton = (
     <Button onClick={() => setForm({})}>
       <Icon name="plus" className="size-4" />
-      Nova movimentação
+      {t('newButton')}
     </Button>
   )
 
   function renderContent() {
     if (periodError) {
-      return <p className="px-4 py-10 text-center text-sm text-muted">Ajuste o período para ver as movimentações.</p>
+      return <p className="px-4 py-10 text-center text-sm text-muted">{t('adjustPeriod')}</p>
     }
     if (transactions.isError && !data) {
       return (
         <EmptyState
           role="alert"
           image="erro"
-          title="Não foi possível carregar as movimentações"
+          title={t('loadError')}
           description={transactions.error.message}
-          action={<Button variant="secondary" onClick={() => transactions.refetch()}>Tentar novamente</Button>}
+          action={<Button variant="secondary" onClick={() => transactions.refetch()}>{t('common:actions.tryAgain')}</Button>}
         />
       )
     }
@@ -87,7 +87,7 @@ export default function TransactionsPage() {
       return (
         <div className="flex justify-center py-16 text-primary" role="status">
           <Spinner className="size-8" />
-          <span className="sr-only">Carregando movimentações…</span>
+          <span className="sr-only">{t('loading')}</span>
         </div>
       )
     }
@@ -96,9 +96,9 @@ export default function TransactionsPage() {
         return (
           <EmptyState
             image="sem-resultados"
-            title="Nenhuma movimentação encontrada com esses filtros."
-            description="Tente outra categoria, outro tipo ou outro período."
-            action={<Button variant="secondary" onClick={clearFilters}>Limpar filtros</Button>}
+            title={t('empty.filteredTitle')}
+            description={t('empty.filteredDescription')}
+            action={<Button variant="secondary" onClick={clearFilters}>{t('empty.clearFilters')}</Button>}
           />
         )
       }
@@ -106,8 +106,8 @@ export default function TransactionsPage() {
       return (
         <EmptyState
           image="cofre-vazio"
-          title={isMonth ? 'Nenhuma movimentação neste mês.' : 'Nenhuma movimentação no período.'}
-          description={isMonth ? 'Lance uma receita ou um gasto para começar.' : 'Escolha outro período ou lance uma nova movimentação.'}
+          title={isMonth ? t('empty.monthTitle') : t('empty.periodTitle')}
+          description={isMonth ? t('empty.monthDescription') : t('empty.periodDescription')}
           action={newButton}
         />
       )
@@ -134,11 +134,11 @@ export default function TransactionsPage() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h1 className="text-2xl font-semibold text-foreground">Movimentações</h1>
+        <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
         <div className="flex flex-wrap gap-2">
           <Button variant="secondary" onClick={() => setManagingCategories(true)}>
             <Icon name="tag" className="size-4" />
-            Gerenciar categorias
+            {t('manageCategories')}
           </Button>
           {newButton}
         </div>
@@ -153,7 +153,7 @@ export default function TransactionsPage() {
           onChange={updateFilters}
           onClear={clearFilters}
         />
-        <section aria-label="Lista de movimentações" className="overflow-hidden rounded-2xl border border-border bg-surface">
+        <section aria-label={t('listLabel')} className="overflow-hidden rounded-2xl border border-border bg-surface">
           {renderContent()}
         </section>
       </div>
@@ -171,22 +171,28 @@ export default function TransactionsPage() {
 }
 
 function DeleteTransactionDialog({ transaction, onClose }: { transaction: Transaction; onClose: () => void }) {
+  const { t } = useTranslation('transactions')
   const mutation = useDeleteTransaction()
 
   return (
     <ConfirmDialog
-      title="Apagar movimentação"
-      confirmLabel="Apagar"
+      title={t('delete.title')}
+      confirmLabel={t('delete.confirm')}
       isLoading={mutation.isPending}
       error={mutation.error?.message}
       onCancel={onClose}
       onConfirm={() => mutation.mutate(transaction.id, { onSuccess: onClose })}
     >
       <p>
-        Apagar <strong className="font-semibold text-foreground">{transaction.description}</strong> de{' '}
-        {formatDate(transaction.date)}?
+        {/* <name/> recebe o elemento pronto: a descrição digitada nunca passa pelo parser de tags. */}
+        <Trans
+          t={t}
+          i18nKey="delete.question"
+          values={{ date: formatDate(transaction.date) }}
+          components={{ name: <strong className="font-semibold text-foreground">{transaction.description}</strong> }}
+        />
       </p>
-      <p className="mt-2">Essa ação não pode ser desfeita.</p>
+      <p className="mt-2">{t('delete.irreversible')}</p>
     </ConfirmDialog>
   )
 }

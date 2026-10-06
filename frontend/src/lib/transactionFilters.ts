@@ -1,4 +1,5 @@
 import type { TransactionQuery, TransactionType } from '../api/types'
+import i18n from '../i18n'
 import { isValidIsoDate, type DateRange } from './dates'
 
 // Filtros da tela de Movimentações, guardados na URL em português:
@@ -85,6 +86,6 @@ export function hasOtherFilters(filters: TransactionFilters): boolean {
 }
 
 export function rangeError(filters: TransactionFilters): string | undefined {
-  if (filters.from && filters.to && filters.from > filters.to) return 'A data final não pode ser antes da inicial.'
+  if (filters.from && filters.to && filters.from > filters.to) return i18n.t('validation.rangeInverted')
   return undefined
 }
