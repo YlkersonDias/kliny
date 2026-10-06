@@ -71,9 +71,12 @@ public sealed class MySqlApi : IAsyncLifetime
         await using (var admin = AdminContext())
         {
             await admin.Database.MigrateAsync(Ct);
-            await admin.Database.ExecuteSqlAsync($"CREATE USER {_appUser}@'%' IDENTIFIED BY {appPassword}", Ct);
-            // O nome do banco é identificador (não aceita parâmetro); é só hex de um Guid.
+            // Usuário, senha e nome do banco são literais/identificadores: o MySQL não aceita
+            // parâmetro vinculado nessas posições do CREATE USER e do GRANT. Sem risco de injeção,
+            // porque os três vêm só de hex de um Guid gerado aqui, nunca de entrada do usuário.
 #pragma warning disable EF1002
+            await admin.Database.ExecuteSqlRawAsync(
+                $"CREATE USER '{_appUser}'@'%' IDENTIFIED BY '{appPassword}'", Ct);
             await admin.Database.ExecuteSqlRawAsync(
                 $"GRANT SELECT, INSERT, UPDATE, DELETE ON `{database}`.* TO '{_appUser}'@'%'", Ct);
 #pragma warning restore EF1002
