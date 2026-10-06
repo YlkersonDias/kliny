@@ -3,6 +3,7 @@ using Backend.Data;
 using Backend.Exceptions;
 using Backend.Localization;
 using Backend.Options;
+using Backend.RateLimiting;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -50,6 +51,9 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
 
 builder.Services.AddAuthorization();
 
+// Limite de tentativas no login e no cadastro (seção RateLimits do appsettings.json).
+builder.Services.AddAppRateLimiting(builder.Configuration);
+
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -89,6 +93,10 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
+
+// Depois do UseRequestLocalization (mensagem do 429 no idioma pedido) e antes da autenticação:
+// a tentativa recusada não chega a validar token nem a rodar o BCrypt.
+app.UseRateLimiter();
 
 app.UseAuthentication();
 app.UseAuthorization();

@@ -1,3 +1,4 @@
+using Backend.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics;
 
 namespace Backend.Exceptions;
@@ -11,6 +12,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             NotFoundException => StatusCodes.Status404NotFound,
             ConflictException => StatusCodes.Status409Conflict,
             BusinessRuleException => StatusCodes.Status400BadRequest,
+            TooManyRequestsException => StatusCodes.Status429TooManyRequests,
             _ => (int?)null,
         };
 
@@ -19,6 +21,8 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
             return false;
 
         httpContext.Response.StatusCode = status.Value;
+        if (exception is TooManyRequestsException tooMany)
+            TooManyRequests.SetRetryAfter(httpContext.Response, tooMany.RetryAfter);
         return await problemDetailsService.TryWriteAsync(new ProblemDetailsContext
         {
             HttpContext = httpContext,

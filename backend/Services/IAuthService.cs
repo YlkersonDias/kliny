@@ -8,6 +8,7 @@ public interface IAuthService
     Task<AuthResponse> RegisterAsync(RegisterRequest request);
 
     /// <returns>A resposta com o token, ou null se o e-mail ou a senha estiverem errados.</returns>
+    /// <exception cref="Exceptions.TooManyRequestsException">E-mail bloqueado por falhas seguidas.</exception>
     Task<AuthResponse?> LoginAsync(LoginRequest request);
 
     Task<UserResponse?> GetUserAsync(int userId);

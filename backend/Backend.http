@@ -281,3 +281,38 @@ Accept-Language: en-US
 GET {{baseUrl}}/api/reports/summary
 Authorization: Bearer {{token}}
 Accept-Language: en-US
+
+######################### Limite de tentativas #########################
+# Limites na seção RateLimits do appsettings.json. Acima deles: 429 com Retry-After.
+# Por IP: 10 logins por minuto e 5 cadastros por hora (o proxy do Vite faz todo
+# mundo vir de 127.0.0.1 em desenvolvimento). Por e-mail: 5 falhas em 15 min
+# bloqueiam o e-mail por 15 min, mesmo com a senha certa, exista a conta ou não.
+# Reiniciar a API zera os limites.
+
+### Login errado: repetir 5 vezes (401) e na 6ª vem 429 "Tente novamente em 15 minutos"
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "bloqueio@kliny.local",
+  "password": "senhaerrada"
+}
+
+### Mesmo e-mail com maiúsculas e espaços: também bloqueado (429)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+
+{
+  "email": "  BLOQUEIO@kliny.local ",
+  "password": "senhaerrada"
+}
+
+### 429 em inglês: "Too many attempts. Try again in 15 minutes."
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+Accept-Language: en-US
+
+{
+  "email": "bloqueio@kliny.local",
+  "password": "senhaerrada"
+}

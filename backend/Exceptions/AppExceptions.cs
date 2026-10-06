@@ -11,3 +11,10 @@ public class ConflictException(string message) : Exception(message);
 
 /// <summary>Dados válidos no formato, mas que ferem uma regra de negócio (400).</summary>
 public class BusinessRuleException(string message) : Exception(message);
+
+/// <summary>Tentativas demais; vira 429 com o cabeçalho Retry-After.</summary>
+public class TooManyRequestsException(TimeSpan retryAfter)
+    : Exception(Backend.RateLimiting.TooManyRequests.Message(retryAfter))
+{
+    public TimeSpan RetryAfter { get; } = retryAfter;
+}

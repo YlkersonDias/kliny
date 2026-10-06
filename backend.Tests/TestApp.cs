@@ -1,0 +1,64 @@
+using System.Net;
+using Backend.DTOs.Auth;
+using Backend.Exceptions;
+using Backend.Services;
+using Microsoft.AspNetCore.Builder;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.Extensions.DependencyInjection;
+
+namespace Backend.Tests;
+
+// A API inteira em memória, com o IAuthService trocado por um falso: não precisa de MySQL.
+// Cada teste cria a sua, para os limites começarem do zero.
+public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null) : WebApplicationFactory<Program>
+{
+    // Cabeçalho só dos testes: define o IP de origem da requisição.
+    public const string ClientIpHeader = "X-Test-Client-Ip";
+
+    protected override void ConfigureWebHost(IWebHostBuilder builder)
+    {
+        // Fora de Development: não lê o user-secrets da máquina (no CI ele nem existe).
+        builder.UseEnvironment("Testing");
+        builder.UseSetting("Jwt:Key", new string('k', 64));
+        foreach (var (key, value) in settings ?? new Dictionary<string, string>())
+            builder.UseSetting(key, value);
+
+        builder.ConfigureServices(services =>
+        {
+            services.AddSingleton<IAuthService, FakeAuthService>();
+            services.AddSingleton<IStartupFilter, ClientIpStartupFilter>();
+        });
+    }
+
+    private sealed class ClientIpStartupFilter : IStartupFilter
+    {
+        public Action<IApplicationBuilder> Configure(Action<IApplicationBuilder> next) => app =>
+        {
+            app.Use((context, nextMiddleware) =>
+            {
+                if (context.Request.Headers.TryGetValue(ClientIpHeader, out var ip))
+                    context.Connection.RemoteIpAddress = IPAddress.Parse(ip.ToString());
+                return nextMiddleware(context);
+            });
+            next(app);
+        };
+    }
+}
+
+// Login sempre errado (401), salvo o e-mail bloqueado (429); cadastro sempre aceito (201).
+public sealed class FakeAuthService : IAuthService
+{
+    public const string LockedEmail = "bloqueado@kliny.test";
+
+    public Task<AuthResponse> RegisterAsync(RegisterRequest request) =>
+        Task.FromResult(new AuthResponse("token", DateTime.UtcNow.AddHours(1),
+            new UserResponse(1, request.Name, request.Email, DateTime.UtcNow)));
+
+    public Task<AuthResponse?> LoginAsync(LoginRequest request) =>
+        request.Email == LockedEmail
+            ? throw new TooManyRequestsException(TimeSpan.FromMinutes(15))
+            : Task.FromResult<AuthResponse?>(null);
+
+    public Task<UserResponse?> GetUserAsync(int userId) => Task.FromResult<UserResponse?>(null);
+}

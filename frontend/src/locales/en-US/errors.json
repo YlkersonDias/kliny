@@ -7,6 +7,7 @@
   "forbidden": "You don't have permission to do this.",
   "notFound": "Record not found.",
   "conflict": "The data conflicts with an existing record.",
+  "tooManyRequests": "Too many attempts. Wait a few minutes and try again.",
   "generic": "Couldn't complete the operation.",
   "genericRetry": "Couldn't complete the operation. Try again."
 }

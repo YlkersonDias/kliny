@@ -7,7 +7,7 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
-public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthService
+public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle) : IAuthService
 {
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
@@ -40,11 +40,20 @@ public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthSer
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var email = NormalizeEmail(request.Email);
+
+        // E-mail bloqueado recusa até a senha certa; e-mail sem conta também é contado e bloqueado.
+        if (loginThrottle.GetLockout(email) is { } retryAfter)
+            throw new TooManyRequestsException(retryAfter);
+
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
 
         if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        {
+            loginThrottle.RegisterFailure(email);
             return null;
+        }
 
+        loginThrottle.Reset(email);
         return BuildResponse(user);
     }
 

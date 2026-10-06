@@ -104,6 +104,8 @@ function defaultMessage(status: number): string {
     case 403: return i18n.t('errors:forbidden')
     case 404: return i18n.t('errors:notFound')
     case 409: return i18n.t('errors:conflict')
+    // A API manda o tempo de espera no detail; este texto é só para resposta sem ele.
+    case 429: return i18n.t('errors:tooManyRequests')
     default: return i18n.t('errors:generic')
   }
 }

@@ -22,6 +22,14 @@ public static class Messages
         "E-mail ou senha inválidos.",
         "Invalid email or password.");
 
+    public static string TooManyAttemptsOneMinute => Text(
+        "Muitas tentativas. Tente novamente em 1 minuto.",
+        "Too many attempts. Try again in 1 minute.");
+
+    public static string TooManyAttemptsMinutes => Text(
+        "Muitas tentativas. Tente novamente em {0} minutos.",
+        "Too many attempts. Try again in {0} minutes.");
+
     public static string NameRequired => Text(
         "Informe o nome.",
         "Enter your name.");
