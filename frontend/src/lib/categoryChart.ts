@@ -1,10 +1,10 @@
 import type { CategoryTotal } from '../api/types'
+import i18n from '../i18n'
 
 // Fatias do gráfico de rosca por categoria. A API já manda do maior total para o menor.
 // No máximo 7 fatias: com mais categorias, as 6 maiores e "Outras", que soma o resto.
 
 export const MAX_SLICES = 7
-export const UNCATEGORIZED_LABEL = 'Sem categoria'
 
 const toCents = (value: number) => Math.round(value * 100)
 
@@ -36,7 +36,7 @@ export function toSlices(rows: CategoryTotal[]): CategorySlice[] {
 
   const slices: CategorySlice[] = visible.map((row, index) => ({
     key: row.categoryId === null ? 'sem-categoria' : String(row.categoryId),
-    name: row.categoryName ?? UNCATEGORIZED_LABEL,
+    name: categoryName(row),
     total: row.total,
     count: row.count,
     percentage: percentage(toCents(row.total), totalCents),
@@ -52,7 +52,7 @@ export function toSlices(rows: CategoryTotal[]): CategorySlice[] {
     const restCents = rest.reduce((sum, row) => sum + toCents(row.total), 0)
     slices.push({
       key: 'outras',
-      name: `Outras (${rest.length})`,
+      name: i18n.t('reports:category.others', { grouped: rest.length }),
       total: restCents / 100,
       count: rest.reduce((sum, row) => sum + row.count, 0),
       percentage: percentage(restCents, totalCents),
@@ -68,7 +68,7 @@ export function toSlices(rows: CategoryTotal[]): CategorySlice[] {
 
 // Nome exibido de uma linha da tabela completa (que lista todas, sem agrupar).
 export function categoryName(row: CategoryTotal): string {
-  return row.categoryName ?? UNCATEGORIZED_LABEL
+  return row.categoryName ?? i18n.t('uncategorized')
 }
 
 export function totalOf(rows: CategoryTotal[]): number {

@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { CategoryReportType, ReportPeriod, TimelineGrouping } from '../api/types'
 import { CategorySection } from '../components/reports/CategorySection'
@@ -20,16 +21,18 @@ function Placeholder({ className }: { className: string }) {
 }
 
 function SectionError({ message, onRetry }: { message: string; onRetry: () => void }) {
+  const { t } = useTranslation()
   return (
     <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
       <FormAlert>{message}</FormAlert>
-      <Button variant="secondary" onClick={onRetry}>Tentar novamente</Button>
+      <Button variant="secondary" onClick={onRetry}>{t('actions.tryAgain')}</Button>
     </section>
   )
 }
 
 export default function ReportsPage() {
-  usePageTitle('Relatórios')
+  const { t } = useTranslation(['reports', 'common'])
+  usePageTitle(t('title'))
   const [searchParams, setSearchParams] = useSearchParams()
   const filters = parseReportFilters(searchParams)
   const { period } = filters
@@ -57,7 +60,7 @@ export default function ReportsPage() {
 
   function renderContent() {
     if (periodError) {
-      return <p className="rounded-2xl border border-border bg-surface px-5 py-8 text-center text-sm text-muted">Ajuste o período para ver os relatórios.</p>
+      return <p className="rounded-2xl border border-border bg-surface px-5 py-8 text-center text-sm text-muted">{t('adjustPeriod')}</p>
     }
     if (summary.isError && !summary.data) {
       return (
@@ -65,9 +68,9 @@ export default function ReportsPage() {
           <EmptyState
             role="alert"
             image="erro"
-            title="Não foi possível carregar os relatórios"
+            title={t('loadError')}
             description={summary.error.message}
-            action={<Button variant="secondary" onClick={() => summary.refetch()}>Tentar novamente</Button>}
+            action={<Button variant="secondary" onClick={() => summary.refetch()}>{t('common:actions.tryAgain')}</Button>}
           />
         </div>
       )
@@ -75,7 +78,7 @@ export default function ReportsPage() {
     if (!summary.data) {
       return (
         <div role="status" className="space-y-4">
-          <span className="sr-only">Carregando relatórios…</span>
+          <span className="sr-only">{t('loading')}</span>
           <Placeholder className="h-56" />
           <Placeholder className="h-80" />
           <Placeholder className="h-72" />
@@ -92,8 +95,8 @@ export default function ReportsPage() {
         <div className="rounded-2xl border border-border bg-surface">
           <EmptyState
             image="sem-dados"
-            title="Nenhuma movimentação neste período."
-            description={`De ${formatDate(period.from)} a ${formatDate(period.to)} não há receitas, gastos nem operações de cofre. Escolha outro período.`}
+            title={t('empty.title')}
+            description={t('empty.description', { from: formatDate(period.from), to: formatDate(period.to) })}
           />
         </div>
       )
@@ -106,7 +109,7 @@ export default function ReportsPage() {
         </div>
 
         {categories.isError && !categories.data ? (
-          <SectionError message={`Não foi possível carregar o relatório por categoria. ${categories.error.message}`} onRetry={() => categories.refetch()} />
+          <SectionError message={t('categoryError', { message: categories.error.message })} onRetry={() => categories.refetch()} />
         ) : categories.data ? (
           <CategorySection
             type={filters.type}
@@ -119,7 +122,7 @@ export default function ReportsPage() {
         )}
 
         {timeline.isError && !timeline.data ? (
-          <SectionError message={`Não foi possível carregar a linha do tempo. ${timeline.error.message}`} onRetry={() => timeline.refetch()} />
+          <SectionError message={t('timelineError', { message: timeline.error.message })} onRetry={() => timeline.refetch()} />
         ) : timeline.data ? (
           <TimelineSection points={timeline.data} grouping={grouping} isRefreshing={timeline.isPlaceholderData} />
         ) : (
@@ -131,9 +134,9 @@ export default function ReportsPage() {
 
   return (
     <>
-      <h1 className="text-2xl font-semibold text-foreground">Relatórios</h1>
+      <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
       <p className="mt-1 text-sm text-muted">
-        {formatDate(period.from)} a {formatDate(period.to)} · operações de cofre ficam fora de receitas e gastos.
+        {t('subtitle', { from: formatDate(period.from), to: formatDate(period.to) })}
       </p>
       <div className="mt-6 space-y-4">
         <PeriodSelector

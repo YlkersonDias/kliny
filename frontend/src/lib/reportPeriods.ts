@@ -1,4 +1,5 @@
 import type { ReportPeriod, TimelineGrouping } from '../api/types'
+import i18n from '../i18n'
 import { currentMonthRange, isValidIsoDate, toIsoDate } from './dates'
 
 // Período dos Relatórios, guardado na URL:
@@ -7,12 +8,8 @@ import { currentMonthRange, isValidIsoDate, toIsoDate } from './dates'
 
 export type PeriodPreset = 'este-mes' | 'mes-passado' | 'este-ano' | 'personalizado'
 
-export const PRESETS: { value: PeriodPreset; label: string }[] = [
-  { value: 'este-mes', label: 'Este mês' },
-  { value: 'mes-passado', label: 'Mês passado' },
-  { value: 'este-ano', label: 'Este ano' },
-  { value: 'personalizado', label: 'Personalizado' },
-]
+// Na ordem da tela; o rótulo vem do i18n (reports:period.presets).
+export const PRESETS: PeriodPreset[] = ['este-mes', 'mes-passado', 'este-ano', 'personalizado']
 
 // Mesmos limites da API (ReportPeriodQuery e TimelineQuery).
 export const MAX_YEARS = 10
@@ -60,12 +57,12 @@ export function presetRange(preset: Exclude<PeriodPreset, 'personalizado'>, now:
 
 // Erro de período, na ordem em que a API confere. undefined = válido.
 export function periodError({ from, to }: ReportPeriod): string | undefined {
-  if (!from || !to) return 'Informe as duas datas.'
-  if (!isValidIsoDate(from) || !isValidIsoDate(to)) return 'Data inválida.'
-  if (from > to) return 'A data final não pode ser antes da inicial.'
+  if (!from || !to) return i18n.t('reports:period.bothDates')
+  if (!isValidIsoDate(from) || !isValidIsoDate(to)) return i18n.t('validation.dateInvalid')
+  if (from > to) return i18n.t('validation.rangeInverted')
   // Nos últimos 10 anos do calendário a API não confere (AddYears estouraria).
   if (Number(from.slice(0, 4)) <= 9999 - MAX_YEARS && to > addYears(from, MAX_YEARS)) {
-    return `O período deve ter no máximo ${MAX_YEARS} anos.`
+    return i18n.t('reports:period.maxYears', { max: MAX_YEARS })
   }
   return undefined
 }
@@ -91,7 +88,7 @@ export interface ReportFilters {
 
 export function parseReportFilters(params: URLSearchParams, now: Date = new Date()): ReportFilters {
   const raw = params.get('periodo')
-  const preset: PeriodPreset = PRESETS.some((option) => option.value === raw) ? (raw as PeriodPreset) : 'este-mes'
+  const preset: PeriodPreset = PRESETS.includes(raw as PeriodPreset) ? (raw as PeriodPreset) : 'este-mes'
   const fallback = presetRange('este-mes', now)
   const period = preset === 'personalizado'
     ? { from: params.get('de') ?? fallback.from, to: params.get('ate') ?? fallback.to }

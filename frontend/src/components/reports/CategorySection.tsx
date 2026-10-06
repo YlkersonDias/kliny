@@ -1,4 +1,5 @@
 import { lazy } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { CategoryReportType, CategoryTotal } from '../../api/types'
 import { categoryName, toSlices, totalOf } from '../../lib/categoryChart'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
@@ -23,7 +24,8 @@ function signed(type: CategoryReportType, value: number): string {
 }
 
 export function CategorySection({ type, rows, onTypeChange, isRefreshing = false }: CategorySectionProps) {
-  const noun = type === 'expense' ? 'gastos' : 'receitas'
+  const { t } = useTranslation('reports')
+  const isExpense = type === 'expense'
   const slices = toSlices(rows)
   const total = totalOf(rows)
   const top = slices[0]
@@ -31,24 +33,24 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
   return (
     <section aria-labelledby="por-categoria" className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
       <div className="flex flex-wrap items-center justify-between gap-3">
-        <h2 id="por-categoria" className="text-lg font-semibold text-foreground">Por categoria</h2>
+        <h2 id="por-categoria" className="text-lg font-semibold text-foreground">{t('category.title')}</h2>
         <fieldset className="flex gap-2">
-          <legend className="sr-only">Mostrar</legend>
-          <ChoiceChip compact name="tipo-categoria" value="expense" checked={type === 'expense'} label="Gastos" onChange={() => onTypeChange('expense')} />
-          <ChoiceChip compact name="tipo-categoria" value="income" checked={type === 'income'} label="Receitas" onChange={() => onTypeChange('income')} />
+          <legend className="sr-only">{t('category.show')}</legend>
+          <ChoiceChip compact name="tipo-categoria" value="expense" checked={type === 'expense'} label={t('category.expense')} onChange={() => onTypeChange('expense')} />
+          <ChoiceChip compact name="tipo-categoria" value="income" checked={type === 'income'} label={t('category.income')} onChange={() => onTypeChange('income')} />
         </fieldset>
       </div>
 
       <div aria-busy={isRefreshing || undefined} className={`mt-4 transition-opacity ${isRefreshing ? 'opacity-60' : ''}`}>
         {rows.length === 0 ? (
-          <p className="text-sm text-muted">{type === 'expense' ? 'Nenhum gasto neste período.' : 'Nenhuma receita neste período.'}</p>
+          <p className="text-sm text-muted">{isExpense ? t('category.noExpense') : t('category.noIncome')}</p>
         ) : (
           <ChartFigure
             labelledBy="por-categoria"
             heightClass="h-64"
             chart={(
               <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
-                <CategoryDonut slices={slices} total={total} totalLabel={`em ${noun}`} />
+                <CategoryDonut slices={slices} total={total} totalLabel={isExpense ? t('category.totalExpense') : t('category.totalIncome')} />
                 {/* Legenda visual (a tabela abaixo traz as mesmas informações para todos). */}
                 <ol className="min-w-0 divide-y divide-border">
                   {slices.map((slice) => (
@@ -66,7 +68,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
                         {slice.name}
                       </span>
                       <span className="text-right font-semibold text-foreground">{signed(type, slice.total)}</span>
-                      <span className="min-w-[4.5ch] text-right text-muted">{PCT.format(slice.percentage)}%</span>
+                      <span className="min-w-[4.5ch] text-right text-muted">{t('category.percent', { value: PCT.format(slice.percentage) })}</span>
                     </li>
                   ))}
                 </ol>
@@ -74,24 +76,24 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
             )}
             caption={(
               <>
-                {formatMoney(total)} em {noun} em {rows.length} {rows.length === 1 ? 'categoria' : 'categorias'}.
-                {top && <> A maior é {top.name}, com {PCT.format(top.percentage)}%.</>}
+                {t(isExpense ? 'category.captionExpense' : 'category.captionIncome', { total: formatMoney(total), count: rows.length })}
+                {top && <>{' '}{t('category.top', { name: top.name, percent: PCT.format(top.percentage) })}</>}
                 {slices.some((slice) => slice.isOther) && (
-                  <> As {slices[slices.length - 1].groupedCount} menores aparecem juntas em “Outras”; a tabela lista todas.</>
+                  <>{' '}{t('category.grouped', { grouped: slices[slices.length - 1].groupedCount })}</>
                 )}
               </>
             )}
-            tableLabel={`Ver ${noun} por categoria em tabela`}
+            tableLabel={isExpense ? t('category.tableExpense') : t('category.tableIncome')}
             table={(
               <table className="w-full text-left">
-                <caption className="sr-only">{type === 'expense' ? 'Gastos' : 'Receitas'} por categoria no período</caption>
+                <caption className="sr-only">{isExpense ? t('category.tableCaptionExpense') : t('category.tableCaptionIncome')}</caption>
                 <thead className="text-muted">
                   <tr>
-                    <th scope="col" className="py-1.5 pr-3 font-medium">Posição</th>
-                    <th scope="col" className="py-1.5 pr-3 font-medium">Categoria</th>
-                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">Valor</th>
-                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">Percentual</th>
-                    <th scope="col" className="py-1.5 text-right font-medium">Lançamentos</th>
+                    <th scope="col" className="py-1.5 pr-3 font-medium">{t('category.position')}</th>
+                    <th scope="col" className="py-1.5 pr-3 font-medium">{t('category.category')}</th>
+                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t('category.amount')}</th>
+                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t('category.percentage')}</th>
+                    <th scope="col" className="py-1.5 text-right font-medium">{t('category.entries')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border tabular-nums">
@@ -102,7 +104,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
                         {categoryName(row)}
                       </th>
                       <td className="py-1.5 pr-3 text-right text-foreground">{signed(type, row.total)}</td>
-                      <td className="py-1.5 pr-3 text-right text-muted">{PCT.format(total === 0 ? 0 : (row.total / total) * 100)}%</td>
+                      <td className="py-1.5 pr-3 text-right text-muted">{t('category.percent', { value: PCT.format(total === 0 ? 0 : (row.total / total) * 100) })}</td>
                       <td className="py-1.5 text-right text-muted">{row.count}</td>
                     </tr>
                   ))}

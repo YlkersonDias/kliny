@@ -1,4 +1,5 @@
 import { lazy } from 'react'
+import { useTranslation } from 'react-i18next'
 import type { TimelineGrouping, TimelinePoint } from '../../api/types'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { periodLabel, summarizeTimeline } from '../../lib/timelineChart'
@@ -14,16 +15,17 @@ interface TimelineSectionProps {
 }
 
 export function TimelineSection({ points, grouping, isRefreshing = false }: TimelineSectionProps) {
+  const { t } = useTranslation('reports')
   const summary = summarizeTimeline(points, grouping)
-  const unit = grouping === 'day' ? 'dia' : 'mês'
+  const byDay = grouping === 'day'
   const hasMovement = summary.activePeriods > 0
 
   return (
     <section aria-labelledby="ao-longo-do-tempo" className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
-      <h2 id="ao-longo-do-tempo" className="text-lg font-semibold text-foreground">Ao longo do tempo</h2>
+      <h2 id="ao-longo-do-tempo" className="text-lg font-semibold text-foreground">{t('timeline.title')}</h2>
       <div aria-busy={isRefreshing || undefined} className={`mt-4 transition-opacity ${isRefreshing ? 'opacity-60' : ''}`}>
         {!hasMovement ? (
-          <p className="text-sm text-muted">Nenhuma receita ou gasto neste período.</p>
+          <p className="text-sm text-muted">{t('timeline.none')}</p>
         ) : (
           <ChartFigure
             labelledBy="ao-longo-do-tempo"
@@ -34,35 +36,39 @@ export function TimelineSection({ points, grouping, isRefreshing = false }: Time
                 <li className="flex items-center gap-1.5 text-income">
                   <span className="size-3 rounded-[3px] bg-income" />
                   <Icon name="income" className="size-4" />
-                  <span>Receitas (+)</span>
+                  <span>{t('timeline.legendIncome')}</span>
                 </li>
                 <li className="flex items-center gap-1.5 text-expense">
                   <span className="size-3 rounded-[3px] bg-expense" />
                   <Icon name="expense" className="size-4" />
-                  <span>Gastos (−)</span>
+                  <span>{t('timeline.legendExpense')}</span>
                 </li>
               </ul>
             )}
             chart={<TimelineBars points={points} grouping={grouping} />}
             caption={(
               <>
-                No período, entraram {formatMoney(summary.income)} e saíram {formatMoney(summary.expense)},
-                com movimento em {summary.activePeriods} de {points.length} {grouping === 'day' ? 'dias' : 'meses'}.
+                {t(byDay ? 'timeline.captionDay' : 'timeline.captionMonth', {
+                  income: formatMoney(summary.income),
+                  expense: formatMoney(summary.expense),
+                  active: summary.activePeriods,
+                  periods: points.length,
+                })}
                 {summary.maxExpense && (
-                  <> {grouping === 'day' ? 'Dia' : 'Mês'} com mais gasto: {summary.maxExpense.label}, {formatMoney(summary.maxExpense.expense)}.</>
+                  <>{' '}{t(byDay ? 'timeline.maxDay' : 'timeline.maxMonth', { label: summary.maxExpense.label, amount: formatMoney(summary.maxExpense.expense) })}</>
                 )}
               </>
             )}
-            tableLabel={`Ver receitas e gastos por ${unit} em tabela`}
+            tableLabel={byDay ? t('timeline.tableDay') : t('timeline.tableMonth')}
             table={(
               <table className="w-full text-left">
-                <caption className="sr-only">Receitas e gastos por {unit} no período</caption>
+                <caption className="sr-only">{byDay ? t('timeline.tableCaptionDay') : t('timeline.tableCaptionMonth')}</caption>
                 <thead className="text-muted">
                   <tr>
-                    <th scope="col" className="py-1.5 pr-3 font-medium">{grouping === 'day' ? 'Dia' : 'Mês'}</th>
-                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">Receitas</th>
-                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">Gastos</th>
-                    <th scope="col" className="py-1.5 text-right font-medium">Saldo do {unit}</th>
+                    <th scope="col" className="py-1.5 pr-3 font-medium">{byDay ? t('timeline.day') : t('timeline.month')}</th>
+                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t('timeline.income')}</th>
+                    <th scope="col" className="py-1.5 pr-3 text-right font-medium">{t('timeline.expense')}</th>
+                    <th scope="col" className="py-1.5 text-right font-medium">{byDay ? t('timeline.netDay') : t('timeline.netMonth')}</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border tabular-nums">

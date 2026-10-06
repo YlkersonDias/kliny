@@ -1,3 +1,4 @@
+import { useTranslation } from 'react-i18next'
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import type { TimelineGrouping, TimelinePoint } from '../../api/types'
 import { formatMoney } from '../../lib/money'
@@ -7,6 +8,7 @@ import { axisLabel, periodLabel } from '../../lib/timelineChart'
 // Receita sempre à esquerda e gasto à direita; a legenda em HTML traz ícone e sinal.
 
 export default function TimelineBars({ points, grouping }: { points: TimelinePoint[]; grouping: TimelineGrouping }) {
+  const { t } = useTranslation('reports')
   const data = points.map((point) => ({ ...point, axis: axisLabel(point.period, grouping) }))
 
   return (
@@ -28,7 +30,7 @@ export default function TimelineBars({ points, grouping }: { points: TimelinePoi
               const period = payload?.[0]?.payload?.period
               return typeof period === 'string' ? periodLabel(period, grouping) : ''
             }}
-            formatter={(value, name) => [formatMoney(Number(value)), name === 'income' ? 'Receitas' : 'Gastos']}
+            formatter={(value, name) => [formatMoney(Number(value)), name === 'income' ? t('timeline.income') : t('timeline.expense')]}
             contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)', fontSize: 13 }}
             labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
             itemStyle={{ color: 'var(--color-foreground)' }}
