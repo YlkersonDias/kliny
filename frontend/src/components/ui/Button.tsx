@@ -4,11 +4,11 @@ import { Spinner } from './Spinner'
 type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 const variants: Record<Variant, string> = {
-  primary: 'bg-primary text-white hover:bg-primary-hover',
+  primary: 'bg-primary text-on-primary hover:bg-primary-hover',
   secondary: 'border border-border bg-surface text-foreground hover:bg-background',
   ghost: 'text-muted hover:bg-background hover:text-foreground',
-  // Branco sobre danger tem 4,8:1; o hover escurece, então o contraste só aumenta.
-  danger: 'bg-danger text-white hover:brightness-90',
+  // on-danger: branco no claro (4,8:1), marinho no escuro (6,6:1); o hover só aumenta o contraste.
+  danger: 'bg-danger text-on-danger hover:bg-danger-hover',
 }
 
 interface ButtonProps extends ComponentProps<'button'> {

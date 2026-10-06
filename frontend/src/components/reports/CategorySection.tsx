@@ -3,6 +3,7 @@ import type { CategoryReportType, CategoryTotal } from '../../api/types'
 import { categoryName, toSlices, totalOf } from '../../lib/categoryChart'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { ChartFigure } from '../charts/ChartFigure'
+import { ChoiceChip } from '../ui/ChoiceChip'
 
 const CategoryDonut = lazy(() => import('./CategoryDonut'))
 
@@ -21,20 +22,6 @@ function signed(type: CategoryReportType, value: number): string {
   return type === 'expense' ? formatOutflow(value) : formatSigned(value)
 }
 
-function TypeChoice({ value, current, label, onChange }: {
-  value: CategoryReportType
-  current: CategoryReportType
-  label: string
-  onChange: (type: CategoryReportType) => void
-}) {
-  return (
-    <label className="inline-flex cursor-pointer items-center rounded-lg border border-border px-3 py-1.5 text-sm font-semibold text-muted transition-colors hover:bg-background has-checked:border-primary has-checked:bg-primary has-checked:text-white has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary">
-      <input type="radio" name="tipo-categoria" value={value} checked={current === value} onChange={() => onChange(value)} className="sr-only" />
-      {label}
-    </label>
-  )
-}
-
 export function CategorySection({ type, rows, onTypeChange, isRefreshing = false }: CategorySectionProps) {
   const noun = type === 'expense' ? 'gastos' : 'receitas'
   const slices = toSlices(rows)
@@ -47,8 +34,8 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
         <h2 id="por-categoria" className="text-lg font-semibold text-foreground">Por categoria</h2>
         <fieldset className="flex gap-2">
           <legend className="sr-only">Mostrar</legend>
-          <TypeChoice value="expense" current={type} label="Gastos" onChange={onTypeChange} />
-          <TypeChoice value="income" current={type} label="Receitas" onChange={onTypeChange} />
+          <ChoiceChip compact name="tipo-categoria" value="expense" checked={type === 'expense'} label="Gastos" onChange={() => onTypeChange('expense')} />
+          <ChoiceChip compact name="tipo-categoria" value="income" checked={type === 'income'} label="Receitas" onChange={() => onTypeChange('income')} />
         </fieldset>
       </div>
 

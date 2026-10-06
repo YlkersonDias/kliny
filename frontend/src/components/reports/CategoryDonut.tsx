@@ -3,8 +3,9 @@ import type { CategorySlice } from '../../lib/categoryChart'
 import { formatMoney } from '../../lib/money'
 
 // Carregado sob demanda (React.lazy). Só visual: o ChartFigure o esconde do leitor de tela.
-// As fatias se diferenciam pelo número (selo branco, 17:1 sobre qualquer tom), pela ordem
-// (horário a partir do topo, do maior para o menor) e pelo traço branco entre elas; a cor
+// As fatias se diferenciam pelo número (selo em surface com número foreground: 17:1 no claro,
+// 14:1 no escuro), pela ordem (horário a partir do topo, do maior para o menor) e pelo traço
+// surface entre elas; a cor
 // da escala só reforça a posição. "Outras" usa hachura neutra.
 
 const RADIAN = Math.PI / 180

@@ -11,7 +11,7 @@ export default function NotFoundPage() {
       <p className="mt-2 text-muted">O endereço pode estar errado ou a página não existe mais.</p>
       <Link
         to="/"
-        className="mt-6 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-white hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
+        className="mt-6 rounded-lg bg-primary px-4 py-2.5 text-sm font-semibold text-on-primary hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary"
       >
         Voltar ao início
       </Link>

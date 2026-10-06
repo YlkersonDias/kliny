@@ -1,7 +1,8 @@
-import { Link, Outlet, useNavigate } from 'react-router'
+import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
 import { APP_NAME } from '../../config/app'
 import { Button } from '../ui/Button'
+import { Icon } from '../ui/Icon'
 import { NavIcon, Navigation } from './Navigation'
 
 const LOGOUT_ICON = 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10'
@@ -28,6 +29,26 @@ export function AppLayout() {
     </Link>
   )
 
+  // Nome do usuário como atalho para /configuracoes. O nome acessível começa pelo texto visível
+  // (WCAG 2.5.3). No celular, 44 px de altura (alvo de toque).
+  function settingsLink(layout: string) {
+    return (
+      <NavLink
+        to="/configuracoes"
+        aria-label={`${user?.name ?? ''}, configurações`}
+        title={user?.name}
+        className={({ isActive }) =>
+          `flex min-w-0 items-center gap-2 rounded-lg text-sm font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary ${layout} ${
+            isActive ? 'bg-surface-soft/50 text-primary' : 'text-muted hover:bg-background hover:text-foreground'
+          }`
+        }
+      >
+        <Icon name="settings" />
+        <span className="truncate">{user?.name}</span>
+      </NavLink>
+    )
+  }
+
   return (
     <div className="min-h-dvh">
       <a
@@ -44,7 +65,7 @@ export function AppLayout() {
           <Navigation variant="sidebar" />
         </div>
         <div className="border-t border-border p-3">
-          <p className="truncate px-3 pb-2 text-sm text-muted" title={user?.name}>{user?.name}</p>
+          <div className="mb-1">{settingsLink('px-3 py-2.5')}</div>
           <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
             Sair
@@ -56,7 +77,7 @@ export function AppLayout() {
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-border bg-surface px-4 md:hidden">
         {brand}
         <div className="flex min-w-0 items-center gap-1">
-          <span className="truncate text-sm text-muted">{user?.name}</span>
+          {settingsLink('min-h-11 px-2')}
           <Button variant="ghost" className="px-2" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
             Sair

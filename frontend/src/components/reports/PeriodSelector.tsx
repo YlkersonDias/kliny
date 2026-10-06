@@ -1,5 +1,6 @@
 import type { ReportPeriod, TimelineGrouping } from '../../api/types'
 import { MAX_DAYS_BY_DAY, PRESETS, type PeriodPreset } from '../../lib/reportPeriods'
+import { ChoiceChip as Choice } from '../ui/ChoiceChip'
 import { Input } from '../ui/Input'
 
 interface PeriodSelectorProps {
@@ -11,29 +12,6 @@ interface PeriodSelectorProps {
   onPresetChange: (preset: PeriodPreset) => void
   onPeriodChange: (period: ReportPeriod) => void
   onGroupingChange: (grouping: TimelineGrouping) => void
-}
-
-// Opção de radio com aparência de botão: o <input> é de verdade (sr-only), a <label> é o alvo.
-function Choice({ name, value, checked, disabled, label, onChange }: {
-  name: string
-  value: string
-  checked: boolean
-  disabled?: boolean
-  label: string
-  onChange: () => void
-}) {
-  return (
-    <label
-      className={`inline-flex items-center rounded-lg border px-3 py-2 text-sm font-semibold transition-colors has-focus-visible:outline-2 has-focus-visible:outline-offset-2 has-focus-visible:outline-primary ${
-        disabled
-          ? 'cursor-not-allowed border-border text-muted opacity-60'
-          : 'cursor-pointer border-border text-muted hover:bg-background has-checked:border-primary has-checked:bg-primary has-checked:text-white'
-      }`}
-    >
-      <input type="radio" name={name} value={value} checked={checked} disabled={disabled} onChange={onChange} className="sr-only" />
-      {label}
-    </label>
-  )
 }
 
 export function PeriodSelector({

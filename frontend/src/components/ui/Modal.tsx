@@ -48,7 +48,7 @@ export function Modal({ title, onClose, children, initialFocusRef, size = 'md' }
     <dialog
       ref={dialogRef}
       aria-labelledby={titleId}
-      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl bg-surface p-0 text-foreground shadow-xl backdrop:bg-foreground/40 ${
+      className={`m-auto max-h-[calc(100dvh-2rem)] w-[calc(100%-2rem)] overflow-y-auto rounded-2xl bg-surface p-0 text-foreground shadow-xl backdrop:bg-overlay ${
         size === 'sm' ? 'max-w-sm' : 'max-w-lg'
       }`}
     >

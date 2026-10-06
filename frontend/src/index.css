@@ -18,6 +18,10 @@
   --color-income: #0e7c5a;
   --color-expense: #d9345b;
   --color-danger: #dc2626;     /* red-600: erro de formulário, diferente de gasto */
+  --color-danger-hover: #b91c1c; /* red-700: on-danger sobre ele tem 6,5:1 */
+  --color-on-primary: #ffffff; /* texto sobre primary: 8,6:1 (hover 11,6:1) */
+  --color-on-danger: #ffffff;  /* texto sobre danger: 4,8:1 */
+  --color-overlay: rgb(15 23 42 / 0.4); /* fundo atrás dos modais */
   --color-vault: #ffb53d;
   --color-vault-text: #a2641a;
   --color-background: #e0e0ee;
@@ -32,7 +36,7 @@
   Escala das categorias (gráfico de rosca dos Relatórios): do primary-hover ao surface-soft,
   interpolada em OKLab. Posição 1 = maior total. Sem verde nem vermelho, que já são receita e
   gasto. A cor não identifica a fatia sozinha (vizinhas ~1,35:1): o número e a legenda, sim.
-  "Outras" usa hachura de border com muted. Modo noturno (etapa 7): redefinir estes tokens.
+  "Outras" usa hachura de border com muted. O modo noturno inverte a escala (bloco abaixo).
   "static": o Tailwind só gera as variáveis que encontra escritas no código, e estas são
   montadas em tempo de execução (var(--color-category-N)); sem isso, as fatias saem pretas.
 */
@@ -46,7 +50,50 @@
   --color-category-7: #bbbbdd;
 }
 
+/*
+  Modo noturno: redefine os mesmos tokens. O data-theme é aplicado no <html> por um script do
+  index.html, antes do React (sem piscar), e depois pelo ThemeProvider. Fora de camada, para
+  vencer o @theme (que fica na camada theme).
+
+  Contraste sobre surface (#1d1f3d): foreground 14,0:1, muted 6,8:1, primary 7,6:1,
+  income 8,0:1, expense 6,6:1, danger 5,8:1, vault-text 9,3:1; on-primary sobre primary 8,7:1
+  (hover 11,4:1), on-danger sobre danger 6,6:1 (hover 9,6:1). Todos passam também sobre
+  background e surface-soft, mas a regra "receita, gasto e erro só dentro dos cartões" continua,
+  porque o tema claro depende dela.
+  - vault (âmbar) é o mesmo do claro: 9,1:1 sobre surface, ainda só em ícones e barras.
+  - Categorias invertidas: a maior fatia é a lavanda mais clara (10:1), a menor 1,9:1.
+*/
+:root[data-theme="dark"] {
+  color-scheme: dark;
+  --color-primary: #a9adf5;
+  --color-primary-hover: #c6c9fb;
+  --color-on-primary: #12132a;
+  --color-income: #3ecf98;
+  --color-expense: #ff7d9b;
+  --color-danger: #f87171;
+  --color-danger-hover: #fca5a5;
+  --color-on-danger: #12132a;
+  --color-overlay: rgb(5 6 15 / 0.7);
+  --color-vault: #ffb53d;
+  --color-vault-text: #f5bb62;
+  --color-background: #12132a;
+  --color-surface: #1d1f3d;
+  --color-surface-soft: #2a2c55;
+  --color-border: #33365e;
+  --color-foreground: #eef0f8;
+  --color-muted: #a4a8c4;
+
+  --color-category-1: #c6c9fb;
+  --color-category-2: #afb2e6;
+  --color-category-3: #989cd2;
+  --color-category-4: #8287bd;
+  --color-category-5: #6d72a9;
+  --color-category-6: #595d95;
+  --color-category-7: #454982;
+}
+
 @layer base {
+  /* O tema escuro troca para dark no bloco :root[data-theme="dark"] (campo de data, rolagem, <dialog>). */
   html {
     color-scheme: light;
   }

@@ -7,6 +7,20 @@
     <link rel="apple-touch-icon" sizes="180x180" href="/mascote/kliny-icone-180.png" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>%APP_NAME%</title>
+    <script>
+      // Aplica o tema antes do React, para a tela não piscar no tema errado. Mesma regra e
+      // mesma chave de src/lib/theme.ts: mudou lá, mudar aqui.
+      (function () {
+        var preference = 'system'
+        try {
+          var stored = localStorage.getItem('ui.theme')
+          if (stored === 'light' || stored === 'dark') preference = stored
+        } catch (e) {}
+        var dark = preference === 'dark' ||
+          (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
+        document.documentElement.dataset.theme = dark ? 'dark' : 'light'
+      })()
+    </script>
   </head>
   <body>
     <div id="root"></div>

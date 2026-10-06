@@ -29,7 +29,7 @@ export default function TimelineBars({ points, grouping }: { points: TimelinePoi
               return typeof period === 'string' ? periodLabel(period, grouping) : ''
             }}
             formatter={(value, name) => [formatMoney(Number(value)), name === 'income' ? 'Receitas' : 'Gastos']}
-            contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', fontSize: 13 }}
+            contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)', fontSize: 13 }}
             labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
             itemStyle={{ color: 'var(--color-foreground)' }}
           />

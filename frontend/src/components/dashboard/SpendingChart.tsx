@@ -30,7 +30,7 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
             cursor={{ fill: 'var(--color-background)' }}
             formatter={(value) => [formatMoney(Number(value)), 'Gasto']}
             labelFormatter={(day) => `Dia ${day}`}
-            contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', fontSize: 13 }}
+            contentStyle={{ borderRadius: 8, borderColor: 'var(--color-border)', backgroundColor: 'var(--color-surface)', fontSize: 13 }}
             labelStyle={{ color: 'var(--color-foreground)', fontWeight: 600 }}
             itemStyle={{ color: 'var(--color-foreground)' }}
           />
