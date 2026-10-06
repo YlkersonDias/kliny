@@ -1,0 +1,65 @@
+# Build e testes a cada push na main e em cada pull request.
+# Localmente o Smart App Control bloqueia o Backend.dll recompilado; aqui ele não existe.
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  backend:
+    name: Backend (build e testes)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-dotnet@v6
+        with:
+          dotnet-version: 10.0.x
+
+      - name: Restaurar
+        run: dotnet restore Kliny.sln
+
+      - name: Compilar
+        run: dotnet build Kliny.sln --no-restore --configuration Release
+
+      # Os testes não usam MySQL nem user-secrets (ver backend.Tests/TestApp.cs).
+      - name: Testar
+        run: dotnet test --solution Kliny.sln --no-build --configuration Release
+
+  frontend:
+    name: Frontend (lint, testes e build)
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: frontend
+    steps:
+      - uses: actions/checkout@v7
+
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+          cache: npm
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Instalar dependências
+        run: npm ci
+
+      - name: Lint
+        run: npm run lint
+
+      - name: Testar
+        run: npm test
+
+      - name: Compilar
+        run: npm run build
