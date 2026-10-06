@@ -7,21 +7,40 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
+using MySqlConnector;
 
 namespace Backend.Tests;
 
-// A API inteira com os services de verdade e um MySQL descartável: um banco novo por execução
+// A API inteira com os services de verdade e um MySQL descartável: um banco novo por fixture
 // (kliny_test_<guid>), criado pelas migrations e apagado no fim.
-// O servidor vem de KLINY_TEST_MYSQL (sem Database), definida só no CI, onde o MySQL é um
-// container de serviço. Sem ela os testes são pulados, salvo no CI, onde a falta é erro.
-// Nunca usa o banco kliny nem os usuários kliny_app e kliny_migrator.
+// Como em produção, a API conecta com um usuário só de DML (SELECT, INSERT, UPDATE, DELETE no
+// banco de teste), igual ao kliny_app; as migrations rodam com o usuário administrador, como
+// faria o kliny_migrator. Se o app passar a precisar de DDL, os testes quebram.
+// O servidor vem de KLINY_TEST_MYSQL (sem Database, com um usuário que cria bancos e usuários),
+// definida só no CI, onde o MySQL é um container de serviço. Sem ela os testes são pulados,
+// salvo no CI, onde a falta é erro. Nunca usa o banco kliny nem os usuários kliny_app e kliny_migrator.
 public sealed class MySqlApi : IAsyncLifetime
 {
     public const string ServerVariable = "KLINY_TEST_MYSQL";
 
+    private static readonly MySqlServerVersion ServerVersion = new(new Version(8, 4, 0));
+
     private App? _app;
+    private string _adminConnectionString = "";
+    private string _appUser = "";
 
     public bool IsAvailable => _app is not null;
+
+    // Conexão do usuário só de DML, a mesma que a API usa.
+    public string AppConnectionString
+    {
+        get
+        {
+            SkipIfUnavailable();
+            return field;
+        }
+        private set;
+    } = "";
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
@@ -35,9 +54,32 @@ public sealed class MySqlApi : IAsyncLifetime
             return;
         }
 
-        _app = new App($"{server.TrimEnd(';')};Database=kliny_test_{Guid.NewGuid():N}");
-        using var scope = _app.Services.CreateScope();
-        await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.MigrateAsync(Ct);
+        // Nomes só com hex do Guid: entram no SQL abaixo sem risco. Usuário do MySQL tem até 32 caracteres.
+        var id = Guid.NewGuid().ToString("N");
+        var database = $"kliny_test_{id}";
+        _appUser = $"kliny_t_{id[..16]}";
+        var appPassword = Guid.NewGuid().ToString("N");
+
+        _adminConnectionString = new MySqlConnectionStringBuilder(server) { Database = database }.ConnectionString;
+        AppConnectionString = new MySqlConnectionStringBuilder(server)
+        {
+            Database = database,
+            UserID = _appUser,
+            Password = appPassword,
+        }.ConnectionString;
+
+        await using (var admin = AdminContext())
+        {
+            await admin.Database.MigrateAsync(Ct);
+            await admin.Database.ExecuteSqlAsync($"CREATE USER {_appUser}@'%' IDENTIFIED BY {appPassword}", Ct);
+            // O nome do banco é identificador (não aceita parâmetro); é só hex de um Guid.
+#pragma warning disable EF1002
+            await admin.Database.ExecuteSqlRawAsync(
+                $"GRANT SELECT, INSERT, UPDATE, DELETE ON `{database}`.* TO '{_appUser}'@'%'", Ct);
+#pragma warning restore EF1002
+        }
+
+        _app = new App(AppConnectionString);
     }
 
     public async ValueTask DisposeAsync()
@@ -45,15 +87,25 @@ public sealed class MySqlApi : IAsyncLifetime
         if (_app is null)
             return;
 
-        using (var scope = _app.Services.CreateScope())
-            await scope.ServiceProvider.GetRequiredService<AppDbContext>().Database.EnsureDeletedAsync();
         await _app.DisposeAsync();
+        // Fecha as conexões ociosas do usuário de teste antes de apagá-lo junto com o banco.
+        await using (var pooled = new MySqlConnection(AppConnectionString))
+            await MySqlConnection.ClearPoolAsync(pooled);
+        await using var admin = AdminContext();
+        await admin.Database.ExecuteSqlAsync($"DROP USER IF EXISTS {_appUser}@'%'");
+        await admin.Database.EnsureDeletedAsync();
     }
+
+    private AppDbContext AdminContext() =>
+        new(new DbContextOptionsBuilder<AppDbContext>().UseMySql(_adminConnectionString, ServerVersion).Options);
+
+    private void SkipIfUnavailable() =>
+        Assert.SkipWhen(_app is null, $"Sem MySQL de teste ({ServerVariable}): roda no CI.");
 
     // Cliente sem token; pula o teste se não há MySQL de teste.
     public HttpClient Client(string? token = null)
     {
-        Assert.SkipWhen(_app is null, $"Sem MySQL de teste ({ServerVariable}): roda no CI.");
+        SkipIfUnavailable();
         var client = _app!.CreateClient();
         if (token is not null)
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
@@ -86,7 +138,7 @@ public sealed class MySqlApi : IAsyncLifetime
                              .ToList())
                     services.Remove(descriptor);
                 services.ConfigureDbContext<AppDbContext>(options =>
-                    options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 0))));
+                    options.UseMySql(connectionString, ServerVersion));
             });
         }
     }

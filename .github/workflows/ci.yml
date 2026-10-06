@@ -46,7 +46,8 @@ jobs:
       - name: Compilar
         run: dotnet build Kliny.sln --no-restore --configuration Release
 
-      # Sem user-secrets. Os testes com MySQL criam e apagam o próprio banco (kliny_test_<guid>);
+      # Sem user-secrets. Os testes com MySQL criam e apagam o próprio banco (kliny_test_<guid>) e um
+      # usuário só de DML para a API (o root daqui só roda as migrations e cria esse usuário);
       # sem esta variável no CI eles falham, para não passarem pulados sem ninguém ver.
       - name: Testar
         run: dotnet test --solution Kliny.sln --no-build --configuration Release
