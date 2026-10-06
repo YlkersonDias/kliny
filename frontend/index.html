@@ -21,9 +21,12 @@
           (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
       })()
-
+    </script>
+    <script>
       // Idioma da página antes do React (leitores de tela e hifenização). Mesma regra e mesma chave
       // de src/lib/language.ts: mudou lá, mudar aqui. Padrão: português.
+      // Num <script> separado do tema: sem ponto e vírgula, duas funções "(function () {...})()"
+      // seguidas viram uma chamada só, e a segunda quebra.
       (function () {
         var language = 'pt-BR'
         try {

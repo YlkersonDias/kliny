@@ -9,6 +9,17 @@ export const LANGUAGE_STORAGE_KEY = 'ui.language'
 // Português é sempre o padrão, qualquer que seja o idioma do navegador.
 export const DEFAULT_LANGUAGE: Language = 'pt-BR'
 
+// Nome de cada idioma escrito nele mesmo (com lang no elemento), igual nas duas interfaces:
+// quem não lê o idioma atual ainda reconhece o seu. Por isso fica fora do i18n.
+export const LANGUAGE_NAMES: Record<Language, string> = {
+  'pt-BR': 'Português (Brasil)',
+  'en-US': 'English (US)',
+}
+export const LANGUAGE_SHORT_NAMES: Record<Language, string> = {
+  'pt-BR': 'Português',
+  'en-US': 'English',
+}
+
 // Valor ausente, inválido ou de outra versão vale o padrão (português).
 export function parseLanguage(value: unknown): Language {
   return value === 'pt-BR' || value === 'en-US' ? value : DEFAULT_LANGUAGE

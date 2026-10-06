@@ -10,5 +10,10 @@
     "currentDark": "escuro",
     "currentLight": "claro",
     "choiceHint": "A escolha vale para este navegador."
+  },
+  "language": {
+    "title": "Idioma",
+    "legend": "Idioma da interface",
+    "hint": "A escolha vale para este navegador. Os valores continuam em reais."
   }
 }

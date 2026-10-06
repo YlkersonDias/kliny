@@ -10,5 +10,10 @@
     "currentDark": "dark",
     "currentLight": "light",
     "choiceHint": "This choice applies to this browser."
+  },
+  "language": {
+    "title": "Language",
+    "legend": "Interface language",
+    "hint": "This choice applies to this browser. Amounts stay in Brazilian reais."
   }
 }

@@ -1,5 +1,6 @@
 import type { ReactNode } from 'react'
 import { APP_NAME } from '../../config/app'
+import { LanguageSwitch } from '../ui/LanguageSwitch'
 import { ThemeToggle } from '../ui/ThemeToggle'
 
 interface AuthLayoutProps {
@@ -14,8 +15,11 @@ interface AuthLayoutProps {
 export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLayoutProps) {
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center bg-surface-soft px-4 py-10">
-      {/* Antes de entrar já dá para trocar o tema (o padrão é o escuro). */}
-      <ThemeToggle onSoft className="absolute right-3 top-3" />
+      {/* Antes de entrar já dá para trocar o idioma e o tema (os padrões são português e escuro). */}
+      <div className="absolute right-3 top-3 flex items-center gap-1">
+        <LanguageSwitch />
+        <ThemeToggle onSoft />
+      </div>
       <div className="w-full max-w-sm">
         {/*
           O mascote fica fora do fluxo, então a margem reserva o espaço dele acima do cartão.
