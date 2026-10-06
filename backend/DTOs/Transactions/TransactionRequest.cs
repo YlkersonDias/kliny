@@ -1,19 +1,20 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Transactions;
 
 // Não tem VaultId: operações de cofre usam os endpoints de cofre.
 public class TransactionRequest : IValidatableObject
 {
-    [Required(ErrorMessage = "Informe a descrição.")]
-    [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionRequired))]
+    [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionMaxLength))]
     public string Description { get; set; } = string.Empty;
 
     // Positivo = receita; negativo = gasto.
-    [Required(ErrorMessage = "Informe o valor.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.AmountRequired))]
     public decimal? Amount { get; set; }
 
-    [Required(ErrorMessage = "Informe a data.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DateRequired))]
     public DateOnly? Date { get; set; }
 
     public int? CategoryId { get; set; }
@@ -24,7 +25,7 @@ public class TransactionRequest : IValidatableObject
             yield break;
 
         if (amount == 0)
-            yield return new ValidationResult("O valor não pode ser zero.", [nameof(Amount)]);
+            yield return new ValidationResult(Messages.AmountZero, [nameof(Amount)]);
         else if (AmountRules.Validate(amount) is { } error)
             yield return new ValidationResult(error, [nameof(Amount)]);
     }

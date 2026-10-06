@@ -1,5 +1,6 @@
 using Backend.DTOs.Auth;
 using Backend.Extensions;
+using Backend.Resources;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -28,7 +29,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     {
         var response = await authService.LoginAsync(request);
         return response is null
-            ? Problem("E-mail ou senha inválidos.", statusCode: StatusCodes.Status401Unauthorized)
+            ? Problem(Messages.InvalidCredentials, statusCode: StatusCodes.Status401Unauthorized)
             : Ok(response);
     }
 

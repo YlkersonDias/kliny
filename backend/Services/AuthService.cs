@@ -2,20 +2,19 @@ using Backend.Data;
 using Backend.DTOs.Auth;
 using Backend.Exceptions;
 using Backend.Models;
+using Backend.Resources;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthService
 {
-    private const string EmailInUseMessage = "Este e-mail já está cadastrado.";
-
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         var email = NormalizeEmail(request.Email);
 
         if (await db.Users.AnyAsync(u => u.Email == email))
-            throw new ConflictException(EmailInUseMessage);
+            throw new ConflictException(Messages.EmailInUse);
 
         var user = new User
         {
@@ -32,7 +31,7 @@ public class AuthService(AppDbContext db, ITokenService tokenService) : IAuthSer
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            throw new ConflictException(EmailInUseMessage);
+            throw new ConflictException(Messages.EmailInUse);
         }
 
         return BuildResponse(user);

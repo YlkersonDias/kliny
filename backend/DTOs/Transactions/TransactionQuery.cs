@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Transactions;
 
@@ -27,21 +28,21 @@ public class TransactionQuery : IValidatableObject
     public TransactionType? Type { get; set; }
 
     // Limite alto o bastante na prática e que impede o estouro do cálculo de Skip.
-    [Range(1, 1_000_000, ErrorMessage = "A página deve ficar entre 1 e 1.000.000.")]
+    [Range(1, 1_000_000, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PageRange))]
     public int Page { get; set; } = 1;
 
-    [Range(1, 100, ErrorMessage = "O tamanho da página deve ficar entre 1 e 100.")]
+    [Range(1, 100, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PageSizeRange))]
     public int PageSize { get; set; } = 20;
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
     {
         if (From > To)
-            yield return new ValidationResult("A data inicial não pode ser depois da data final.", [nameof(From), nameof(To)]);
+            yield return new ValidationResult(Messages.FromAfterTo, [nameof(From), nameof(To)]);
 
         if (Uncategorized && CategoryId is not null)
-            yield return new ValidationResult("Escolha uma categoria ou \"sem categoria\", não os dois.", [nameof(Uncategorized), nameof(CategoryId)]);
+            yield return new ValidationResult(Messages.CategoryAndUncategorized, [nameof(Uncategorized), nameof(CategoryId)]);
 
         if (Uncategorized && (Type == TransactionType.Vault || VaultId is not null))
-            yield return new ValidationResult("Operações de cofre não têm categoria.", [nameof(Uncategorized)]);
+            yield return new ValidationResult(Messages.VaultOperationsHaveNoCategory, [nameof(Uncategorized)]);
     }
 }

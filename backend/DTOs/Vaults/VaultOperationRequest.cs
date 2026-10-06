@@ -1,18 +1,19 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Vaults;
 
 // Usado no depósito e na retirada. O valor é sempre positivo: o endpoint define o sinal gravado.
 public class VaultOperationRequest : IValidatableObject
 {
-    [Required(ErrorMessage = "Informe o valor.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.AmountRequired))]
     public decimal? Amount { get; set; }
 
-    [Required(ErrorMessage = "Informe a data.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DateRequired))]
     public DateOnly? Date { get; set; }
 
-    // Opcional; sem ela, o service usa "Depósito no cofre X" ou "Retirada do cofre X".
-    [StringLength(255, ErrorMessage = "A descrição deve ter no máximo 255 caracteres.")]
+    // Opcional; sem ela, o service usa "Depósito no cofre X" ou "Retirada do cofre X" (no idioma da requisição).
+    [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionMaxLength))]
     public string? Description { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)
@@ -20,7 +21,7 @@ public class VaultOperationRequest : IValidatableObject
         if (Amount is { } amount)
         {
             if (amount <= 0)
-                yield return new ValidationResult("O valor deve ser maior que zero.", [nameof(Amount)]);
+                yield return new ValidationResult(Messages.AmountMustBePositive, [nameof(Amount)]);
             else if (AmountRules.Validate(amount) is { } error)
                 yield return new ValidationResult(error, [nameof(Amount)]);
         }
@@ -30,6 +31,6 @@ public class VaultOperationRequest : IValidatableObject
         // do mundo (UTC+14): ninguém tem a própria data de hoje recusada. O frontend aplica
         // o limite exato, com a data local do navegador.
         if (Date is { } date && date > DateOnly.FromDateTime(DateTime.UtcNow.AddHours(14)))
-            yield return new ValidationResult("Operações de cofre não podem ter data futura.", [nameof(Date)]);
+            yield return new ValidationResult(Messages.VaultOperationFutureDate, [nameof(Date)]);
     }
 }

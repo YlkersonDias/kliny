@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Reports;
 
@@ -23,6 +24,6 @@ public class TimelineQuery : ReportPeriodQuery
         if (GroupBy == TimelineGrouping.Day && From is { } from && To is { } to
             && to.DayNumber - from.DayNumber + 1 > MaxDays)
             yield return new ValidationResult(
-                $"Com agrupamento por dia, o período deve ter no máximo {MaxDays} dias.", [nameof(GroupBy)]);
+                string.Format(Messages.TimelineDayMaxDays, MaxDays), [nameof(GroupBy)]);
     }
 }

@@ -240,3 +240,44 @@ Authorization: Bearer {{token}}
 ### Sem período (400)
 GET {{baseUrl}}/api/reports/summary
 Authorization: Bearer {{token}}
+
+############################### Idiomas ################################
+# As mensagens saem no idioma do Accept-Language: pt-BR (padrão) ou en-US.
+# Sem o cabeçalho, ou com outro idioma, a resposta vem em português.
+
+### Cadastro inválido em inglês (400)
+POST {{baseUrl}}/api/auth/register
+Content-Type: application/json
+Accept-Language: en-US
+
+{
+  "name": "",
+  "email": "nao-e-email",
+  "password": "curta"
+}
+
+### Login com senha errada em inglês (401)
+POST {{baseUrl}}/api/auth/login
+Content-Type: application/json
+Accept-Language: en-US
+
+{
+  "email": "teste@kliny.local",
+  "password": "senhaerrada"
+}
+
+### Depósito acima do saldo da conta em inglês (400): data mm/dd/yyyy e valor R$1,234.56
+POST {{baseUrl}}/api/vaults/1/deposit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Accept-Language: en-US
+
+{
+  "amount": 999999,
+  "date": "2026-10-06"
+}
+
+### Sem período em inglês (400)
+GET {{baseUrl}}/api/reports/summary
+Authorization: Bearer {{token}}
+Accept-Language: en-US

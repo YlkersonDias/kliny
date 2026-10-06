@@ -1,11 +1,12 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Vaults;
 
 public class VaultRequest : IValidatableObject
 {
-    [Required(ErrorMessage = "Informe o nome do cofre.")]
-    [StringLength(100, ErrorMessage = "O nome do cofre deve ter no máximo 100 caracteres.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.VaultNameRequired))]
+    [StringLength(100, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.VaultNameMaxLength))]
     public string Name { get; set; } = string.Empty;
 
     // Meta opcional, em reais.
@@ -17,7 +18,7 @@ public class VaultRequest : IValidatableObject
             yield break;
 
         if (goal <= 0)
-            yield return new ValidationResult("A meta deve ser maior que zero.", [nameof(Goal)]);
+            yield return new ValidationResult(Messages.GoalMustBePositive, [nameof(Goal)]);
         else if (AmountRules.Validate(goal) is { } error)
             yield return new ValidationResult(error, [nameof(Goal)]);
     }

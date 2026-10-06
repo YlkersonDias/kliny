@@ -1,20 +1,16 @@
-using System.Globalization;
 using Backend.Data;
 using Backend.DTOs.Transactions;
 using Backend.DTOs.Vaults;
 using Backend.Exceptions;
+using Backend.Localization;
 using Backend.Models;
+using Backend.Resources;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class VaultService(AppDbContext db) : IVaultService
 {
-    private const string NotFoundMessage = "Cofre não encontrado.";
-    private const string DuplicateNameMessage = "Já existe um cofre com esse nome.";
-    private const string HasBalanceMessage = "Retire o saldo antes de apagar o cofre.";
-    private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo("pt-BR");
-
     public async Task<IReadOnlyList<VaultResponse>> ListAsync(int userId) =>
         await Project(db.Vaults.AsNoTracking().Where(v => v.UserId == userId).OrderBy(v => v.Name))
             .ToListAsync();
@@ -22,7 +18,7 @@ public class VaultService(AppDbContext db) : IVaultService
     public async Task<VaultResponse> GetAsync(int userId, int id) =>
         await Project(db.Vaults.AsNoTracking().Where(v => v.Id == id && v.UserId == userId))
             .FirstOrDefaultAsync()
-            ?? throw new NotFoundException(NotFoundMessage);
+            ?? throw new NotFoundException(Messages.VaultNotFound);
 
     public async Task<VaultResponse> CreateAsync(int userId, VaultRequest request)
     {
@@ -36,7 +32,7 @@ public class VaultService(AppDbContext db) : IVaultService
     public async Task<VaultResponse> UpdateAsync(int userId, int id, VaultRequest request)
     {
         var vault = await db.Vaults.FirstOrDefaultAsync(v => v.Id == id && v.UserId == userId)
-            ?? throw new NotFoundException(NotFoundMessage);
+            ?? throw new NotFoundException(Messages.VaultNotFound);
         Apply(vault, request);
         await SaveAsync(userId, vault);
         return await GetAsync(userId, id);
@@ -48,7 +44,7 @@ public class VaultService(AppDbContext db) : IVaultService
         var vault = await LockOwnedAsync(userId, id);
 
         if (await GetBalanceAsync(vault.Id) != 0)
-            throw new ConflictException(HasBalanceMessage);
+            throw new ConflictException(Messages.VaultHasBalance);
 
         // Com saldo zero, depósitos e retiradas se anulam e os relatórios já os ignoram,
         // então apagá-los não muda os totais da conta. O histórico do cofre se perde.
@@ -82,7 +78,7 @@ public class VaultService(AppDbContext db) : IVaultService
 
         if (isWithdrawal && amount > balance)
             throw new BusinessRuleException(
-                $"Saldo insuficiente no cofre. Disponível: {balance.ToString("C", PtBr)}.");
+                string.Format(Messages.VaultInsufficientBalance, AppCultures.FormatMoney(balance)));
 
         if (!isWithdrawal)
         {
@@ -91,15 +87,18 @@ public class VaultService(AppDbContext db) : IVaultService
             var available = await GetAccountBalanceAsync(userId, date);
             if (amount > available)
             {
-                var message = $"Saldo insuficiente na conta. Disponível em {date.ToString("dd/MM/yyyy", PtBr)}: {available.ToString("C", PtBr)}.";
+                var message = string.Format(Messages.AccountInsufficientBalance,
+                    AppCultures.FormatDate(date), AppCultures.FormatMoney(available));
                 if (available <= 0)
-                    message += " Lance uma receita antes de depositar.";
+                    message += " " + Messages.AddIncomeBeforeDeposit;
                 throw new BusinessRuleException(message);
             }
         }
 
+        // A descrição padrão sai no idioma da requisição e fica gravada assim: quem troca de idioma
+        // pode ter, no mesmo extrato, descrições nos dois idiomas.
         var description = string.IsNullOrWhiteSpace(request.Description)
-            ? (isWithdrawal ? $"Retirada do cofre {vault.Name}" : $"Depósito no cofre {vault.Name}")
+            ? string.Format(isWithdrawal ? Messages.WithdrawalDescription : Messages.DepositDescription, vault.Name)
             : request.Description.Trim();
 
         var transaction = new Transaction
@@ -132,7 +131,7 @@ public class VaultService(AppDbContext db) : IVaultService
             .FromSql($"SELECT * FROM Vaults WHERE Id = {id} AND UserId = {userId} FOR UPDATE")
             .ToListAsync();
 
-        return vaults.SingleOrDefault() ?? throw new NotFoundException(NotFoundMessage);
+        return vaults.SingleOrDefault() ?? throw new NotFoundException(Messages.VaultNotFound);
     }
 
     // Saldo = soma dos valores do cofre com o sinal invertido.
@@ -154,7 +153,7 @@ public class VaultService(AppDbContext db) : IVaultService
     {
         // A comparação usa a collation do banco, a mesma do índice único.
         if (await db.Vaults.AnyAsync(v => v.UserId == userId && v.Name == vault.Name && v.Id != vault.Id))
-            throw new ConflictException(DuplicateNameMessage);
+            throw new ConflictException(Messages.VaultDuplicateName);
 
         try
         {
@@ -162,7 +161,7 @@ public class VaultService(AppDbContext db) : IVaultService
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            throw new ConflictException(DuplicateNameMessage);
+            throw new ConflictException(Messages.VaultDuplicateName);
         }
     }
 

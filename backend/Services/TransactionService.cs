@@ -3,17 +3,13 @@ using Backend.DTOs;
 using Backend.DTOs.Transactions;
 using Backend.Exceptions;
 using Backend.Models;
+using Backend.Resources;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class TransactionService(AppDbContext db) : ITransactionService
 {
-    private const string NotFoundMessage = "Movimentação não encontrada.";
-    private const string CategoryNotFoundMessage = "Categoria não encontrada.";
-    private const string VaultTransactionMessage =
-        "Movimentações de cofre só podem ser alteradas pelas operações do cofre.";
-
     public async Task<PagedResponse<TransactionResponse>> ListAsync(int userId, TransactionQuery query)
     {
         var transactions = db.Transactions.AsNoTracking().Where(t => t.UserId == userId);
@@ -51,7 +47,7 @@ public class TransactionService(AppDbContext db) : ITransactionService
     public async Task<TransactionResponse> GetAsync(int userId, int id) =>
         await Project(db.Transactions.AsNoTracking().Where(t => t.Id == id && t.UserId == userId))
             .FirstOrDefaultAsync()
-            ?? throw new NotFoundException(NotFoundMessage);
+            ?? throw new NotFoundException(Messages.TransactionNotFound);
 
     public async Task<TransactionResponse> CreateAsync(int userId, TransactionRequest request)
     {
@@ -84,10 +80,10 @@ public class TransactionService(AppDbContext db) : ITransactionService
     private async Task<Transaction> FindEditableAsync(int userId, int id)
     {
         var transaction = await db.Transactions.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId)
-            ?? throw new NotFoundException(NotFoundMessage);
+            ?? throw new NotFoundException(Messages.TransactionNotFound);
 
         if (transaction.VaultId is not null)
-            throw new ConflictException(VaultTransactionMessage);
+            throw new ConflictException(Messages.VaultTransactionReadOnly);
 
         return transaction;
     }
@@ -97,7 +93,7 @@ public class TransactionService(AppDbContext db) : ITransactionService
         // As chaves estrangeiras não garantem que a categoria seja do mesmo usuário.
         if (request.CategoryId is { } categoryId
             && !await db.Categories.AnyAsync(c => c.Id == categoryId && c.UserId == userId))
-            throw new BusinessRuleException(CategoryNotFoundMessage);
+            throw new BusinessRuleException(Messages.CategoryNotFound);
 
         transaction.Description = request.Description.Trim();
         transaction.Amount = request.Amount!.Value;

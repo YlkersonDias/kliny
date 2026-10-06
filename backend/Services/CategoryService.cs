@@ -2,15 +2,13 @@ using Backend.Data;
 using Backend.DTOs.Categories;
 using Backend.Exceptions;
 using Backend.Models;
+using Backend.Resources;
 using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
 public class CategoryService(AppDbContext db) : ICategoryService
 {
-    private const string NotFoundMessage = "Categoria não encontrada.";
-    private const string DuplicateNameMessage = "Já existe uma categoria com esse nome.";
-
     public async Task<IReadOnlyList<CategoryResponse>> ListAsync(int userId) =>
         await db.Categories
             .AsNoTracking()
@@ -47,13 +45,13 @@ public class CategoryService(AppDbContext db) : ICategoryService
 
     private async Task<Category> FindOwnedAsync(int userId, int id) =>
         await db.Categories.FirstOrDefaultAsync(c => c.Id == id && c.UserId == userId)
-            ?? throw new NotFoundException(NotFoundMessage);
+            ?? throw new NotFoundException(Messages.CategoryNotFound);
 
     private async Task SaveAsync(int userId, Category category)
     {
         // A comparação usa a collation do banco, a mesma do índice único.
         if (await db.Categories.AnyAsync(c => c.UserId == userId && c.Name == category.Name && c.Id != category.Id))
-            throw new ConflictException(DuplicateNameMessage);
+            throw new ConflictException(Messages.CategoryDuplicateName);
 
         try
         {
@@ -61,7 +59,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            throw new ConflictException(DuplicateNameMessage);
+            throw new ConflictException(Messages.CategoryDuplicateName);
         }
     }
 }

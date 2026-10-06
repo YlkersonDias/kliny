@@ -1,3 +1,5 @@
+using Backend.Resources;
+
 namespace Backend.DTOs;
 
 // Regras de formato comuns a todo valor em dinheiro gravado em decimal(18,2).
@@ -11,9 +13,9 @@ public static class AmountRules
     public static string? Validate(decimal amount)
     {
         if (decimal.Round(amount, 2) != amount)
-            return "O valor deve ter no máximo duas casas decimais.";
+            return Messages.AmountTooManyDecimals;
         if (Math.Abs(amount) > MaxAbsolute)
-            return "O valor é grande demais.";
+            return Messages.AmountTooLarge;
         return null;
     }
 }

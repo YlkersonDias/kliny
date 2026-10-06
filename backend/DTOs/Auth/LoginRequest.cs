@@ -1,12 +1,13 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Auth;
 
 public class LoginRequest
 {
-    [Required(ErrorMessage = "Informe o e-mail.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailRequired))]
     public string Email { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe a senha.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordRequired))]
     public string Password { get; set; } = string.Empty;
 }

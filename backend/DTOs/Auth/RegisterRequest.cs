@@ -1,20 +1,21 @@
 using System.ComponentModel.DataAnnotations;
+using Backend.Resources;
 
 namespace Backend.DTOs.Auth;
 
 public class RegisterRequest
 {
-    [Required(ErrorMessage = "Informe o nome.")]
-    [StringLength(100, ErrorMessage = "O nome deve ter no máximo 100 caracteres.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.NameRequired))]
+    [StringLength(100, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.NameMaxLength))]
     public string Name { get; set; } = string.Empty;
 
-    [Required(ErrorMessage = "Informe o e-mail.")]
-    [EmailAddress(ErrorMessage = "E-mail inválido.")]
-    [StringLength(255, ErrorMessage = "O e-mail deve ter no máximo 255 caracteres.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailRequired))]
+    [EmailAddress(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailInvalid))]
+    [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailMaxLength))]
     public string Email { get; set; } = string.Empty;
 
     // O BCrypt considera só os primeiros 72 bytes da senha.
-    [Required(ErrorMessage = "Informe a senha.")]
-    [StringLength(72, MinimumLength = 8, ErrorMessage = "A senha deve ter entre 8 e 72 caracteres.")]
+    [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordRequired))]
+    [StringLength(72, MinimumLength = 8, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordLength))]
     public string Password { get; set; } = string.Empty;
 }

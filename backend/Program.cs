@@ -1,9 +1,11 @@
 using System.Text;
 using Backend.Data;
 using Backend.Exceptions;
+using Backend.Localization;
 using Backend.Options;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
@@ -61,11 +63,23 @@ builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services.AddControllers();
 
+// Idioma das mensagens pelo Accept-Language; sem ele, ou com idioma não suportado, português.
+builder.Services.Configure<RequestLocalizationOptions>(options =>
+{
+    options.SetDefaultCulture(AppCultures.Portuguese)
+        .AddSupportedCultures(AppCultures.Supported)
+        .AddSupportedUICultures(AppCultures.Supported);
+    // Só o cabeçalho escolhe o idioma (sem ?culture= nem cookie).
+    options.RequestCultureProviders = [new AcceptLanguageHeaderRequestCultureProvider()];
+});
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
 var app = builder.Build();
 
+// Antes de tudo: as mensagens de erro do ApiExceptionHandler também saem no idioma pedido.
+app.UseRequestLocalization();
 app.UseExceptionHandler();
 
 // Configure the HTTP request pipeline.
