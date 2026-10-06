@@ -1,0 +1,91 @@
+{
+  "title": "Cofres",
+  "newButton": "Novo cofre",
+  "loading": "Carregando cofres…",
+  "loadError": "Não foi possível carregar os cofres",
+  "empty": {
+    "title": "Nenhum cofre ainda.",
+    "description": "Crie um cofre para separar dinheiro para um objetivo, como uma reserva ou uma viagem."
+  },
+  "totalSaved": "Total guardado",
+  "count_zero": "{{count}} cofres",
+  "count_one": "{{count}} cofre",
+  "count_other": "{{count}} cofres",
+  "card": {
+    "edit": "Editar {{name}}",
+    "depositTo": "em {{name}}",
+    "withdrawFrom": "de {{name}}"
+  },
+  "goal": {
+    "none": "Sem meta",
+    "progressLabel": "Progresso da meta",
+    "reachedValue": "Meta de {{goal}} atingida",
+    "progressValue": "{{percent}}% da meta de {{goal}}",
+    "line": "Meta {{goal}}",
+    "reached": "Atingida",
+    "percent": "{{percent}}%"
+  },
+  "detail": {
+    "back": "Cofres",
+    "pageTitle": "Cofre",
+    "notFoundTitle": "Cofre não encontrado.",
+    "notFoundDescription": "Ele pode ter sido apagado, ou o endereço está errado.",
+    "backToVaults": "Voltar para Cofres",
+    "loadError": "Não foi possível carregar o cofre",
+    "loading": "Carregando cofre…",
+    "createdAt": "Criado em {{date}}",
+    "balance": "Saldo",
+    "goalReached": "Meta atingida!",
+    "goalReachedText": "Você juntou {{goal}} ou mais.",
+    "statement": "Extrato",
+    "statementNote": "Depósitos e retiradas não podem ser editados. Para corrigir, faça a operação inversa.",
+    "statementError": "Não foi possível carregar o extrato",
+    "statementLoading": "Carregando extrato…",
+    "statementEmptyTitle": "Nenhuma movimentação neste cofre.",
+    "statementEmptyDescription": "Faça o primeiro depósito para começar a juntar.",
+    "deposit": "Depósito",
+    "withdrawal": "Retirada"
+  },
+  "form": {
+    "newTitle": "Novo cofre",
+    "editTitle": "Editar cofre",
+    "name": "Nome",
+    "namePlaceholder": "Ex.: Reserva de emergência",
+    "goal": "Meta (opcional)",
+    "goalHintNew": "Quanto você quer juntar neste cofre.",
+    "goalHintRemove": "Deixe em branco para remover a meta.",
+    "goalReachedNotice": "O cofre já tem {{balance}} guardados, o que já atinge esta meta. Ele vai aparecer como “Meta atingida”.",
+    "submitNew": "Criar cofre",
+    "submitEdit": "Salvar alterações",
+    "nameRequired": "Informe o nome do cofre.",
+    "nameMax": "O nome do cofre deve ter no máximo {{max}} caracteres."
+  },
+  "operation": {
+    "depositTitle": "Depositar em {{name}}",
+    "withdrawTitle": "Retirar de {{name}}",
+    "insufficientVault": "Saldo insuficiente no cofre. Disponível: {{balance}}.",
+    "accountShortfall": "Saldo insuficiente na conta. Disponível em {{date}}: {{balance}}.",
+    "addIncomeFirst": "Lance uma receita antes de depositar.",
+    "futureDate": "Operações de cofre não podem ter data futura.",
+    "pickDateFirst": "O disponível na conta aparece depois de escolher a data.",
+    "availableToday": "Disponível na conta hoje: {{balance}}.",
+    "availableOn": "Disponível na conta em {{date}}: {{balance}}.",
+    "accountError": "Não foi possível consultar o saldo da conta; ele será conferido ao depositar.",
+    "accountLoading": "Consultando o disponível na conta…",
+    "availableInVault": "Disponível no cofre: {{balance}}.",
+    "dateHint": "Hoje ou uma data passada.",
+    "description": "Descrição (opcional)",
+    "depositPlaceholder": "Depósito no cofre {{name}}",
+    "withdrawPlaceholder": "Retirada do cofre {{name}}",
+    "emptyVault": "Este cofre está sem saldo, então não há o que retirar."
+  },
+  "delete": {
+    "title": "Apagar cofre",
+    "hasBalance": "<name/> ainda tem <strong>{{balance}}</strong> guardados. Retire todo o saldo antes de apagar o cofre.",
+    "withdrawAll": "Retirar saldo",
+    "confirm": "Apagar cofre",
+    "question": "Apagar o cofre <name/>?",
+    "history": "O histórico de depósitos e retiradas deste cofre também será apagado. Essa ação não pode ser desfeita. Os totais da conta não mudam, porque os depósitos e as retiradas se anulam.",
+    "understand": "Entendo que o histórico será perdido."
+  }
+}

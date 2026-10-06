@@ -1,0 +1,70 @@
+{
+  "title": "Movimentações",
+  "newButton": "Nova movimentação",
+  "manageCategories": "Gerenciar categorias",
+  "listLabel": "Lista de movimentações",
+  "loading": "Carregando movimentações…",
+  "loadError": "Não foi possível carregar as movimentações",
+  "adjustPeriod": "Ajuste o período para ver as movimentações.",
+  "count_zero": "{{count}} movimentações",
+  "count_one": "{{count}} movimentação",
+  "count_other": "{{count}} movimentações",
+  "empty": {
+    "filteredTitle": "Nenhuma movimentação encontrada com esses filtros.",
+    "filteredDescription": "Tente outra categoria, outro tipo ou outro período.",
+    "clearFilters": "Limpar filtros",
+    "monthTitle": "Nenhuma movimentação neste mês.",
+    "monthDescription": "Lance uma receita ou um gasto para começar.",
+    "periodTitle": "Nenhuma movimentação no período.",
+    "periodDescription": "Escolha outro período ou lance uma nova movimentação."
+  },
+  "filters": {
+    "label": "Filtros",
+    "category": "Categoria",
+    "allCategories": "Todas",
+    "vaultHasNoCategory": "Operações de cofre não têm categoria.",
+    "type": "Tipo",
+    "allTypes": "Todos",
+    "income": "Receitas",
+    "expense": "Gastos",
+    "vault": "Cofres",
+    "clear": "Limpar filtros"
+  },
+  "list": {
+    "date": "Data",
+    "description": "Descrição",
+    "category": "Categoria",
+    "amount": "Valor",
+    "actions": "Ações",
+    "seeVault": "Ver cofre",
+    "seeVaultOf": "Ver cofre de {{description}}",
+    "itemName": "{{description}} de {{date}}",
+    "edit": "Editar {{name}}",
+    "delete": "Apagar {{name}}"
+  },
+  "kind": {
+    "income": "Receita",
+    "expense": "Gasto",
+    "vault": "Cofre"
+  },
+  "amountKind": "{{kind}}:",
+  "form": {
+    "newTitle": "Nova movimentação",
+    "editTitle": "Editar movimentação",
+    "type": "Tipo",
+    "description": "Descrição",
+    "amountHint": "Sempre positivo: o tipo define se entra ou sai.",
+    "category": "Categoria (opcional)",
+    "categoriesError": "Não foi possível carregar as categorias.",
+    "newCategory": "Nova categoria",
+    "submitNew": "Adicionar",
+    "submitEdit": "Salvar alterações",
+    "descriptionRequired": "Informe a descrição."
+  },
+  "delete": {
+    "title": "Apagar movimentação",
+    "confirm": "Apagar",
+    "question": "Apagar <name/> de {{date}}?",
+    "irreversible": "Essa ação não pode ser desfeita."
+  }
+}

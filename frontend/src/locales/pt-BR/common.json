@@ -1,0 +1,44 @@
+{
+  "actions": {
+    "cancel": "Cancelar",
+    "close": "Fechar",
+    "tryAgain": "Tentar novamente",
+    "add": "Adicionar",
+    "save": "Salvar",
+    "saveChanges": "Salvar alterações",
+    "delete": "Apagar",
+    "edit": "Editar",
+    "deposit": "Depositar",
+    "withdraw": "Retirar"
+  },
+  "loading": "Carregando…",
+  "fields": {
+    "from": "De",
+    "to": "Até",
+    "date": "Data",
+    "amount": "Valor",
+    "name": "Nome"
+  },
+  "amountPlaceholder": "0,00",
+  "uncategorized": "Sem categoria",
+  "validation": {
+    "dateRequired": "Informe a data.",
+    "dateInvalid": "Data inválida.",
+    "amountRequired": "Informe o valor.",
+    "amountInvalid": "Valor inválido. Use o formato 1.234,56, com até 2 casas decimais.",
+    "amountPositive": "O valor deve ser maior que zero.",
+    "descriptionMax": "A descrição deve ter no máximo {{max}} caracteres.",
+    "rangeInverted": "A data final não pode ser antes da inicial."
+  },
+  "pagination": {
+    "label": "Paginação",
+    "summary": "Página {{page}} de {{lastPage}} · {{items}}",
+    "previous": "Anterior",
+    "next": "Próxima"
+  },
+  "notFound": {
+    "title": "Página não encontrada",
+    "description": "O endereço pode estar errado ou a página não existe mais.",
+    "backHome": "Voltar ao início"
+  }
+}

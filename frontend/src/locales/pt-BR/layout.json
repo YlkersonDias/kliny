@@ -1,0 +1,18 @@
+{
+  "skipToContent": "Pular para o conteúdo",
+  "homeLink": "{{appName}}, página inicial",
+  "settingsLink": "{{name}}, configurações",
+  "signOut": "Sair",
+  "nav": {
+    "label": "Menu principal",
+    "home": "Início",
+    "transactions": "Movimentações",
+    "vaults": "Cofres",
+    "reports": "Relatórios"
+  },
+  "theme": {
+    "label": "Modo escuro",
+    "on": "Modo escuro ativado",
+    "off": "Modo escuro desativado"
+  }
+}

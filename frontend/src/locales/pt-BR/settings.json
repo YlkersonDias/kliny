@@ -1,0 +1,14 @@
+{
+  "title": "Configurações",
+  "appearance": "Aparência",
+  "theme": {
+    "legend": "Tema",
+    "light": "Claro",
+    "dark": "Escuro",
+    "system": "Sistema",
+    "systemHint": "Segue o tema do sistema operacional, agora {{current}}.",
+    "currentDark": "escuro",
+    "currentLight": "claro",
+    "choiceHint": "A escolha vale para este navegador."
+  }
+}

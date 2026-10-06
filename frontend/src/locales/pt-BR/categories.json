@@ -1,0 +1,27 @@
+{
+  "validation": {
+    "nameRequired": "Informe o nome da categoria.",
+    "nameMax": "O nome da categoria deve ter no máximo {{max}} caracteres."
+  },
+  "newModal": {
+    "title": "Nova categoria",
+    "name": "Nome",
+    "submit": "Criar categoria"
+  },
+  "manager": {
+    "title": "Gerenciar categorias",
+    "newLabel": "Nova categoria",
+    "yours": "Suas categorias",
+    "loading": "Carregando categorias…",
+    "empty": "Nenhuma categoria ainda. Crie a primeira acima.",
+    "rename": "Renomear {{name}}",
+    "delete": "Apagar {{name}}",
+    "newName": "Novo nome para {{name}}"
+  },
+  "delete": {
+    "title": "Apagar categoria",
+    "confirm": "Apagar",
+    "question": "Apagar a categoria <name/>?",
+    "note": "As movimentações desta categoria não serão apagadas: elas ficarão sem categoria."
+  }
+}

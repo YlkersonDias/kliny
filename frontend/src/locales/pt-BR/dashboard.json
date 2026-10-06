@@ -1,0 +1,56 @@
+{
+  "title": "Início",
+  "startingBalance": "Saldo inicial",
+  "loadError": "Não foi possível carregar o resumo",
+  "summaryError": "Não foi possível carregar o resumo do mês. {{message}}",
+  "chartError": "Não foi possível carregar os gastos por dia. {{message}}",
+  "vaultsError": "Não foi possível carregar os cofres. {{message}}",
+  "month": {
+    "accountToday": "Na conta hoje",
+    "saved": "e <strong>{{amount}}</strong> guardados {{where}}",
+    "inVaults": "em cofres",
+    "inVaultsCount_zero": "em {{count}} cofres",
+    "inVaultsCount_one": "em {{count}} cofre",
+    "inVaultsCount_other": "em {{count}} cofres",
+    "thisMonth": "Este mês",
+    "in": "Entrou",
+    "out": "Saiu",
+    "left": "Sobrou",
+    "futureNote": "Este mês inclui lançamentos com data depois de hoje. Eles já entram em “Entrou” e “Saiu”, mas só contam em “Na conta” quando a data chegar: em {{date}}, o saldo previsto é {{balance}}."
+  },
+  "spending": {
+    "title": "Gastos por dia",
+    "noneThisMonth": "Nenhum gasto neste mês.",
+    "summary_zero": "Até hoje, você gastou {{total}} em {{count}} dias.",
+    "summary_one": "Até hoje, você gastou {{total}} em {{count}} dia.",
+    "summary_other": "Até hoje, você gastou {{total}} em {{count}} dias.",
+    "max": "Maior gasto: dia {{day}}, {{amount}}.",
+    "noneUntilToday": "Nenhum gasto até hoje.",
+    "future": "Há {{amount}} em gastos com data depois de hoje.",
+    "tableLabel": "Ver gastos por dia em tabela",
+    "tableCaption": "Gastos por dia neste mês",
+    "day": "Dia",
+    "spent": "Gasto",
+    "afterToday": "(depois de hoje)",
+    "tooltipDay": "Dia {{day}}",
+    "today": "hoje"
+  },
+  "recent": {
+    "title": "Últimas movimentações",
+    "seeAll": "Ver todas"
+  },
+  "vaults": {
+    "title": "Cofres",
+    "seeAll": "Ver todos ({{count}})",
+    "seeVaults": "Ver cofres",
+    "none": "Nenhum cofre ainda.",
+    "create": "Criar um cofre"
+  },
+  "welcome": {
+    "title": "Comece pelo dinheiro que você já tem",
+    "text": "Lance uma receita chamada “Saldo inicial” com o valor que está na sua conta hoje. A partir dela, o {{appName}} calcula seu saldo.",
+    "negative": "Se a conta estiver no negativo, lance como gasto.",
+    "start": "Lançar saldo inicial",
+    "createVault": "Criar um cofre"
+  }
+}
