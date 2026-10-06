@@ -3,6 +3,7 @@ import { useAuth } from '../../auth/useAuth'
 import { APP_NAME } from '../../config/app'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
+import { ThemeToggle } from '../ui/ThemeToggle'
 import { NavIcon, Navigation } from './Navigation'
 
 const LOGOUT_ICON = 'M15 4h3a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2h-3M10 16l-4-4 4-4M6 12h10'
@@ -65,7 +66,10 @@ export function AppLayout() {
           <Navigation variant="sidebar" />
         </div>
         <div className="border-t border-border p-3">
-          <div className="mb-1">{settingsLink('px-3 py-2.5')}</div>
+          <div className="mb-1 flex items-center gap-1">
+            <div className="min-w-0 flex-1">{settingsLink('px-3 py-2.5')}</div>
+            <ThemeToggle />
+          </div>
           <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
             Sair
@@ -78,6 +82,7 @@ export function AppLayout() {
         {brand}
         <div className="flex min-w-0 items-center gap-1">
           {settingsLink('min-h-11 px-2')}
+          <ThemeToggle />
           <Button variant="ghost" className="px-2" onClick={handleSignOut}>
             <NavIcon path={LOGOUT_ICON} />
             Sair

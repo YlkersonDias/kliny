@@ -102,6 +102,13 @@
     @apply bg-background text-foreground antialiased;
   }
 
+  /* Ligado pelo ThemeProvider só no instante da troca de tema: tudo muda de cor junto. */
+  html[data-theme-switching] *,
+  html[data-theme-switching] *::before,
+  html[data-theme-switching] *::after {
+    transition: none !important;
+  }
+
   /* Títulos e <main> recebem foco por código ao trocar de página (useFocusOnRouteChange);
      não são controles, então não mostram contorno. */
   h1[tabindex="-1"]:focus,

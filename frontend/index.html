@@ -11,10 +11,11 @@
       // Aplica o tema antes do React, para a tela não piscar no tema errado. Mesma regra e
       // mesma chave de src/lib/theme.ts: mudou lá, mudar aqui.
       (function () {
-        var preference = 'system'
+        // Padrão: escuro (sem preferência guardada ou com localStorage bloqueado).
+        var preference = 'dark'
         try {
           var stored = localStorage.getItem('ui.theme')
-          if (stored === 'light' || stored === 'dark') preference = stored
+          if (stored === 'light' || stored === 'dark' || stored === 'system') preference = stored
         } catch (e) {}
         var dark = preference === 'dark' ||
           (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)

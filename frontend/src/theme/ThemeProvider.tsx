@@ -28,7 +28,18 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
   const theme = resolveTheme(preference, prefersDark)
 
   useEffect(() => {
-    document.documentElement.dataset.theme = theme
+    const root = document.documentElement
+    if (root.dataset.theme === theme) return
+    // Sem transição durante a troca: botões e links com transition-colors mudariam em 150 ms
+    // enquanto o fundo muda na hora, e a tela passaria por combinações sem contraste.
+    root.dataset.themeSwitching = ''
+    root.dataset.theme = theme
+    void root.offsetHeight // aplica as cores novas antes de religar as transições
+    const frame = requestAnimationFrame(() => delete root.dataset.themeSwitching)
+    return () => {
+      cancelAnimationFrame(frame)
+      delete root.dataset.themeSwitching
+    }
   }, [theme])
 
   useEffect(() => {

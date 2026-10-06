@@ -2,17 +2,17 @@ import { describe, expect, it } from 'vitest'
 import { parseThemePreference, resolveTheme } from './theme'
 
 describe('parseThemePreference', () => {
-  it('aceita claro e escuro', () => {
+  it('aceita claro, escuro e sistema', () => {
     expect(parseThemePreference('light')).toBe('light')
     expect(parseThemePreference('dark')).toBe('dark')
+    expect(parseThemePreference('system')).toBe('system')
   })
 
-  it('trata ausente, inválido ou de outro tipo como sistema', () => {
-    expect(parseThemePreference(null)).toBe('system')
-    expect(parseThemePreference('system')).toBe('system')
-    expect(parseThemePreference('Dark')).toBe('system')
-    expect(parseThemePreference('"dark"')).toBe('system')
-    expect(parseThemePreference(1)).toBe('system')
+  it('trata ausente, inválido ou de outro tipo como escuro (o padrão)', () => {
+    expect(parseThemePreference(null)).toBe('dark')
+    expect(parseThemePreference('Light')).toBe('dark')
+    expect(parseThemePreference('"light"')).toBe('dark')
+    expect(parseThemePreference(1)).toBe('dark')
   })
 })
 
