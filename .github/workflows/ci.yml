@@ -61,7 +61,8 @@ jobs:
       - name: Diagnóstico temporário de falha nos testes
         if: failure()
         run: |
-          tail -n 200 test-output.log \
+          sed -E 's/\x1b\[[0-9;]*m//g' test-output.log > plain.log
+          { grep -E "^(failed|skipped) " plain.log || true; echo "--- fim da lista; cauda do log abaixo ---"; tail -n 150 plain.log; } \
             | sed 's/%/%25/g; s/\r$//' \
             | awk 'BEGIN{ORS="%0A"}{print}' \
             | fold -w 3000 \
