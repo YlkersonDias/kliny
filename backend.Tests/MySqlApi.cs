@@ -95,7 +95,10 @@ public sealed class MySqlApi : IAsyncLifetime
         await using (var pooled = new MySqlConnection(AppConnectionString))
             await MySqlConnection.ClearPoolAsync(pooled);
         await using var admin = AdminContext();
-        await admin.Database.ExecuteSqlAsync($"DROP USER IF EXISTS {_appUser}@'%'");
+        // Mesmo motivo do CREATE USER: nome de usuário não aceita parâmetro vinculado aqui.
+#pragma warning disable EF1002
+        await admin.Database.ExecuteSqlRawAsync($"DROP USER IF EXISTS '{_appUser}'@'%'");
+#pragma warning restore EF1002
         await admin.Database.EnsureDeletedAsync();
     }
 
