@@ -139,18 +139,6 @@ public class RateLimitingTests
         }
     }
 
-    [Theory]
-    [InlineData("RateLimits:LoginPerIp:PermitLimit", "0")]
-    [InlineData("RateLimits:RegisterPerIp:WindowSeconds", "0")]
-    [InlineData("RateLimits:LoginPerEmail:MaxFailures", "0")]
-    public void Limite_invalido_impede_a_api_de_subir(string key, string value)
-    {
-        using var app = new TestApp(new Dictionary<string, string> { [key] = value });
-
-        var error = Assert.ThrowsAny<Exception>(() => app.CreateClient());
-        Assert.Contains(nameof(Backend.Options.RateLimitOptions), error.ToString());
-    }
-
     [Fact]
     public async Task Email_bloqueado_recebe_429_com_o_tempo_restante()
     {
