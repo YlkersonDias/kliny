@@ -61,10 +61,16 @@ function useInvalidateAfterOperation() {
   ])
 }
 
+interface VaultOperationVariables {
+  id: number
+  request: VaultOperationRequest
+  idempotencyKey: string
+}
+
 export function useDepositToVault() {
   const invalidate = useInvalidateAfterOperation()
   return useMutation({
-    mutationFn: ({ id, request }: { id: number; request: VaultOperationRequest }) => depositToVault(id, request),
+    mutationFn: ({ id, request, idempotencyKey }: VaultOperationVariables) => depositToVault(id, request, idempotencyKey),
     onSuccess: invalidate,
   })
 }
@@ -72,7 +78,7 @@ export function useDepositToVault() {
 export function useWithdrawFromVault() {
   const invalidate = useInvalidateAfterOperation()
   return useMutation({
-    mutationFn: ({ id, request }: { id: number; request: VaultOperationRequest }) => withdrawFromVault(id, request),
+    mutationFn: ({ id, request, idempotencyKey }: VaultOperationVariables) => withdrawFromVault(id, request, idempotencyKey),
     onSuccess: invalidate,
   })
 }

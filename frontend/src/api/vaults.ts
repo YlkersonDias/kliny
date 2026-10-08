@@ -22,10 +22,12 @@ export function deleteVault(id: number): Promise<void> {
   return apiRequest(`/vaults/${id}`, { method: 'DELETE' })
 }
 
-export function depositToVault(id: number, request: VaultOperationRequest): Promise<VaultOperationResponse> {
-  return apiRequest(`/vaults/${id}/deposit`, { method: 'POST', body: request })
+// idempotencyKey: a mesma chave em envios repetidos (nova tentativa depois de falha de rede)
+// devolve o lançamento já gravado, sem criar outro. Ver lib/idempotency.ts.
+export function depositToVault(id: number, request: VaultOperationRequest, idempotencyKey: string): Promise<VaultOperationResponse> {
+  return apiRequest(`/vaults/${id}/deposit`, { method: 'POST', body: request, headers: { 'Idempotency-Key': idempotencyKey } })
 }
 
-export function withdrawFromVault(id: number, request: VaultOperationRequest): Promise<VaultOperationResponse> {
-  return apiRequest(`/vaults/${id}/withdraw`, { method: 'POST', body: request })
+export function withdrawFromVault(id: number, request: VaultOperationRequest, idempotencyKey: string): Promise<VaultOperationResponse> {
+  return apiRequest(`/vaults/${id}/withdraw`, { method: 'POST', body: request, headers: { 'Idempotency-Key': idempotencyKey } })
 }

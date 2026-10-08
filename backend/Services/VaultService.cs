@@ -55,17 +55,22 @@ public class VaultService(AppDbContext db) : IVaultService
         await dbTransaction.CommitAsync();
     }
 
-    public Task<VaultOperationResponse> DepositAsync(int userId, int id, VaultOperationRequest request) =>
-        OperateAsync(userId, id, request, isWithdrawal: false);
+    public Task<VaultOperationResult> DepositAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey = null) =>
+        OperateAsync(userId, id, request, idempotencyKey, isWithdrawal: false);
 
-    public Task<VaultOperationResponse> WithdrawAsync(int userId, int id, VaultOperationRequest request) =>
-        OperateAsync(userId, id, request, isWithdrawal: true);
+    public Task<VaultOperationResult> WithdrawAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey = null) =>
+        OperateAsync(userId, id, request, idempotencyKey, isWithdrawal: true);
 
-    private async Task<VaultOperationResponse> OperateAsync(
-        int userId, int id, VaultOperationRequest request, bool isWithdrawal)
+    private async Task<VaultOperationResult> OperateAsync(
+        int userId, int id, VaultOperationRequest request, string? idempotencyKey, bool isWithdrawal)
     {
+        if (idempotencyKey is not null && !IdempotencyKey.IsValid(idempotencyKey))
+            throw new BusinessRuleException(Messages.IdempotencyKeyInvalid);
+
         var amount = request.Amount!.Value;
         var date = request.Date!.Value;
+        // Depósito é negativo (sai da conta); retirada é positiva (volta para a conta).
+        var signedAmount = isWithdrawal ? amount : -amount;
 
         await using var dbTransaction = await db.Database.BeginTransactionAsync();
         // Depósito: trava a conta (linha do usuário) antes do cofre, para dois depósitos ao mesmo
@@ -74,6 +79,13 @@ public class VaultService(AppDbContext db) : IVaultService
         if (!isWithdrawal)
             await db.Database.ExecuteSqlAsync($"SELECT Id FROM Users WHERE Id = {userId} FOR UPDATE");
         var vault = await LockOwnedAsync(userId, id);
+
+        // Envio repetido: devolve o que já foi gravado, antes de conferir saldos (uma retirada que
+        // esvaziou o cofre seria recusada na repetição). A consulta vem depois das travas, então
+        // enxerga o que uma requisição simultânea com a mesma chave acabou de gravar.
+        if (idempotencyKey is not null && await FindByKeyAsync(userId, idempotencyKey) is { } previous)
+            return await ReplayAsync(previous, vault.Id, signedAmount, date);
+
         var balance = await GetBalanceAsync(vault.Id);
 
         if (isWithdrawal && amount > balance)
@@ -106,19 +118,51 @@ public class VaultService(AppDbContext db) : IVaultService
             UserId = userId,
             VaultId = vault.Id,
             Description = description,
-            // Depósito é negativo (sai da conta); retirada é positiva (volta para a conta).
-            Amount = isWithdrawal ? amount : -amount,
+            Amount = signedAmount,
             Date = date,
+            IdempotencyKey = idempotencyKey,
         };
         db.Transactions.Add(transaction);
-        await db.SaveChangesAsync();
+        try
+        {
+            await db.SaveChangesAsync();
+        }
+        catch (DbUpdateException ex) when (idempotencyKey is not null && ex.IsUniqueViolation())
+        {
+            // A mesma chave chegou ao mesmo tempo por outro cofre (travas diferentes) e gravou antes.
+            await dbTransaction.RollbackAsync();
+            db.ChangeTracker.Clear();
+            var winner = await FindByKeyAsync(userId, idempotencyKey) ?? throw new InvalidOperationException(
+                "Violação do índice de idempotência sem o lançamento correspondente.", ex);
+            return await ReplayAsync(winner, vault.Id, signedAmount, date);
+        }
         await dbTransaction.CommitAsync();
 
-        return new VaultOperationResponse(
-            new TransactionResponse(transaction.Id, transaction.Description, transaction.Amount,
-                transaction.Date, null, null, vault.Id),
-            balance - transaction.Amount);
+        return new VaultOperationResult(
+            new VaultOperationResponse(ToResponse(transaction), balance - transaction.Amount),
+            Replayed: false);
     }
+
+    private Task<Transaction?> FindByKeyAsync(int userId, string idempotencyKey) =>
+        db.Transactions.AsNoTracking()
+            .FirstOrDefaultAsync(t => t.UserId == userId && t.IdempotencyKey == idempotencyKey);
+
+    // A mesma chave só vale para a mesma operação: mesmo cofre, mesmo valor com o mesmo sinal
+    // (depósito ou retirada) e mesma data. A descrição não entra: a padrão depende do idioma.
+    // O saldo devolvido é o atual do cofre, que pode ter mudado desde o envio original.
+    private async Task<VaultOperationResult> ReplayAsync(
+        Transaction previous, int vaultId, decimal signedAmount, DateOnly date)
+    {
+        if (previous.VaultId != vaultId || previous.Amount != signedAmount || previous.Date != date)
+            throw new ConflictException(Messages.IdempotencyKeyReused);
+
+        return new VaultOperationResult(
+            new VaultOperationResponse(ToResponse(previous), await GetBalanceAsync(vaultId)),
+            Replayed: true);
+    }
+
+    private static TransactionResponse ToResponse(Transaction transaction) =>
+        new(transaction.Id, transaction.Description, transaction.Amount, transaction.Date, null, null, transaction.VaultId);
 
     // Trava a linha do cofre até o fim da transação de banco. Duas retiradas simultâneas
     // passariam juntas pela checagem de saldo; com a trava, a segunda espera a primeira

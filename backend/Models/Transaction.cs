@@ -14,6 +14,10 @@ public class Transaction
     public int? CategoryId { get; set; }
     public int? VaultId { get; set; }
 
+    // Só em depósito e retirada: a chave Idempotency-Key enviada pelo cliente, única por usuário.
+    // Um envio repetido com a mesma chave devolve o lançamento já gravado, sem criar outro.
+    public string? IdempotencyKey { get; set; }
+
     public User User { get; set; } = null!;
     public Category? Category { get; set; }
     public Vault? Vault { get; set; }

@@ -1,3 +1,4 @@
+using Backend.Data;
 using Backend.DTOs.Vaults;
 using Backend.Extensions;
 using Backend.Services;
@@ -51,17 +52,30 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
         return NoContent();
     }
 
+    // Idempotency-Key opcional: com ela, repetir o envio não cria um segundo lançamento.
     [HttpPost("{id:int}/deposit")]
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Deposit(int id, VaultOperationRequest request) =>
-        Ok(await vaultService.DepositAsync(User.GetUserId(), id, request));
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Deposit(
+        int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
+        Result(await vaultService.DepositAsync(User.GetUserId(), id, request, idempotencyKey));
 
     [HttpPost("{id:int}/withdraw")]
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    public async Task<IActionResult> Withdraw(int id, VaultOperationRequest request) =>
-        Ok(await vaultService.WithdrawAsync(User.GetUserId(), id, request));
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> Withdraw(
+        int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
+        Result(await vaultService.WithdrawAsync(User.GetUserId(), id, request, idempotencyKey));
+
+    // Repetição: mesmo 200 e mesmo lançamento, com o cabeçalho Idempotent-Replayed para quem quiser saber.
+    private OkObjectResult Result(VaultOperationResult result)
+    {
+        if (result.Replayed)
+            Response.Headers["Idempotent-Replayed"] = "true";
+        return Ok(result.Response);
+    }
 }

@@ -7,6 +7,7 @@ import { useSummary } from '../../hooks/useReports'
 import { useDepositToVault, useWithdrawFromVault } from '../../hooks/useVaults'
 import { formatDate, isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
+import { newIdempotencyKey } from '../../lib/idempotency'
 import { formatMoney, parseMoneyInput, toInputText } from '../../lib/money'
 import { depositShortfallMessage, exceedsAccountBalance, formatAccountBalance, vaultOperationDateError } from '../../lib/vaults'
 import { Button } from '../ui/Button'
@@ -81,6 +82,9 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   })
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
+  // Uma chave por intenção: a mesma numa nova tentativa com os mesmos valores (falha de rede,
+  // clique repetido), e outra quando um campo muda. Ver lib/idempotency.ts.
+  const [idempotencyKey, setIdempotencyKey] = useState(() => newIdempotencyKey())
   const amountRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
   const descriptionRef = useRef<HTMLInputElement>(null)
@@ -117,6 +121,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
 
   function change(field: Field, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
+    setIdempotencyKey(newIdempotencyKey())
     // O saldo disponível depende da data: trocar a data também limpa o erro do valor, que ficaria
     // falando da data anterior (e escondendo a dica com o disponível da nova).
     setErrors((current) => ({ ...current, [field]: undefined, ...(field === 'date' ? { amount: undefined } : {}) }))
@@ -137,7 +142,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
       // Sem descrição, a API usa "Depósito no cofre X" ou "Retirada do cofre X".
       ...(description ? { description } : {}),
     }
-    mutation.mutate({ id: vault.id, request }, {
+    mutation.mutate({ id: vault.id, request, idempotencyKey }, {
       onSuccess: onClose,
       onError: (error) => {
         // Saldo insuficiente (400 sem campo) pertence ao valor.
