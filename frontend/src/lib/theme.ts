@@ -2,6 +2,8 @@
 // O script do index.html repete esta regra para aplicar o tema antes do React: mudou aqui,
 // mudar lá também (mesma chave e mesmos valores).
 
+import { THEME_COLORS } from './themeColors'
+
 export type ThemePreference = 'light' | 'dark' | 'system'
 export type Theme = 'light' | 'dark'
 
@@ -9,6 +11,12 @@ export const THEME_STORAGE_KEY = 'ui.theme'
 export const DARK_QUERY = '(prefers-color-scheme: dark)'
 // Quem nunca escolheu abre no escuro, qualquer que seja o tema do sistema operacional.
 export const DEFAULT_THEME_PREFERENCE: ThemePreference = 'dark'
+
+
+// Cor da barra do navegador e do app instalado (7.4); as cores ficam em themeColors.ts.
+export function applyThemeColor(theme: Theme): void {
+  document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
+}
 
 // Valor ausente, inválido ou de outra versão vale o padrão (escuro).
 export function parseThemePreference(value: unknown): ThemePreference {
