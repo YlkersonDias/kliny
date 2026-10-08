@@ -156,7 +156,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
                 StatusOf(Operate(client, second, "withdraw", 20m, key)));
 
             Assert.Equal(1, statuses.Count(s => s == HttpStatusCode.OK));
-            Assert.Equal(1, statuses.Count(s => s == HttpStatusCode.Conflict));
+            Assert.Equal(1, statuses.Count(s => s == HttpStatusCode.UnprocessableEntity));
             Assert.Equal(20m, await BalanceAsync(client, first) + await BalanceAsync(client, second));
         }
     }
@@ -172,7 +172,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
     [InlineData("deposit", 100, "2021-03-09", false)]
     [InlineData("withdraw", 100, Date, false)]
     [InlineData("deposit", 100, Date, true)]
-    public async Task Mesma_chave_numa_operacao_diferente_responde_409(
+    public async Task Mesma_chave_numa_operacao_diferente_responde_422(
         string operation, int amount, string date, bool otherVault)
     {
         using var client = AsA();
@@ -184,7 +184,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
 
         using var response = await Operate(client, target, operation, amount, key, date);
 
-        Assert.Equal(HttpStatusCode.Conflict, response.StatusCode);
+        Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(Ct);
         Assert.Equal("Esta chave de idempotência já foi usada numa operação diferente.", body.GetProperty("detail").GetString());
         Assert.Equal(600m, await BalanceAsync(client, vault));

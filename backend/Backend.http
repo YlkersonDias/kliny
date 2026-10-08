@@ -193,7 +193,7 @@ Content-Type: application/json
 # Idempotency-Key obrigatória em depósito e retirada (sem ela, 400): 1 a 64 letras, números,
 # hífens ou sublinhados. Repetir a requisição com a mesma chave devolve o mesmo lançamento
 # (200, cabeçalho Idempotent-Replayed: true), sem criar outro; para um lançamento novo, troque a
-# chave. A mesma chave com outro valor, data, cofre ou tipo responde 409.
+# chave. A mesma chave com outro valor, data, cofre ou tipo responde 422.
 POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json
@@ -216,7 +216,7 @@ Idempotency-Key: exemplo-retirada-1
   "description": "Conserto do carro"
 }
 
-### Mesma chave do depósito acima com outro valor (409)
+### Mesma chave do depósito acima com outro valor (422)
 POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json

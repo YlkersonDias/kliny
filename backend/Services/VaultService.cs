@@ -157,7 +157,7 @@ public class VaultService(AppDbContext db) : IVaultService
         Transaction previous, int vaultId, decimal signedAmount, DateOnly date)
     {
         if (previous.VaultId != vaultId || previous.Amount != signedAmount || previous.Date != date)
-            throw new ConflictException(Messages.IdempotencyKeyReused);
+            throw new UnprocessableException(Messages.IdempotencyKeyReused);
 
         return new VaultOperationResult(
             new VaultOperationResponse(ToResponse(previous), await GetBalanceAsync(vaultId)),

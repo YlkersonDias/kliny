@@ -29,13 +29,13 @@ public interface IVaultService
     /// </remarks>
     /// <exception cref="Exceptions.NotFoundException">O cofre não existe ou é de outro usuário.</exception>
     /// <exception cref="Exceptions.BusinessRuleException">Saldo da conta insuficiente, ou chave ausente ou inválida.</exception>
-    /// <exception cref="Exceptions.ConflictException">A chave já foi usada numa operação diferente.</exception>
+    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente (422).</exception>
     Task<VaultOperationResult> DepositAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey);
 
     /// <summary>Grava uma transação positiva no cofre: o dinheiro sai do cofre e volta para a conta.</summary>
     /// <remarks>Mesma idempotência do depósito.</remarks>
     /// <exception cref="Exceptions.NotFoundException">O cofre não existe ou é de outro usuário.</exception>
     /// <exception cref="Exceptions.BusinessRuleException">O valor é maior que o saldo do cofre, ou chave ausente ou inválida.</exception>
-    /// <exception cref="Exceptions.ConflictException">A chave já foi usada numa operação diferente.</exception>
+    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente (422).</exception>
     Task<VaultOperationResult> WithdrawAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey);
 }

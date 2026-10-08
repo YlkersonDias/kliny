@@ -57,7 +57,7 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Deposit(
         int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
         Result(await vaultService.DepositAsync(User.GetUserId(), id, request, idempotencyKey));
@@ -66,7 +66,7 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Withdraw(
         int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
         Result(await vaultService.WithdrawAsync(User.GetUserId(), id, request, idempotencyKey));

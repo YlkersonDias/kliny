@@ -9,6 +9,9 @@ public class NotFoundException(string message) : Exception(message);
 /// <summary>Conflito com o estado atual, como um valor único repetido (409).</summary>
 public class ConflictException(string message) : Exception(message);
 
+/// <summary>Pedido bem formado, mas contraditório: repetir não adianta (422). Ex.: Idempotency-Key reaproveitada com outro conteúdo.</summary>
+public class UnprocessableException(string message) : Exception(message);
+
 /// <summary>Dados válidos no formato, mas que ferem uma regra de negócio (400).</summary>
 public class BusinessRuleException(string message) : Exception(message);
 
