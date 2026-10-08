@@ -63,6 +63,11 @@ public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThro
         return user is null ? null : UserResponse.FromUser(user);
     }
 
+    // Um UPDATE só, sem ler antes: duas chamadas simultâneas incrementam as duas vezes.
+    public Task RevokeAllTokensAsync(int userId) =>
+        db.Users.Where(u => u.Id == userId)
+            .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.TokenVersion, u => u.TokenVersion + 1));
+
     private AuthResponse BuildResponse(User user)
     {
         var (token, expiresAt) = tokenService.CreateToken(user);

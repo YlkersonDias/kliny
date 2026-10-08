@@ -2,6 +2,7 @@ using System.Security.Claims;
 using System.Text;
 using Backend.Models;
 using Backend.Options;
+using Backend.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
@@ -29,6 +30,7 @@ public class TokenService(IOptions<JwtOptions> options) : ITokenService
                 new Claim(JwtRegisteredClaimNames.Email, user.Email),
                 new Claim(JwtRegisteredClaimNames.Name, user.Name),
                 new Claim(JwtRegisteredClaimNames.Jti, Guid.NewGuid().ToString()),
+                new Claim(TokenVersionValidation.ClaimType, user.TokenVersion.ToString(), ClaimValueTypes.Integer32),
             ]),
         };
 

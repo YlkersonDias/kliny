@@ -48,6 +48,8 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = JwtRegisteredClaimNames.Name,
         };
+        // S.5: confere a versão do token com a do usuário no banco (revogação).
+        options.Events = new JwtBearerEvents { OnTokenValidated = TokenVersionValidation.ValidateAsync };
     });
 
 // Todo endpoint exige login, salvo os marcados com [AllowAnonymous] (só cadastro e login).

@@ -66,4 +66,6 @@ public sealed class FakeAuthService : IAuthService
     };
 
     public Task<UserResponse?> GetUserAsync(int userId) => Task.FromResult<UserResponse?>(null);
+
+    public Task RevokeAllTokensAsync(int userId) => Task.CompletedTask;
 }

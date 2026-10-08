@@ -53,4 +53,15 @@ public class AuthController(IAuthService authService) : ControllerBase
         var user = await authService.GetUserAsync(User.GetUserId());
         return user is null ? Unauthorized() : Ok(user);
     }
+
+    // S.5: invalida todos os tokens do usuário, inclusive o desta requisição.
+    [Authorize]
+    [HttpPost("logout-all")]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> LogoutAll()
+    {
+        await authService.RevokeAllTokensAsync(User.GetUserId());
+        return NoContent();
+    }
 }

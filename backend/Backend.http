@@ -56,6 +56,10 @@ Authorization: Bearer {{token}}
 ### Usuário logado sem token (401)
 GET {{baseUrl}}/api/auth/me
 
+### Sair de todos os dispositivos (204): todo token emitido antes, inclusive este, passa a dar 401
+POST {{baseUrl}}/api/auth/logout-all
+Authorization: Bearer {{token}}
+
 ############################## Categorias ##############################
 
 ### Listar categorias (200)
