@@ -81,3 +81,7 @@ jobs:
 
       - name: Compilar
         run: npm run build
+
+      # S.4: a <meta> da CSP vem antes dos scripts e tem os hashes certos dos scripts inline do build.
+      - name: Conferir a CSP do build
+        run: npm run check:csp

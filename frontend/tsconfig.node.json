@@ -22,5 +22,5 @@
     "noFallthroughCasesInSwitch": true,
     "noUncheckedSideEffectImports": true
   },
-  "include": ["vite.config.ts", "src/config/app.ts"]
+  "include": ["vite.config.ts", "src/config/app.ts", "csp.ts", "csp.test.ts", "scripts/check-csp.ts"]
 }

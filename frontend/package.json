@@ -8,6 +8,7 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
+    "check:csp": "node scripts/check-csp.ts",
     "test": "vitest run"
   },
   "dependencies": {
