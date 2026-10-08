@@ -62,6 +62,10 @@ public static class Messages
         "A senha é longa demais: com acentos ou emojis, o limite de 72 caracteres fica menor.",
         "The password is too long: with accents or emojis, the 72-character limit gets shorter.");
 
+    public static string WrongPassword => Text(
+        "Senha incorreta.",
+        "Incorrect password.");
+
     public static string CategoryNotFound => Text(
         "Categoria não encontrada.",
         "Category not found.");

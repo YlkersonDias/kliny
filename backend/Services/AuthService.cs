@@ -74,6 +74,31 @@ public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThro
         return user is null ? null : UserResponse.FromUser(user);
     }
 
+    public async Task DeleteAccountAsync(int userId, string password)
+    {
+        // O token já foi validado (TokenVersionValidation), então o usuário existe.
+        var user = await db.Users.AsNoTracking().FirstAsync(u => u.Id == userId);
+
+        // Mesmo bloqueio do login: com um token roubado, não dá para adivinhar a senha à vontade.
+        if (loginThrottle.GetLockout(user.Email) is { } retryAfter)
+            throw new TooManyRequestsException(retryAfter);
+        if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
+        {
+            loginThrottle.RegisterFailure(user.Email);
+            throw new BusinessRuleException(Messages.WrongPassword);
+        }
+
+        // As movimentações saem antes do usuário: a chave estrangeira cofre -> movimentação é
+        // RESTRICT, e a cascata a partir do usuário esbarraria nela. Categorias e cofres saem pela
+        // cascata do usuário. Tudo numa transação: ou some tudo, ou nada.
+        await using var transaction = await db.Database.BeginTransactionAsync();
+        await db.Transactions.Where(t => t.UserId == userId).ExecuteDeleteAsync();
+        await db.Users.Where(u => u.Id == userId).ExecuteDeleteAsync();
+        await transaction.CommitAsync();
+
+        loginThrottle.Reset(user.Email);
+    }
+
     // Um UPDATE só, sem ler antes: duas chamadas simultâneas incrementam as duas vezes.
     public Task RevokeAllTokensAsync(int userId) =>
         db.Users.Where(u => u.Id == userId)

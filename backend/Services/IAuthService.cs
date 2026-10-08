@@ -18,4 +18,12 @@ public interface IAuthService
     /// emitido antes (em qualquer aparelho) passa a responder 401.
     /// </summary>
     Task RevokeAllTokensAsync(int userId);
+
+    /// <summary>
+    /// Exclui a conta e todos os dados do usuário (movimentações, cofres e categorias). Irreversível.
+    /// Exige a senha atual; as falhas contam no bloqueio por e-mail do login (S.1).
+    /// </summary>
+    /// <exception cref="Exceptions.BusinessRuleException">Senha incorreta.</exception>
+    /// <exception cref="Exceptions.TooManyRequestsException">E-mail bloqueado por falhas seguidas.</exception>
+    Task DeleteAccountAsync(int userId, string password);
 }
