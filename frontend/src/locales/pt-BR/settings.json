@@ -24,5 +24,17 @@
     "confirmText": "Você vai sair deste e de todos os outros aparelhos em que entrou. Para voltar, entre de novo com seu e-mail e senha.",
     "confirm": "Sair de todos",
     "error": "Não foi possível sair de todos os dispositivos."
+  },
+  "account": {
+    "title": "Privacidade e conta",
+    "privacyLink": "Ler a política de privacidade",
+    "deleteDescription": "Excluir a conta apaga para sempre todas as suas movimentações, categorias e cofres. Não dá para desfazer.",
+    "deleteButton": "Excluir minha conta",
+    "confirmTitle": "Excluir a conta?",
+    "confirmText": "Todos os seus dados serão apagados para sempre, em todos os aparelhos. Para confirmar, digite a sua senha.",
+    "password": "Senha",
+    "understand": "Entendo que todos os meus dados serão apagados e que isso não pode ser desfeito.",
+    "confirm": "Excluir conta",
+    "error": "Não foi possível excluir a conta."
   }
 }

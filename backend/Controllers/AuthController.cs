@@ -54,6 +54,21 @@ public class AuthController(IAuthService authService) : ControllerBase
         return user is null ? Unauthorized() : Ok(user);
     }
 
+    // Exclui a conta e todos os dados do usuário, de forma irreversível. Exige a senha atual e tem o
+    // mesmo limite por IP do login. Depois disso, o token (e qualquer outro do usuário) responde 401.
+    [Authorize]
+    [HttpPost("delete-account")]
+    [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request)
+    {
+        await authService.DeleteAccountAsync(User.GetUserId(), request.Password);
+        return NoContent();
+    }
+
     // S.5: invalida todos os tokens do usuário, inclusive o desta requisição.
     [Authorize]
     [HttpPost("logout-all")]

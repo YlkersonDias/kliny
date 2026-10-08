@@ -5,6 +5,7 @@ import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import DashboardPage from './pages/DashboardPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
+import PrivacyPage from './pages/PrivacyPage'
 import RegisterPage from './pages/RegisterPage'
 import ReportsPage from './pages/ReportsPage'
 import SettingsPage from './pages/SettingsPage'
@@ -32,6 +33,9 @@ export default function App() {
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
       </Route>
+
+      {/* Pública, com e sem login. */}
+      <Route path="/privacidade" element={<PrivacyPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

@@ -1,0 +1,42 @@
+{
+  "title": "Privacy policy",
+  "updated": "Updated on October 8, 2026.",
+  "intro": "{{appName}} is a personal finance app. This page explains what data it keeps, why, and what you can do about it.",
+  "who": {
+    "title": "Who looks after your data",
+    "body": "{{appName}} and the data kept in it are the responsibility of {{controller}}. For any request about your data, write to {{contact}}.",
+    "missing": "[to be defined before publication]"
+  },
+  "data": {
+    "title": "What we keep",
+    "account": "For your account: name, email, the date it was created and the password, kept only as a hash (a form that cannot be turned back into the original password).",
+    "finances": "What you record: income, expenses, categories, vaults, goals, deposits and withdrawals, with amount, date and description.",
+    "nothingElse": "We do not keep documents, bank details, cards or your location."
+  },
+  "use": {
+    "title": "What we use it for",
+    "body": "Only to show your finances to you. We do not sell or share your data, show ads, or use third-party analytics or tracking."
+  },
+  "browser": {
+    "title": "What stays in your browser",
+    "body": "Your session (so you stay signed in), and the theme and language you chose. If you install {{appName}} as an app, the browser keeps only the app files, never your financial data. We do not use tracking cookies."
+  },
+  "security": {
+    "title": "How we protect it",
+    "body": "The connection is always encrypted (HTTPS), the password is kept as a hash, each person can only reach their own data, and sign-in attempts are limited. Sessions expire after one hour, and in Settings you can sign out of all devices at once."
+  },
+  "retention": {
+    "title": "How long we keep it",
+    "body": "As long as your account exists. When you delete your account, your data is removed from the database right away. Database backups are kept for {{backupRetention}} and then deleted."
+  },
+  "rights": {
+    "title": "Your rights",
+    "body": "Under the Brazilian General Data Protection Law (LGPD), you can confirm what data we have, ask for a copy, correct it and ask for it to be deleted. You can delete your account and all its data yourself in Settings. For other requests, use the contact above."
+  },
+  "changes": {
+    "title": "Changes to this policy",
+    "body": "If this policy changes, the date at the top of the page changes too."
+  },
+  "back": "Back",
+  "footerLink": "Privacy policy"
+}
