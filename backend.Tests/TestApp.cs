@@ -48,19 +48,22 @@ public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null
     }
 }
 
-// Login sempre errado (401), salvo o e-mail bloqueado (429); cadastro sempre aceito (201).
+// Login sempre errado (401), salvo o e-mail bloqueado (429) e o de falha (500); cadastro sempre aceito (201).
 public sealed class FakeAuthService : IAuthService
 {
     public const string LockedEmail = "bloqueado@kliny.test";
+    public const string FailingEmail = "falha@kliny.test";
 
     public Task<AuthResponse> RegisterAsync(RegisterRequest request) =>
         Task.FromResult(new AuthResponse("token", DateTime.UtcNow.AddHours(1),
             new UserResponse(1, request.Name, request.Email, DateTime.UtcNow)));
 
-    public Task<AuthResponse?> LoginAsync(LoginRequest request) =>
-        request.Email == LockedEmail
-            ? throw new TooManyRequestsException(TimeSpan.FromMinutes(15))
-            : Task.FromResult<AuthResponse?>(null);
+    public Task<AuthResponse?> LoginAsync(LoginRequest request) => request.Email switch
+    {
+        LockedEmail => throw new TooManyRequestsException(TimeSpan.FromMinutes(15)),
+        FailingEmail => throw new InvalidOperationException("Falha simulada para o teste dos cabeçalhos no 500."),
+        _ => Task.FromResult<AuthResponse?>(null),
+    };
 
     public Task<UserResponse?> GetUserAsync(int userId) => Task.FromResult<UserResponse?>(null);
 }

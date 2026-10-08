@@ -4,6 +4,7 @@ import react from '@vitejs/plugin-react'
 import tailwindcss from '@tailwindcss/vite'
 // Com a extensão: o carregador nativo de configuração do Vite não resolve import sem ela.
 import { APP_NAME } from './src/config/app.ts'
+import { cspMeta } from './csp.ts'
 
 // Substitui %APP_NAME% no index.html pela mesma constante usada nos componentes.
 function appName(): Plugin {
@@ -21,6 +22,8 @@ export default defineConfig({
     react(),
     tailwindcss(),
     appName(),
+    // Só no build; o hash dos scripts inline é sobre o HTML final (ver csp.ts).
+    cspMeta(),
   ],
   server: {
     // Em desenvolvimento a API fica na mesma origem, sem precisar de CORS.
