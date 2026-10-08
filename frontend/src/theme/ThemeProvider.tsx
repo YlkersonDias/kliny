@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useMemo, useState, useSyncExternalStore, type ReactNode } from 'react'
 import {
+  applyThemeColor,
   DARK_QUERY,
   THEME_STORAGE_KEY,
   parseThemePreference,
@@ -29,6 +30,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
 
   useEffect(() => {
     const root = document.documentElement
+    applyThemeColor(theme)
     if (root.dataset.theme === theme) return
     // Sem transição durante a troca: botões e links com transition-colors mudariam em 150 ms
     // enquanto o fundo muda na hora, e a tela passaria por combinações sem contraste.

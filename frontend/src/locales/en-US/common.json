@@ -40,5 +40,10 @@
     "title": "Page not found",
     "description": "The address may be wrong, or the page no longer exists.",
     "backHome": "Back to home"
+  },
+  "update": {
+    "available": "A new version of {{appName}} is available.",
+    "reload": "Update",
+    "later": "Not now"
   }
 }

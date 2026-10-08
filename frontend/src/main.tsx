@@ -8,6 +8,7 @@ import { AuthProvider } from './auth/AuthProvider'
 import { LanguageProvider } from './language/LanguageProvider'
 import { ThemeProvider } from './theme/ThemeProvider'
 import App from './App.tsx'
+import { UpdatePrompt } from './components/ui/UpdatePrompt'
 import './index.css'
 
 // networkMode 'always': sem rede, o padrão do TanStack Query é pausar a requisição em silêncio
@@ -38,6 +39,7 @@ createRoot(document.getElementById('root')!).render(
             <LanguageProvider>
               <App />
             </LanguageProvider>
+            <UpdatePrompt />
           </AuthProvider>
         </QueryClientProvider>
       </BrowserRouter>
