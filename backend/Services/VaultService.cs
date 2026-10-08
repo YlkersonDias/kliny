@@ -176,6 +176,9 @@ public class VaultService(AppDbContext db) : IVaultService
     {
         var vaults = await db.Vaults
             .FromSql($"SELECT * FROM Vaults WHERE Id = {id} AND UserId = {userId} FOR UPDATE")
+            // O filtro global (S.6b) poria este SQL numa subconsulta e o FOR UPDATE deixaria de ficar no
+            // SELECT de fora. O dono já está filtrado no próprio SQL.
+            .IgnoreQueryFilters()
             .ToListAsync();
 
         return vaults.SingleOrDefault() ?? throw new NotFoundException(Messages.VaultNotFound);
