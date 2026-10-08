@@ -55,16 +55,19 @@ public class VaultService(AppDbContext db) : IVaultService
         await dbTransaction.CommitAsync();
     }
 
-    public Task<VaultOperationResult> DepositAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey = null) =>
+    public Task<VaultOperationResult> DepositAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey) =>
         OperateAsync(userId, id, request, idempotencyKey, isWithdrawal: false);
 
-    public Task<VaultOperationResult> WithdrawAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey = null) =>
+    public Task<VaultOperationResult> WithdrawAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey) =>
         OperateAsync(userId, id, request, idempotencyKey, isWithdrawal: true);
 
     private async Task<VaultOperationResult> OperateAsync(
         int userId, int id, VaultOperationRequest request, string? idempotencyKey, bool isWithdrawal)
     {
-        if (idempotencyKey is not null && !IdempotencyKey.IsValid(idempotencyKey))
+        // Obrigatória: sem ela, um envio repetido (falha de rede, clique duplo) gravaria duas vezes.
+        if (string.IsNullOrEmpty(idempotencyKey))
+            throw new BusinessRuleException(Messages.IdempotencyKeyRequired);
+        if (!IdempotencyKey.IsValid(idempotencyKey))
             throw new BusinessRuleException(Messages.IdempotencyKeyInvalid);
 
         var amount = request.Amount!.Value;
@@ -83,7 +86,7 @@ public class VaultService(AppDbContext db) : IVaultService
         // Envio repetido: devolve o que já foi gravado, antes de conferir saldos (uma retirada que
         // esvaziou o cofre seria recusada na repetição). A consulta vem depois das travas, então
         // enxerga o que uma requisição simultânea com a mesma chave acabou de gravar.
-        if (idempotencyKey is not null && await FindByKeyAsync(userId, idempotencyKey) is { } previous)
+        if (await FindByKeyAsync(userId, idempotencyKey) is { } previous)
             return await ReplayAsync(previous, vault.Id, signedAmount, date);
 
         var balance = await GetBalanceAsync(vault.Id);
@@ -127,7 +130,7 @@ public class VaultService(AppDbContext db) : IVaultService
         {
             await db.SaveChangesAsync();
         }
-        catch (DbUpdateException ex) when (idempotencyKey is not null && ex.IsUniqueViolation())
+        catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
             // A mesma chave chegou ao mesmo tempo por outro cofre (travas diferentes) e gravou antes.
             await dbTransaction.RollbackAsync();

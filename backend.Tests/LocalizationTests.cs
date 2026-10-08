@@ -91,9 +91,10 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     private async Task<(HttpStatusCode Status, List<string> Messages)> Send(
-        HttpMethod method, string url, string? language, object? body = null, bool authenticated = true)
+        HttpMethod method, string url, string? language, object? body = null, bool authenticated = true,
+        bool idempotencyKeys = true)
     {
-        using var client = fixture.Api.Client(authenticated ? fixture.Token : null);
+        using var client = fixture.Api.Client(authenticated ? fixture.Token : null, idempotencyKeys);
         using var response = await client.SendAsync(Localization.Request(method, url, language, body), Ct);
         return (response.StatusCode, await Localization.MessagesOf(response));
     }
@@ -194,6 +195,15 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
             HttpStatusCode.BadRequest, english,
             "Saldo insuficiente na conta. Disponível em 01/02/2021: R$ 0,00. Lance uma receita antes de depositar.",
             "Insufficient account balance. Available on 02/01/2021: R$0.00. Add income before depositing.");
+
+    [Theory]
+    [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]
+    public async Task Operacao_de_cofre_sem_idempotency_key(string? language, bool english) =>
+        AssertMessage(await Send(HttpMethod.Post, VaultUrl("deposit"), language, new { amount = 10m, date = "2021-03-10" },
+                idempotencyKeys: false),
+            HttpStatusCode.BadRequest, english,
+            "Envie o cabeçalho Idempotency-Key: depósitos e retiradas precisam dele para não serem gravados duas vezes.",
+            "Send the Idempotency-Key header: deposits and withdrawals need it so they are not recorded twice.");
 
     [Theory]
     [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]

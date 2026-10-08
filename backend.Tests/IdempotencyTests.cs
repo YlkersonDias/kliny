@@ -61,6 +61,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
         {
             Content = JsonContent.Create(new { amount, date }),
         };
+        // Sem chave aqui, o cliente do MySqlApi põe uma nova (um envio, uma intenção).
         if (key is not null)
             request.Headers.Add("Idempotency-Key", key);
         return await client.SendAsync(request, Ct);
@@ -236,16 +237,35 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
         Assert.Equal(70m, await BalanceAsync(a, vaultA));
     }
 
-    [Fact]
-    public async Task Sem_chave_cada_envio_e_um_lancamento()
+    [Theory]
+    [InlineData("deposit")]
+    [InlineData("withdraw")]
+    public async Task Sem_chave_responde_400_e_nao_grava(string operation)
     {
-        // A chave é opcional: sem ela, o comportamento é o de antes.
+        // A chave é obrigatória. Cliente sem o handler que põe uma chave nova em cada envio.
+        using var client = AsA();
+        using var withoutKeys = fixture.Api.Client(fixture.TokenA, idempotencyKeys: false);
+        var vault = await CreateVaultAsync(client);
+        (await Operate(client, vault, "deposit", 50m, null)).EnsureSuccessStatusCode();
+
+        using var response = await Operate(withoutKeys, vault, operation, 10m, null);
+
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        var body = await response.Content.ReadFromJsonAsync<JsonElement>(Ct);
+        Assert.Equal("Envie o cabeçalho Idempotency-Key: depósitos e retiradas precisam dele para não serem gravados duas vezes.",
+            body.GetProperty("detail").GetString());
+        Assert.Equal(1, await StatementCountAsync(client, vault));
+    }
+
+    [Fact]
+    public async Task Chave_vazia_responde_400()
+    {
         using var client = AsA();
         var vault = await CreateVaultAsync(client);
 
-        (await Operate(client, vault, "deposit", 10m, null)).EnsureSuccessStatusCode();
-        (await Operate(client, vault, "deposit", 10m, null)).EnsureSuccessStatusCode();
+        using var response = await Operate(client, vault, "deposit", 10m, "");
 
-        Assert.Equal(2, await StatementCountAsync(client, vault));
+        Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+        Assert.Equal(0, await StatementCountAsync(client, vault));
     }
 }
