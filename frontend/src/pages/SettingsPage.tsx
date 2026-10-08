@@ -1,5 +1,10 @@
+import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { useNavigate } from 'react-router'
+import { useAuth } from '../auth/useAuth'
+import { Button } from '../components/ui/Button'
 import { ChoiceChip } from '../components/ui/ChoiceChip'
+import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { useLanguage } from '../language/useLanguage'
 import { LANGUAGE_NAMES, LANGUAGES } from '../lib/language'
@@ -8,12 +13,30 @@ import { useTheme } from '../theme/useTheme'
 
 const THEMES: ThemePreference[] = ['light', 'dark', 'system']
 
-// Preferências deste navegador (não da conta): tema e idioma.
+// Preferências deste navegador (tema e idioma) e as sessões da conta.
 export default function SettingsPage() {
   const { t } = useTranslation('settings')
   usePageTitle(t('title'))
   const { preference, theme, setPreference } = useTheme()
   const { language, setLanguage } = useLanguage()
+  const { signOutEverywhere } = useAuth()
+  const navigate = useNavigate()
+  const [confirming, setConfirming] = useState(false)
+  const [signingOut, setSigningOut] = useState(false)
+  const [signOutError, setSignOutError] = useState<string | null>(null)
+
+  async function handleSignOutEverywhere() {
+    setSigningOut(true)
+    setSignOutError(null)
+    try {
+      await signOutEverywhere()
+      // Como o "Sair": vai para o login sem guardar esta página para depois.
+      navigate('/entrar', { replace: true })
+    } catch (error) {
+      setSignOutError(`${t('sessions.error')} ${error instanceof Error ? error.message : ''}`.trim())
+      setSigningOut(false)
+    }
+  }
 
   return (
     <>
@@ -65,6 +88,27 @@ export default function SettingsPage() {
           <p id="idioma-dica" className="mt-2 text-sm text-muted">{t('language.hint')}</p>
         </fieldset>
       </section>
+
+      <section aria-labelledby="sessoes" className="mt-6 rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        <h2 id="sessoes" className="text-lg font-semibold text-foreground">{t('sessions.title')}</h2>
+        <p className="mt-2 text-sm text-muted">{t('sessions.description')}</p>
+        <Button variant="secondary" className="mt-4" onClick={() => { setSignOutError(null); setConfirming(true) }}>
+          {t('sessions.button')}
+        </Button>
+      </section>
+
+      {confirming && (
+        <ConfirmDialog
+          title={t('sessions.confirmTitle')}
+          confirmLabel={t('sessions.confirm')}
+          onConfirm={handleSignOutEverywhere}
+          onCancel={() => setConfirming(false)}
+          isLoading={signingOut}
+          error={signOutError}
+        >
+          {t('sessions.confirmText')}
+        </ConfirmDialog>
+      )}
     </>
   )
 }

@@ -12,4 +12,10 @@ public interface IAuthService
     Task<AuthResponse?> LoginAsync(LoginRequest request);
 
     Task<UserResponse?> GetUserAsync(int userId);
+
+    /// <summary>
+    /// "Sair de todos os dispositivos": incrementa a versão de token do usuário, e todo token
+    /// emitido antes (em qualquer aparelho) passa a responder 401.
+    /// </summary>
+    Task RevokeAllTokensAsync(int userId);
 }

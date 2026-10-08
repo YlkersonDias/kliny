@@ -10,6 +10,8 @@ export interface AuthContextValue {
   signIn: (request: LoginRequest) => Promise<void>
   signUp: (request: RegisterRequest) => Promise<void>
   signOut: () => void
+  // Invalida os tokens de todos os aparelhos na API (S.5) e encerra a sessão local.
+  signOutEverywhere: () => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)
