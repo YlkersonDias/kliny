@@ -98,6 +98,29 @@ public class AuthServiceLockoutTests : IDisposable
         await Assert.ThrowsAsync<TooManyRequestsException>(() => Login("ninguem@kliny.test", "qualquer"));
     }
 
+    // S.6: e-mail sem conta também roda o BCrypt, com o mesmo custo do cadastro, para o tempo da
+    // resposta não revelar quem tem conta (regra 4).
+    [Fact]
+    public void Hash_fixo_tem_o_mesmo_custo_do_cadastro()
+    {
+        Assert.Matches($@"^\$2[aby]?\${AuthService.BcryptWorkFactor:00}\$", AuthService.TimingHash);
+        Assert.Equal(11, AuthService.BcryptWorkFactor);
+    }
+
+    [Fact]
+    public async Task Email_sem_conta_tambem_roda_o_bcrypt()
+    {
+        // Só um limite inferior, que não oscila no CI: com custo 11 o BCrypt leva dezenas de
+        // milissegundos; sem ele, a resposta para um e-mail sem conta sairia em menos de 1 ms.
+        _ = AuthService.TimingHash;
+        var stopwatch = System.Diagnostics.Stopwatch.StartNew();
+        Assert.Null(await Login("ninguem@kliny.test", "qualquer-senha"));
+        stopwatch.Stop();
+
+        Assert.True(stopwatch.ElapsedMilliseconds >= 20,
+            $"Login com e-mail sem conta levou {stopwatch.ElapsedMilliseconds} ms: o BCrypt não rodou?");
+    }
+
     [Fact]
     public async Task Email_com_maiusculas_e_espacos_conta_como_o_mesmo()
     {

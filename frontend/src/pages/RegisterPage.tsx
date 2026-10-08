@@ -11,6 +11,7 @@ import { FormAlert } from '../components/ui/FormAlert'
 import { Input } from '../components/ui/Input'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../lib/forms'
+import { exceedsPasswordBytes } from '../lib/password'
 
 const FIELDS = ['name', 'email', 'password', 'confirmPassword'] as const
 type Field = (typeof FIELDS)[number]
@@ -36,6 +37,8 @@ function validate(values: Record<Field, string>, t: TFunction<'auth'>): FieldErr
   if (!values.password) errors.password = t('validation.passwordRequired')
   else if (values.password.length < PASSWORD_MIN || values.password.length > PASSWORD_MAX) {
     errors.password = t('validation.passwordLength', { min: PASSWORD_MIN, max: PASSWORD_MAX })
+  } else if (exceedsPasswordBytes(values.password)) {
+    errors.password = t('validation.passwordTooLong')
   }
 
   // Conferido só aqui: a API não recebe a confirmação.

@@ -45,6 +45,9 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
+            // S.6: só HS256, o algoritmo com que a API assina. Qualquer outro (inclusive "none") é recusado,
+            // mesmo que o padrão da biblioteca mude.
+            ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = JwtRegisteredClaimNames.Name,
         };
