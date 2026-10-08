@@ -182,6 +182,14 @@ public static class Messages
         "Retirada do cofre {0}",
         "Withdrawal from vault {0}");
 
+    public static string IdempotencyKeyInvalid => Text(
+        "Chave de idempotência inválida: use de 1 a 64 letras, números, hífens ou sublinhados.",
+        "Invalid idempotency key: use 1 to 64 letters, digits, hyphens or underscores.");
+
+    public static string IdempotencyKeyReused => Text(
+        "Esta chave de idempotência já foi usada numa operação diferente.",
+        "This idempotency key was already used for a different operation.");
+
     public static string FromRequired => Text(
         "Informe a data inicial.",
         "Enter the start date.");

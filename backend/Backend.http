@@ -210,6 +210,19 @@ Content-Type: application/json
   "description": "Conserto do carro"
 }
 
+### Depositar com Idempotency-Key: repetir esta requisição devolve o mesmo lançamento (200,
+# com o cabeçalho Idempotent-Replayed: true), sem criar outro. A mesma chave com outro valor,
+# data, cofre ou tipo responde 409. Formato: 1 a 64 letras, números, hífens ou sublinhados.
+POST {{baseUrl}}/api/vaults/1/deposit
+Authorization: Bearer {{token}}
+Content-Type: application/json
+Idempotency-Key: 3f6c2a1e-9b0d-4c55-8a7e-1d2b3c4d5e6f
+
+{
+  "amount": 25.00,
+  "date": "2026-10-02"
+}
+
 ### Extrato do cofre (200)
 GET {{baseUrl}}/api/transactions?vaultId=1
 Authorization: Bearer {{token}}

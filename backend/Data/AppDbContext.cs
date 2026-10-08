@@ -59,6 +59,10 @@ public class AppDbContext(DbContextOptions<AppDbContext> options) : DbContext(op
             entity.Property(t => t.Description).HasMaxLength(255).IsRequired();
             entity.Property(t => t.Amount).HasPrecision(18, 2);
             entity.HasIndex(t => new { t.UserId, t.Date });
+            entity.Property(t => t.IdempotencyKey).HasMaxLength(IdempotencyKey.MaxLength);
+            // Por usuário: a chave de um nunca encontra o lançamento de outro. O MySQL aceita
+            // vários NULL num índice único, então as movimentações comuns não são afetadas.
+            entity.HasIndex(t => new { t.UserId, t.IdempotencyKey }).IsUnique();
 
             entity.HasOne(t => t.User)
                 .WithMany(u => u.Transactions)
