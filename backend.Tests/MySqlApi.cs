@@ -110,11 +110,13 @@ public sealed class MySqlApi : IAsyncLifetime
     private void SkipIfUnavailable() =>
         Assert.SkipWhen(_app is null, $"Sem MySQL de teste ({ServerVariable}): roda no CI.");
 
-    // Cliente sem token; pula o teste se não há MySQL de teste.
-    public HttpClient Client(string? token = null)
+    // Cliente sem token; pula o teste se não há MySQL de teste. Por padrão, todo depósito e retirada
+    // sem Idempotency-Key ganha uma chave nova (cada envio é uma intenção diferente); com
+    // idempotencyKeys: false, a requisição sai como foi montada, para testar a falta da chave.
+    public HttpClient Client(string? token = null, bool idempotencyKeys = true)
     {
         SkipIfUnavailable();
-        var client = _app!.CreateClient();
+        var client = idempotencyKeys ? _app!.CreateDefaultClient(new IdempotencyKeyHandler()) : _app!.CreateClient();
         if (token is not null)
             client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
         return client;
@@ -129,6 +131,19 @@ public sealed class MySqlApi : IAsyncLifetime
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(Ct);
         return body.GetProperty("token").GetString()!;
+    }
+
+    private sealed class IdempotencyKeyHandler : DelegatingHandler
+    {
+        protected override Task<HttpResponseMessage> SendAsync(HttpRequestMessage request, CancellationToken cancellationToken)
+        {
+            var path = request.RequestUri?.AbsolutePath ?? "";
+            if (request.Method == HttpMethod.Post
+                && (path.EndsWith("/deposit", StringComparison.Ordinal) || path.EndsWith("/withdraw", StringComparison.Ordinal))
+                && !request.Headers.Contains(IdempotencyKey.Header))
+                request.Headers.Add(IdempotencyKey.Header, Guid.NewGuid().ToString());
+            return base.SendAsync(request, cancellationToken);
+        }
     }
 
     private sealed class App(string connectionString) : WebApplicationFactory<Program>

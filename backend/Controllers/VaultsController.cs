@@ -52,12 +52,12 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
         return NoContent();
     }
 
-    // Idempotency-Key opcional: com ela, repetir o envio não cria um segundo lançamento.
+    // Idempotency-Key obrigatória: repetir o envio com a mesma chave não cria um segundo lançamento.
     [HttpPost("{id:int}/deposit")]
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Deposit(
         int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
         Result(await vaultService.DepositAsync(User.GetUserId(), id, request, idempotencyKey));
@@ -66,7 +66,7 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    [ProducesResponseType(StatusCodes.Status422UnprocessableEntity)]
     public async Task<IActionResult> Withdraw(
         int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
         Result(await vaultService.WithdrawAsync(User.GetUserId(), id, request, idempotencyKey));

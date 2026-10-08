@@ -182,6 +182,10 @@ public static class Messages
         "Retirada do cofre {0}",
         "Withdrawal from vault {0}");
 
+    public static string IdempotencyKeyRequired => Text(
+        "Envie o cabeçalho Idempotency-Key: depósitos e retiradas precisam dele para não serem gravados duas vezes.",
+        "Send the Idempotency-Key header: deposits and withdrawals need it so they are not recorded twice.");
+
     public static string IdempotencyKeyInvalid => Text(
         "Chave de idempotência inválida: use de 1 a 64 letras, números, hífens ou sublinhados.",
         "Invalid idempotency key: use 1 to 64 letters, digits, hyphens or underscores.");

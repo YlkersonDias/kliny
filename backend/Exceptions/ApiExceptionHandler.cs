@@ -11,6 +11,7 @@ public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) :
         {
             NotFoundException => StatusCodes.Status404NotFound,
             ConflictException => StatusCodes.Status409Conflict,
+            UnprocessableException => StatusCodes.Status422UnprocessableEntity,
             BusinessRuleException => StatusCodes.Status400BadRequest,
             TooManyRequestsException => StatusCodes.Status429TooManyRequests,
             _ => (int?)null,

@@ -190,9 +190,14 @@ Content-Type: application/json
 ### Depositar; o valor é sempre positivo (200)
 # date: hoje ou passada; data futura responde 400 (vale também para a retirada)
 # Só deposita até o saldo da conta na data do depósito; acima disso responde 400
+# Idempotency-Key obrigatória em depósito e retirada (sem ela, 400): 1 a 64 letras, números,
+# hífens ou sublinhados. Repetir a requisição com a mesma chave devolve o mesmo lançamento
+# (200, cabeçalho Idempotent-Replayed: true), sem criar outro; para um lançamento novo, troque a
+# chave. A mesma chave com outro valor, data, cofre ou tipo responde 422.
 POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json
+Idempotency-Key: exemplo-deposito-1
 
 {
   "amount": 500.00,
@@ -203,6 +208,7 @@ Content-Type: application/json
 POST {{baseUrl}}/api/vaults/1/withdraw
 Authorization: Bearer {{token}}
 Content-Type: application/json
+Idempotency-Key: exemplo-retirada-1
 
 {
   "amount": 150.00,
@@ -210,13 +216,21 @@ Content-Type: application/json
   "description": "Conserto do carro"
 }
 
-### Depositar com Idempotency-Key: repetir esta requisição devolve o mesmo lançamento (200,
-# com o cabeçalho Idempotent-Replayed: true), sem criar outro. A mesma chave com outro valor,
-# data, cofre ou tipo responde 409. Formato: 1 a 64 letras, números, hífens ou sublinhados.
+### Mesma chave do depósito acima com outro valor (422)
 POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json
-Idempotency-Key: 3f6c2a1e-9b0d-4c55-8a7e-1d2b3c4d5e6f
+Idempotency-Key: exemplo-deposito-1
+
+{
+  "amount": 25.00,
+  "date": "2026-10-02"
+}
+
+### Depositar sem Idempotency-Key (400)
+POST {{baseUrl}}/api/vaults/1/deposit
+Authorization: Bearer {{token}}
+Content-Type: application/json
 
 {
   "amount": 25.00,
@@ -284,6 +298,7 @@ POST {{baseUrl}}/api/vaults/1/deposit
 Authorization: Bearer {{token}}
 Content-Type: application/json
 Accept-Language: en-US
+Idempotency-Key: exemplo-deposito-ingles-1
 
 {
   "amount": 999999,
