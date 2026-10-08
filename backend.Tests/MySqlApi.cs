@@ -61,12 +61,14 @@ public sealed class MySqlApi : IAsyncLifetime
         var appPassword = Guid.NewGuid().ToString("N");
 
         _adminConnectionString = new MySqlConnectionStringBuilder(server) { Database = database }.ConnectionString;
-        AppConnectionString = new MySqlConnectionStringBuilder(server)
+        // Variável local: o getter de AppConnectionString pula o teste enquanto _app é null.
+        var appConnectionString = new MySqlConnectionStringBuilder(server)
         {
             Database = database,
             UserID = _appUser,
             Password = appPassword,
         }.ConnectionString;
+        AppConnectionString = appConnectionString;
 
         await using (var admin = AdminContext())
         {
@@ -82,7 +84,7 @@ public sealed class MySqlApi : IAsyncLifetime
 #pragma warning restore EF1002
         }
 
-        _app = new App(AppConnectionString);
+        _app = new App(appConnectionString);
     }
 
     public async ValueTask DisposeAsync()

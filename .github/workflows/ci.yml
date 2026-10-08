@@ -50,25 +50,9 @@ jobs:
       # usuário só de DML para a API (o root daqui só roda as migrations e cria esse usuário);
       # sem esta variável no CI eles falham, para não passarem pulados sem ninguém ver.
       - name: Testar
-        run: |
-          set -o pipefail
-          dotnet test --solution Kliny.sln --no-build --configuration Release 2>&1 | tee test-output.log
+        run: dotnet test --solution Kliny.sln --no-build --configuration Release
         env:
           KLINY_TEST_MYSQL: Server=127.0.0.1;Port=3306;User=root;Password=kliny-ci;AllowPublicKeyRetrieval=true
-
-      # Diagnóstico temporário (etapa S.3): o download do log completo do Actions está bloqueado
-      # na rede de quem está depurando agora. Remover assim que a causa da falha for encontrada.
-      - name: Diagnóstico temporário de falha nos testes
-        if: failure()
-        run: |
-          sed -E 's/\x1b\[[0-9;]*m//g' test-output.log > plain.log
-          { grep -E "^(failed|skipped) " plain.log || true; echo "--- fim da lista; cauda do log abaixo ---"; tail -n 150 plain.log; } \
-            | sed 's/%/%25/g; s/\r$//' \
-            | awk 'BEGIN{ORS="%0A"}{print}' \
-            | fold -w 3000 \
-            | while IFS= read -r chunk || [ -n "$chunk" ]; do
-                echo "::error::$chunk"
-              done
 
   frontend:
     name: Frontend (lint, testes e build)
