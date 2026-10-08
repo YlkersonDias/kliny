@@ -12,6 +12,8 @@ export interface AuthContextValue {
   signOut: () => void
   // Invalida os tokens de todos os aparelhos na API (S.5) e encerra a sessão local.
   signOutEverywhere: () => Promise<void>
+  // Exclui a conta na API (exige a senha) e encerra a sessão local.
+  deleteAccount: (password: string) => Promise<void>
 }
 
 export const AuthContext = createContext<AuthContextValue | null>(null)

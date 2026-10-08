@@ -2,6 +2,7 @@ import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useNavigate } from 'react-router'
 import { useAuth } from '../auth/useAuth'
+import { AccountSection } from '../components/settings/AccountSection'
 import { Button } from '../components/ui/Button'
 import { ChoiceChip } from '../components/ui/ChoiceChip'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
@@ -109,6 +110,8 @@ export default function SettingsPage() {
           {t('sessions.confirmText')}
         </ConfirmDialog>
       )}
+
+      <AccountSection />
     </>
   )
 }

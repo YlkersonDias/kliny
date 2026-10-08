@@ -1,4 +1,6 @@
 import type { ReactNode } from 'react'
+import { useTranslation } from 'react-i18next'
+import { Link } from 'react-router'
 import { APP_NAME } from '../../config/app'
 import { LanguageSwitch } from '../ui/LanguageSwitch'
 import { ThemeToggle } from '../ui/ThemeToggle'
@@ -13,6 +15,8 @@ interface AuthLayoutProps {
 
 // Login e cadastro: cartão branco sobre o fundo lilás (o texto fica todo no cartão).
 export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLayoutProps) {
+  const { t } = useTranslation('privacy')
+
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center bg-surface-soft px-4 py-10">
       {/* Antes de entrar já dá para trocar o idioma e o tema (os padrões são português e escuro). */}
@@ -43,6 +47,12 @@ export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLa
           <p className="mt-1 text-sm text-muted">{subtitle}</p>
           <div className="mt-6">{children}</div>
         </main>
+        {/* Sobre o lilás só o foreground passa de 4,5:1 (ver a paleta no CLAUDE.md). */}
+        <p className="mt-4 text-center text-sm">
+          <Link to="/privacidade" className="text-foreground underline underline-offset-2">
+            {t('footerLink')}
+          </Link>
+        </p>
       </div>
     </div>
   )

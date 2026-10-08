@@ -2,7 +2,7 @@ import { useRef, useState, type FormEvent } from 'react'
 import { Link, useLocation } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
 import type { TFunction } from 'i18next'
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/useAuth'
 import { AuthLayout } from '../components/layout/AuthLayout'
@@ -144,6 +144,14 @@ export default function RegisterPage() {
           {mutation.isPending ? t('register.submitting') : t('register.submit')}
         </Button>
       </form>
+
+      <p className="mt-4 text-center text-xs text-muted">
+        <Trans
+          t={t}
+          i18nKey="register.privacyNotice"
+          components={{ link: <Link to="/privacidade" className="font-semibold text-primary underline-offset-2 hover:underline" /> }}
+        />
+      </p>
 
       <p className="mt-6 text-center text-sm text-muted">
         {t('register.hasAccount')}{' '}

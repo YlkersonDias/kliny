@@ -24,5 +24,17 @@
     "confirmText": "You will be signed out of this device and every other device you signed in on. To come back, sign in again with your email and password.",
     "confirm": "Sign out of all",
     "error": "Could not sign out of all devices."
+  },
+  "account": {
+    "title": "Privacy and account",
+    "privacyLink": "Read the privacy policy",
+    "deleteDescription": "Deleting your account permanently erases all your transactions, categories and vaults. It cannot be undone.",
+    "deleteButton": "Delete my account",
+    "confirmTitle": "Delete your account?",
+    "confirmText": "All your data will be erased forever, on every device. To confirm, enter your password.",
+    "password": "Password",
+    "understand": "I understand that all my data will be erased and that this cannot be undone.",
+    "confirm": "Delete account",
+    "error": "Could not delete the account."
   }
 }

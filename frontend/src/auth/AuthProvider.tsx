@@ -84,6 +84,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     endSession(i18n.t('auth:signedOutEverywhere'))
   }, [endSession])
 
+  // Como no signOutEverywhere: a sessão local só termina depois que a API confirmou.
+  const deleteAccount = useCallback(async (password: string) => {
+    await authApi.deleteAccount(password)
+    endSession(i18n.t('auth:accountDeleted'))
+  }, [endSession])
+
   const value = useMemo<AuthContextValue>(() => ({
     user: session?.user ?? null,
     isValidating,
@@ -92,7 +98,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signUp,
     signOut,
     signOutEverywhere,
-  }), [session, isValidating, notice, signIn, signUp, signOut, signOutEverywhere])
+    deleteAccount,
+  }), [session, isValidating, notice, signIn, signUp, signOut, signOutEverywhere, deleteAccount])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }
