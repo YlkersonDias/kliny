@@ -15,5 +15,14 @@
     "title": "Idioma",
     "legend": "Idioma da interface",
     "hint": "A escolha vale para este navegador. Os valores continuam em reais."
+  },
+  "sessions": {
+    "title": "Sessões",
+    "description": "Se você entrou em outro aparelho, como um computador emprestado, pode encerrar todas as sessões de uma vez.",
+    "button": "Sair de todos os dispositivos",
+    "confirmTitle": "Sair de todos os dispositivos?",
+    "confirmText": "Você vai sair deste e de todos os outros aparelhos em que entrou. Para voltar, entre de novo com seu e-mail e senha.",
+    "confirm": "Sair de todos",
+    "error": "Não foi possível sair de todos os dispositivos."
   }
 }

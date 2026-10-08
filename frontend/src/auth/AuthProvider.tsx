@@ -77,6 +77,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => endSession(null), [endSession])
 
+  // Só encerra a sessão local depois que a API confirmou: se falhar, os outros aparelhos
+  // continuariam entrando, e a tela precisa mostrar o erro.
+  const signOutEverywhere = useCallback(async () => {
+    await authApi.logoutAll()
+    endSession(i18n.t('auth:signedOutEverywhere'))
+  }, [endSession])
+
   const value = useMemo<AuthContextValue>(() => ({
     user: session?.user ?? null,
     isValidating,
@@ -84,7 +91,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     signIn,
     signUp,
     signOut,
-  }), [session, isValidating, notice, signIn, signUp, signOut])
+    signOutEverywhere,
+  }), [session, isValidating, notice, signIn, signUp, signOut, signOutEverywhere])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }

@@ -15,5 +15,14 @@
     "title": "Language",
     "legend": "Interface language",
     "hint": "This choice applies to this browser. Amounts stay in Brazilian reais."
+  },
+  "sessions": {
+    "title": "Sessions",
+    "description": "If you signed in on another device, such as a borrowed computer, you can end all sessions at once.",
+    "button": "Sign out of all devices",
+    "confirmTitle": "Sign out of all devices?",
+    "confirmText": "You will be signed out of this device and every other device you signed in on. To come back, sign in again with your email and password.",
+    "confirm": "Sign out of all",
+    "error": "Could not sign out of all devices."
   }
 }
