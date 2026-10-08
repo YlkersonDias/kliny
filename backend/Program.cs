@@ -4,6 +4,7 @@ using Backend.Exceptions;
 using Backend.Localization;
 using Backend.Options;
 using Backend.RateLimiting;
+using Backend.Security;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Localization;
@@ -82,9 +83,29 @@ builder.Services.Configure<RequestLocalizationOptions>(options =>
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
+// Sem o cabeçalho "Server: Kestrel": não informa o servidor a quem não precisa saber (S.4).
+builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
+
+// HSTS (S.4), só fora de Development. Começa curto (Hsts:MaxAgeDays, 30 dias) e sem
+// includeSubDomains nem preload: se o HTTPS do servidor quebrar, os navegadores recusam o site
+// pelo tempo inteiro do HSTS. Aumentar depois que o deploy estiver estável (S.7). O UseHsts só
+// manda o cabeçalho em requisição HTTPS: atrás de um proxy reverso, só depois do ForwardedHeaders (S.7).
+var hstsMaxAgeDays = builder.Configuration.GetValue("Hsts:MaxAgeDays", 30);
+if (hstsMaxAgeDays is < 1 or > 730)
+    throw new InvalidOperationException("Hsts:MaxAgeDays deve ficar entre 1 e 730.");
+builder.Services.AddHsts(options =>
+{
+    options.MaxAge = TimeSpan.FromDays(hstsMaxAgeDays);
+    options.IncludeSubDomains = false;
+    options.Preload = false;
+});
+
 var app = builder.Build();
 
-// Antes de tudo: as mensagens de erro do ApiExceptionHandler também saem no idioma pedido.
+// Primeiro de tudo: os cabeçalhos de segurança saem em toda resposta, inclusive nos erros.
+app.UseSecurityHeaders();
+
+// Antes do resto: as mensagens de erro do ApiExceptionHandler também saem no idioma pedido.
 app.UseRequestLocalization();
 app.UseExceptionHandler();
 
@@ -92,6 +113,10 @@ app.UseExceptionHandler();
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
+}
+else
+{
+    app.UseHsts();
 }
 
 app.UseHttpsRedirection();
