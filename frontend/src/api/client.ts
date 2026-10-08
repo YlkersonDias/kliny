@@ -30,17 +30,20 @@ interface RequestOptions {
   // false nas rotas públicas (login e cadastro): não envia token.
   auth?: boolean
   signal?: AbortSignal
+  // Cabeçalhos extras, como o Idempotency-Key do depósito e da retirada.
+  headers?: Record<string, string>
 }
 
 export async function apiRequest<T>(
   path: string,
-  { method = 'GET', body, auth = true, signal }: RequestOptions = {},
+  { method = 'GET', body, auth = true, signal, headers: extraHeaders }: RequestOptions = {},
 ): Promise<T> {
   const token = auth ? getSessionToken() : null
   // Accept-Language: a API responde as mensagens de erro no idioma da tela.
   const headers = new Headers({ Accept: 'application/json', 'Accept-Language': currentLanguage() })
   if (token) headers.set('Authorization', `Bearer ${token}`)
   if (body !== undefined) headers.set('Content-Type', 'application/json')
+  for (const [name, value] of Object.entries(extraHeaders ?? {})) headers.set(name, value)
 
   let response: Response
   try {
