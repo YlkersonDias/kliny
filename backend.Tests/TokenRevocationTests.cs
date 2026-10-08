@@ -39,7 +39,7 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
 
     // Token assinado com a mesma chave e o mesmo emissor da API de teste (MySqlApi), para o teste
     // provar que a recusa vem da versão, e não da assinatura.
-    private static string ForgeToken(int userId, int? tokenVersion)
+    private static string ForgeToken(int userId, int? tokenVersion, string algorithm = SecurityAlgorithms.HmacSha256)
     {
         var claims = new List<Claim> { new(JwtRegisteredClaimNames.Sub, userId.ToString()) };
         if (tokenVersion is { } version)
@@ -51,7 +51,7 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
             Expires = DateTime.UtcNow.AddMinutes(10),
             Subject = new ClaimsIdentity(claims),
             SigningCredentials = new SigningCredentials(
-                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('k', 64))), SecurityAlgorithms.HmacSha256),
+                new SymmetricSecurityKey(Encoding.UTF8.GetBytes(new string('k', 64))), algorithm),
         });
     }
 
@@ -105,7 +105,25 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(userId, tokenVersion: null)));
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(userId, tokenVersion: 999)));
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(999_999, tokenVersion: 0)));
+
+        // S.6: só HS256. Com a mesma chave e a versão certa, HS512 e token sem assinatura são recusados.
+        var version = await CurrentVersionAsync(userId);
+        Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(userId, version, SecurityAlgorithms.HmacSha512)));
+        Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(UnsignedToken(userId, version)));
     }
+
+    private static string UnsignedToken(int userId, int tokenVersion) =>
+        new JsonWebTokenHandler().CreateToken(new SecurityTokenDescriptor
+        {
+            Issuer = "Kliny",
+            Audience = "Kliny",
+            Expires = DateTime.UtcNow.AddMinutes(10),
+            Subject = new ClaimsIdentity(
+            [
+                new Claim(JwtRegisteredClaimNames.Sub, userId.ToString()),
+                new Claim("tv", tokenVersion.ToString(), ClaimValueTypes.Integer32),
+            ]),
+        });
 
     // Lida direto no banco de teste, com o usuário só de DML da API.
     private async Task<int> CurrentVersionAsync(int userId)

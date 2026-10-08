@@ -14,8 +14,10 @@ public class RegisterRequest
     [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailMaxLength))]
     public string Email { get; set; } = string.Empty;
 
-    // O BCrypt considera só os primeiros 72 bytes da senha.
+    // De 8 a 72 caracteres e, além disso, no máximo 72 bytes em UTF-8 (S.6): o BCrypt só usa os
+    // primeiros 72 bytes, e uma senha com acentos ou emoji passa disso com menos de 72 caracteres.
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordRequired))]
     [StringLength(72, MinimumLength = 8, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordLength))]
+    [MaxUtf8Bytes(PasswordRules.MaxBytes, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordTooLong))]
     public string Password { get; set; } = string.Empty;
 }

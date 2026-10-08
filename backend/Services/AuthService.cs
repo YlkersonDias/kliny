@@ -9,6 +9,15 @@ namespace Backend.Services;
 
 public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle) : IAuthService
 {
+    // Custo do BCrypt (2^11 rodadas), o mesmo no cadastro e no hash fixo abaixo.
+    public const int BcryptWorkFactor = 11;
+
+    // S.6: com e-mail sem conta, o login confere a senha contra este hash, com o mesmo custo,
+    // para levar o mesmo tempo que um e-mail cadastrado. Sem isso, medir o tempo da resposta
+    // revelaria quais e-mails têm conta (regra 4). A senha dele é aleatória e descartada.
+    internal static readonly string TimingHash =
+        BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"), BcryptWorkFactor);
+
     public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
     {
         var email = NormalizeEmail(request.Email);
@@ -20,7 +29,7 @@ public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThro
         {
             Name = request.Name.Trim(),
             Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password),
+            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, BcryptWorkFactor),
         };
 
         db.Users.Add(user);
@@ -47,7 +56,9 @@ public class AuthService(AppDbContext db, ITokenService tokenService, ILoginThro
 
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
 
-        if (user is null || !BCrypt.Net.BCrypt.Verify(request.Password, user.PasswordHash))
+        // Sempre um BCrypt: o hash do usuário, ou o fixo se o e-mail não tem conta.
+        var passwordMatches = BCrypt.Net.BCrypt.Verify(request.Password, user?.PasswordHash ?? TimingHash);
+        if (user is null || !passwordMatches)
         {
             loginThrottle.RegisterFailure(email);
             return null;
