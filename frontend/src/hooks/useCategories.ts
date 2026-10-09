@@ -41,6 +41,8 @@ export function useUpdateCategory() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: categoryKeys.all }),
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+      // O orçamento mostra o nome da categoria e some quando ela é apagada.
+      queryClient.invalidateQueries({ queryKey: ['budgets'] }),
     ]),
   })
 }
@@ -52,6 +54,8 @@ export function useDeleteCategory() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: categoryKeys.all }),
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
+      // O orçamento mostra o nome da categoria e some quando ela é apagada.
+      queryClient.invalidateQueries({ queryKey: ['budgets'] }),
       queryClient.invalidateQueries({ queryKey: ['reports'] }),
     ]),
   })

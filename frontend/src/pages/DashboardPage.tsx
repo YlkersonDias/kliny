@@ -1,5 +1,6 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
+import { BudgetsOverview } from '../components/dashboard/BudgetsOverview'
 import { MonthSummaryCard } from '../components/dashboard/MonthSummaryCard'
 import { RecentTransactions } from '../components/dashboard/RecentTransactions'
 import { SpendingSection } from '../components/dashboard/SpendingSection'
@@ -14,6 +15,7 @@ import { usePageTitle } from '../hooks/usePageTitle'
 import { useSummary, useTimeline } from '../hooks/useReports'
 import { useTransactions } from '../hooks/useTransactions'
 import { useVaults } from '../hooks/useVaults'
+import { budgetMonth } from '../lib/budgets'
 import { currentMonthRange, formatLongDate, today as getToday } from '../lib/dates'
 
 const RECENT_COUNT = 5
@@ -106,16 +108,19 @@ export default function DashboardPage() {
 
         <div className="grid grid-cols-1 items-start gap-4 lg:grid-cols-[minmax(0,3fr)_minmax(0,2fr)]">
           <RecentTransactions items={recent.data.items} />
-          {vaults.isError ? (
-            <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
-              <FormAlert>{t('vaultsError', { message: vaults.error.message })}</FormAlert>
-              <Button variant="secondary" onClick={() => vaults.refetch()}>{t('common:actions.tryAgain')}</Button>
-            </section>
-          ) : vaults.data ? (
-            <VaultsOverview vaults={vaults.data} />
-          ) : (
-            <Placeholder className="h-48" />
-          )}
+          <div className="space-y-4">
+            {vaults.isError ? (
+              <section className="space-y-3 rounded-2xl border border-border bg-surface p-5">
+                <FormAlert>{t('vaultsError', { message: vaults.error.message })}</FormAlert>
+                <Button variant="secondary" onClick={() => vaults.refetch()}>{t('common:actions.tryAgain')}</Button>
+              </section>
+            ) : vaults.data ? (
+              <VaultsOverview vaults={vaults.data} />
+            ) : (
+              <Placeholder className="h-48" />
+            )}
+            <BudgetsOverview month={budgetMonth(month)} />
+          </div>
         </div>
       </div>
     )

@@ -52,5 +52,29 @@
     "negative": "Se a conta estiver no negativo, lance como gasto.",
     "start": "Lançar saldo inicial",
     "createVault": "Criar um cofre"
+  },
+  "budgets": {
+    "title": "Orçamento do mês",
+    "manage": "Definir orçamentos",
+    "none": "Defina um limite mensal de gasto por categoria e acompanhe aqui quanto já foi usado.",
+    "spentOf": "{{spent}} de {{limit}}",
+    "remaining": "Faltam {{amount}}",
+    "near": "Quase no limite · faltam {{amount}}",
+    "reached": "Limite atingido",
+    "over": "Passou {{amount}}",
+    "percent": "{{percent}}%",
+    "progressLabel": "Orçamento de {{category}}",
+    "progressValue": "{{percent}}% do limite de {{limit}} usado.",
+    "loadError": "Não foi possível carregar o orçamento. {{message}}",
+    "form": {
+      "title": "Orçamentos mensais",
+      "description": "O limite vale para todos os meses e conta só os gastos da categoria. Deixe em branco para não ter orçamento.",
+      "placeholder": "Sem orçamento",
+      "positive": "O limite deve ser maior que zero.",
+      "noCategories": "Você ainda não tem categorias. Crie em Movimentações, em \"Gerenciar categorias\".",
+      "goToTransactions": "Ir para Movimentações",
+      "save": "Salvar orçamentos",
+      "saveError": "Não foi possível salvar. {{message}}"
+    }
   }
 }

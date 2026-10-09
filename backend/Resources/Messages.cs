@@ -198,6 +198,18 @@ public static class Messages
         "Retire o saldo antes de apagar o cofre.",
         "Withdraw the balance before deleting the vault.");
 
+    public static string BudgetMustBePositive => Text(
+        "O limite deve ser maior que zero.",
+        "The limit must be greater than zero.");
+
+    public static string BudgetNotFound => Text(
+        "Orçamento não encontrado.",
+        "Budget not found.");
+
+    public static string MonthInvalid => Text(
+        "Informe o mês no formato AAAA-MM.",
+        "Enter the month as YYYY-MM.");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

@@ -23,6 +23,7 @@ function useInvalidateAfterChange() {
   return () => Promise.all([
     queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
     queryClient.invalidateQueries({ queryKey: ['reports'] }),
+    queryClient.invalidateQueries({ queryKey: ['budgets'] }),
   ])
 }
 

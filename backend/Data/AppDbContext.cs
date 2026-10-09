@@ -16,6 +16,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
 
     public DbSet<User> Users => Set<User>();
     public DbSet<Category> Categories => Set<Category>();
+    public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<Vault> Vaults => Set<Vault>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
 
@@ -56,6 +57,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             entity.HasOne(c => c.User)
                 .WithMany(u => u.Categories)
                 .HasForeignKey(c => c.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Orçamento (8.2): um por categoria de cada usuário. Apagar o usuário ou a categoria apaga o orçamento.
+        modelBuilder.Entity<Budget>(entity =>
+        {
+            entity.Property(b => b.Amount).HasPrecision(18, 2);
+            entity.HasIndex(b => new { b.UserId, b.CategoryId }).IsUnique();
+            entity.HasQueryFilter(b => b.UserId == CurrentUserId);
+            entity.HasOne(b => b.User)
+                .WithMany()
+                .HasForeignKey(b => b.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(b => b.Category)
+                .WithMany()
+                .HasForeignKey(b => b.CategoryId)
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
