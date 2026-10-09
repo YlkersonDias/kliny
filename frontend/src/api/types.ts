@@ -73,9 +73,15 @@ export interface TransactionQuery {
   uncategorized?: boolean
   vaultId?: number
   type?: TransactionType
+  // Texto procurado na descrição (8.1); a API ignora maiúsculas e acentos.
+  search?: string
+  sort?: TransactionSort
   page?: number
   pageSize?: number
 }
+
+// Lista fechada aceita pela API; ausente = mais recentes primeiro.
+export type TransactionSort = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 
 // balance é calculado pela API (soma das movimentações do cofre com o sinal invertido).
 export interface Vault {

@@ -1,21 +1,28 @@
-import type { TransactionQuery, TransactionType } from '../api/types'
+import type { TransactionQuery, TransactionSort, TransactionType } from '../api/types'
 import i18n from '../i18n'
 import { isValidIsoDate, type DateRange } from './dates'
 
 // Filtros da tela de Movimentações, guardados na URL em português:
-// ?de=2026-10-01&ate=2026-10-31&categoria=3&tipo=gastos&pagina=2
+// ?de=2026-10-01&ate=2026-10-31&categoria=3&tipo=gastos&busca=mercado&ordem=maior&pagina=2
 // Parâmetro ausente = valor padrão; "de=" vazio = sem limite inicial.
 
 export const PAGE_SIZE = 20
 const PAGE_MAX = 1_000_000 // mesmo limite da API
 
 export type TypeFilter = '' | 'receitas' | 'gastos' | 'cofres'
+// '' = mais recentes primeiro (o padrão da API).
+export type SortFilter = '' | 'antigas' | 'maior' | 'menor'
+
+// Mesmo limite da API.
+export const SEARCH_MAX = 100
 
 export interface TransactionFilters {
   from: string // '' = sem limite
   to: string
   category: string // '' = todas, 'sem' = sem categoria, ou o Id
   type: TypeFilter
+  search: string // como foi digitado; a API ignora os espaços das pontas
+  sort: SortFilter
   page: number
 }
 
@@ -23,6 +30,12 @@ const TYPE_TO_API: Record<Exclude<TypeFilter, ''>, TransactionType> = {
   receitas: 'income',
   gastos: 'expense',
   cofres: 'vault',
+}
+
+const SORT_TO_API: Record<Exclude<SortFilter, ''>, TransactionSort> = {
+  antigas: 'date-asc',
+  maior: 'amount-desc',
+  menor: 'amount-asc',
 }
 
 // "?pagina=": inteiro de 1 a PAGE_MAX; qualquer outra coisa vira 1.
@@ -41,11 +54,14 @@ function parseDate(params: URLSearchParams, key: string, fallback: string): stri
 export function parseFilters(params: URLSearchParams, defaultRange: DateRange): TransactionFilters {
   const type = params.get('tipo') ?? ''
   const category = params.get('categoria') ?? ''
+  const sort = params.get('ordem') ?? ''
   const filters: TransactionFilters = {
     from: parseDate(params, 'de', defaultRange.from),
     to: parseDate(params, 'ate', defaultRange.to),
     category: category === 'sem' || /^[1-9]\d{0,9}$/.test(category) ? category : '',
     type: Object.hasOwn(TYPE_TO_API, type) ? (type as TypeFilter) : '',
+    search: (params.get('busca') ?? '').slice(0, SEARCH_MAX),
+    sort: Object.hasOwn(SORT_TO_API, sort) ? (sort as SortFilter) : '',
     page: parsePage(params.get('pagina')),
   }
   // Operações de cofre não têm categoria: a combinação não faz sentido (e a API recusa "sem").
@@ -60,6 +76,8 @@ export function filtersToParams(filters: TransactionFilters, defaultRange: DateR
   if (filters.to !== defaultRange.to) params.set('ate', filters.to)
   if (filters.category && filters.type !== 'cofres') params.set('categoria', filters.category)
   if (filters.type) params.set('tipo', filters.type)
+  if (filters.search.trim()) params.set('busca', filters.search)
+  if (filters.sort) params.set('ordem', filters.sort)
   if (filters.page > 1) params.set('pagina', String(filters.page))
   return params
 }
@@ -71,6 +89,8 @@ export function toQuery(filters: TransactionFilters): TransactionQuery {
     categoryId: /^\d+$/.test(filters.category) ? Number(filters.category) : undefined,
     uncategorized: filters.category === 'sem' || undefined,
     type: filters.type ? TYPE_TO_API[filters.type] : undefined,
+    search: filters.search.trim() || undefined,
+    sort: filters.sort ? SORT_TO_API[filters.sort] : undefined,
     page: filters.page,
     pageSize: PAGE_SIZE,
   }
@@ -80,9 +100,9 @@ export function isDefaultPeriod(filters: TransactionFilters, defaultRange: DateR
   return filters.from === defaultRange.from && filters.to === defaultRange.to
 }
 
-// Filtros além do período (categoria e tipo).
+// Filtros além do período (categoria, tipo e busca). A ordem não filtra nada.
 export function hasOtherFilters(filters: TransactionFilters): boolean {
-  return filters.category !== '' || filters.type !== ''
+  return filters.category !== '' || filters.type !== '' || filters.search.trim() !== ''
 }
 
 export function rangeError(filters: TransactionFilters): string | undefined {

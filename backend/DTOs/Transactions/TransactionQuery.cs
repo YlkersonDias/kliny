@@ -13,8 +13,21 @@ public enum TransactionType
     Vault,
 }
 
+// Ordens aceitas no "sort" (regra 6: lista fechada; nunca um nome de coluna vindo de fora).
+public static class TransactionSort
+{
+    public const string DateDesc = "date-desc";
+    public const string DateAsc = "date-asc";
+    public const string AmountDesc = "amount-desc";
+    public const string AmountAsc = "amount-asc";
+
+    public static readonly IReadOnlySet<string> All = new HashSet<string>([DateDesc, DateAsc, AmountDesc, AmountAsc]);
+}
+
 public class TransactionQuery : IValidatableObject
 {
+    public const int SearchMaxLength = 100;
+
     public DateOnly? From { get; set; }
     public DateOnly? To { get; set; }
     public int? CategoryId { get; set; }
@@ -26,6 +39,13 @@ public class TransactionQuery : IValidatableObject
     public int? VaultId { get; set; }
 
     public TransactionType? Type { get; set; }
+
+    /// <summary>Texto procurado dentro da descrição (sem diferenciar maiúsculas nem acentos).</summary>
+    [StringLength(SearchMaxLength, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.SearchTooLong))]
+    public string? Search { get; set; }
+
+    /// <summary>Uma das ordens de <see cref="TransactionSort"/>; vazio = mais recentes primeiro.</summary>
+    public string? Sort { get; set; }
 
     // Limite alto o bastante na prática e que impede o estouro do cálculo de Skip.
     [Range(1, 1_000_000, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PageRange))]
@@ -41,6 +61,9 @@ public class TransactionQuery : IValidatableObject
 
         if (Uncategorized && CategoryId is not null)
             yield return new ValidationResult(Messages.CategoryAndUncategorized, [nameof(Uncategorized), nameof(CategoryId)]);
+
+        if (Sort is not null && !TransactionSort.All.Contains(Sort))
+            yield return new ValidationResult(Messages.SortInvalid, [nameof(Sort)]);
 
         if (Uncategorized && (Type == TransactionType.Vault || VaultId is not null))
             yield return new ValidationResult(Messages.VaultOperationsHaveNoCategory, [nameof(Uncategorized)]);

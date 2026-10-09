@@ -16,7 +16,8 @@
     "monthTitle": "Nenhuma movimentação neste mês.",
     "monthDescription": "Lance uma receita ou um gasto para começar.",
     "periodTitle": "Nenhuma movimentação no período.",
-    "periodDescription": "Escolha outro período ou lance uma nova movimentação."
+    "periodDescription": "Escolha outro período ou lance uma nova movimentação.",
+    "searchDescription": "Nenhuma descrição tem “<search/>” nesses filtros. Tente outra palavra ou outro período."
   },
   "filters": {
     "label": "Filtros",
@@ -28,7 +29,14 @@
     "income": "Receitas",
     "expense": "Gastos",
     "vault": "Cofres",
-    "clear": "Limpar filtros"
+    "clear": "Limpar filtros",
+    "search": "Buscar",
+    "searchPlaceholder": "Descrição, como mercado ou aluguel",
+    "sort": "Ordenar por",
+    "sortRecent": "Mais recentes",
+    "sortOldest": "Mais antigas",
+    "sortHighest": "Maior valor",
+    "sortLowest": "Menor valor"
   },
   "list": {
     "date": "Data",

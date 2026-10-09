@@ -33,16 +33,31 @@ public class TransactionService(AppDbContext db) : ITransactionService
             _ => transactions,
         };
 
+        // Parametrizado pelo EF (regra 5). A collation do banco (utf8mb4_0900_ai_ci) faz a busca
+        // ignorar maiúsculas e acentos.
+        if (query.Search?.Trim() is { Length: > 0 } search)
+            transactions = transactions.Where(t => t.Description.Contains(search));
+
         var totalCount = await transactions.CountAsync();
-        var items = await Project(transactions
-                .OrderByDescending(t => t.Date)
-                .ThenByDescending(t => t.Id)
+        var items = await Project(Sort(transactions, query.Sort)
                 .Skip((query.Page - 1) * query.PageSize)
                 .Take(query.PageSize))
             .ToListAsync();
 
         return new PagedResponse<TransactionResponse>(items, query.Page, query.PageSize, totalCount);
     }
+
+    // Sempre com desempate pela data e pelo Id, para a paginação nunca repetir nem pular item.
+    // Valor: pelo valor absoluto, então um gasto de R$ 500 vem antes de um de R$ 20.
+    private static IQueryable<Transaction> Sort(IQueryable<Transaction> transactions, string? sort) => sort switch
+    {
+        TransactionSort.DateAsc => transactions.OrderBy(t => t.Date).ThenBy(t => t.Id),
+        TransactionSort.AmountDesc => transactions.OrderByDescending(t => Math.Abs(t.Amount))
+            .ThenByDescending(t => t.Date).ThenByDescending(t => t.Id),
+        TransactionSort.AmountAsc => transactions.OrderBy(t => Math.Abs(t.Amount))
+            .ThenByDescending(t => t.Date).ThenByDescending(t => t.Id),
+        _ => transactions.OrderByDescending(t => t.Date).ThenByDescending(t => t.Id),
+    };
 
     public async Task<TransactionResponse> GetAsync(int userId, int id) =>
         await Project(db.Transactions.AsNoTracking().Where(t => t.Id == id && t.UserId == userId))

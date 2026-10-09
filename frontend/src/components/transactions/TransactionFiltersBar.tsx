@@ -1,9 +1,13 @@
+import { useEffect, useEffectEvent, useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { Category } from '../../api/types'
-import type { TransactionFilters, TypeFilter } from '../../lib/transactionFilters'
+import { SEARCH_MAX, type SortFilter, type TransactionFilters, type TypeFilter } from '../../lib/transactionFilters'
 import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
+
+// Espera parar de digitar antes de consultar a API.
+const SEARCH_DELAY_MS = 300
 
 interface TransactionFiltersBarProps {
   filters: TransactionFilters
@@ -17,6 +21,22 @@ interface TransactionFiltersBarProps {
 export function TransactionFiltersBar({ filters, categories, rangeError, canClear, onChange, onClear }: TransactionFiltersBarProps) {
   const { t } = useTranslation(['transactions', 'common'])
   const isVault = filters.type === 'cofres'
+
+  // A busca digitada fica aqui e só vai para a URL (e para a API) depois da pausa. Se a URL
+  // mudar por fora (Limpar filtros, voltar no navegador), o campo acompanha.
+  const [draft, setDraft] = useState(filters.search)
+  const [committed, setCommitted] = useState(filters.search)
+  if (filters.search !== committed) {
+    setCommitted(filters.search)
+    setDraft(filters.search)
+  }
+  const commitSearch = useEffectEvent((search: string) => {
+    if (search !== filters.search) onChange({ search })
+  })
+  useEffect(() => {
+    const timer = setTimeout(() => commitSearch(draft), SEARCH_DELAY_MS)
+    return () => clearTimeout(timer)
+  }, [draft])
 
   return (
     <section aria-label={t('filters.label')} className="rounded-2xl border border-border bg-surface p-4 sm:p-5">
@@ -63,6 +83,30 @@ export function TransactionFiltersBar({ filters, categories, rangeError, canClea
           <option value="receitas">{t('filters.income')}</option>
           <option value="gastos">{t('filters.expense')}</option>
           <option value="cofres">{t('filters.vault')}</option>
+        </Select>
+      </div>
+      <div className="mt-4 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+        <div className="sm:col-span-1 lg:col-span-3">
+          <Input
+            label={t('filters.search')}
+            type="search"
+            maxLength={SEARCH_MAX}
+            placeholder={t('filters.searchPlaceholder')}
+            value={draft}
+            onChange={(event) => setDraft(event.target.value)}
+            // Enter consulta na hora, sem esperar a pausa.
+            onKeyDown={(event) => { if (event.key === 'Enter' && draft !== filters.search) onChange({ search: draft }) }}
+          />
+        </div>
+        <Select
+          label={t('filters.sort')}
+          value={filters.sort}
+          onChange={(event) => onChange({ sort: event.target.value as SortFilter })}
+        >
+          <option value="">{t('filters.sortRecent')}</option>
+          <option value="antigas">{t('filters.sortOldest')}</option>
+          <option value="maior">{t('filters.sortHighest')}</option>
+          <option value="menor">{t('filters.sortLowest')}</option>
         </Select>
       </div>
       {canClear && (

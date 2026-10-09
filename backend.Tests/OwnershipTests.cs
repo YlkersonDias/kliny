@@ -163,6 +163,20 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Equal(200m, Assert.Single(timeline.EnumerateArray()).GetProperty("income").GetDecimal());
     }
 
+    // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
+    [Fact]
+    public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()
+    {
+        using var b = AsB();
+
+        var exact = await Json(b.GetAsync("/api/transactions?search=Sal%C3%A1rio%20A&from=2020-01-01&to=2020-12-31", Ct));
+        var broad = await Json(b.GetAsync("/api/transactions?search=Sal%C3%A1rio&from=2020-01-01&to=2020-12-31&sort=amount-desc", Ct));
+
+        Assert.Equal(0, exact.GetProperty("totalCount").GetInt32());
+        var only = Assert.Single(broad.GetProperty("items").EnumerateArray());
+        Assert.Equal(fixture.TransactionB, only.GetProperty("id").GetInt32());
+    }
+
     // Vínculo com o Google: B não toma a conta Google de A, e o que B faz no próprio vínculo não
     // mexe no de A (as rotas não recebem Id: o usuário vem sempre do token).
     [Fact]

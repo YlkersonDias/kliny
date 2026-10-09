@@ -97,7 +97,10 @@ export default function TransactionsPage() {
           <EmptyState
             image="sem-resultados"
             title={t('empty.filteredTitle')}
-            description={t('empty.filteredDescription')}
+            description={filters.search.trim()
+              // O texto digitado entra como elemento pronto, nunca pelo parser de tags (regra 13).
+              ? <Trans t={t} i18nKey="empty.searchDescription" components={{ search: <strong className="font-semibold text-foreground">{filters.search.trim()}</strong> }} />
+              : t('empty.filteredDescription')}
             action={<Button variant="secondary" onClick={clearFilters}>{t('empty.clearFilters')}</Button>}
           />
         )
