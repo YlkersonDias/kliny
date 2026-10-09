@@ -78,6 +78,7 @@ builder.Services.AddScoped<ITransactionService, TransactionService>();
 builder.Services.AddScoped<IVaultService, VaultService>();
 builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
+builder.Services.AddScoped<IRecurrenceService, RecurrenceService>();
 
 // Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
 builder.Services.AddProblemDetails();

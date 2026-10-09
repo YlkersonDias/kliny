@@ -54,6 +54,8 @@ export interface Transaction {
   categoryId: number | null
   categoryName: string | null
   vaultId: number | null
+  // Gerada por um lançamento recorrente (8.5a); nula se não for, ou se a regra foi apagada.
+  recurrenceId: number | null
 }
 
 export interface TransactionRequest {
@@ -64,6 +66,37 @@ export interface TransactionRequest {
 }
 
 export type TransactionType = 'income' | 'expense' | 'vault'
+
+// Lançamento recorrente (8.5a): todo mês no dia de startDate (31 cai no último dia dos meses curtos).
+// amount com o sinal da movimentação; nextDate é a próxima ocorrência ainda não lançada.
+export interface Recurrence {
+  id: number
+  description: string
+  amount: number
+  categoryId: number | null
+  categoryName: string | null
+  startDate: string
+  dayOfMonth: number
+  endDate: string | null
+  nextDate: string
+  paused: boolean
+}
+
+export interface RecurrenceCreateRequest {
+  description: string
+  amount: number
+  startDate: string
+  endDate: string | null
+  categoryId: number | null
+}
+
+export interface RecurrenceUpdateRequest {
+  description: string
+  amount: number
+  endDate: string | null
+  categoryId: number | null
+  paused: boolean
+}
 
 export interface TransactionQuery {
   from?: string

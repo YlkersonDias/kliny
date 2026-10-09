@@ -1,6 +1,7 @@
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
+import { useRecurrenceSync } from '../../hooks/useRecurrences'
 import { APP_NAME } from '../../config/app'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
@@ -13,6 +14,8 @@ export function AppLayout() {
   const { t } = useTranslation('layout')
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
+  // Lança os recorrentes que faltam até o fim do mês (8.5a).
+  useRecurrenceSync()
 
   function handleSignOut() {
     signOut()

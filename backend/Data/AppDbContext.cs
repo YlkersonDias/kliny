@@ -19,6 +19,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<Budget> Budgets => Set<Budget>();
     public DbSet<Vault> Vaults => Set<Vault>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
+    public DbSet<Recurrence> Recurrences => Set<Recurrence>();
 
     // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
     // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
@@ -76,6 +77,25 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
+        // Recorrência (8.5a). Apagar o usuário apaga as regras; apagar a categoria deixa a regra sem
+        // categoria. A NextDate é o controle de concorrência da sincronização.
+        modelBuilder.Entity<Recurrence>(entity =>
+        {
+            entity.Property(r => r.Description).HasMaxLength(255).IsRequired();
+            entity.Property(r => r.Amount).HasPrecision(18, 2);
+            entity.Property(r => r.NextDate).IsConcurrencyToken();
+            entity.HasIndex(r => new { r.UserId, r.NextDate });
+            entity.HasQueryFilter(r => r.UserId == CurrentUserId);
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.Category)
+                .WithMany()
+                .HasForeignKey(r => r.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
         modelBuilder.Entity<Vault>(entity =>
         {
             entity.Property(v => v.Name).HasMaxLength(100).IsRequired();
@@ -115,6 +135,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .WithMany(v => v.Transactions)
                 .HasForeignKey(t => t.VaultId)
                 .OnDelete(DeleteBehavior.Restrict);
+
+            // Apagar a regra recorrente mantém as movimentações que ela gerou, sem o vínculo.
+            entity.HasOne(t => t.Recurrence)
+                .WithMany(r => r.Transactions)
+                .HasForeignKey(t => t.RecurrenceId)
+                .OnDelete(DeleteBehavior.SetNull);
         });
     }
 }

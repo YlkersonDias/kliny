@@ -192,6 +192,52 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
+    // Recorrência (8.5a): B não vê, não altera, não pausa nem apaga a de A, não usa a categoria de A
+    // numa recorrência, e a sincronização de B não gera nada para A.
+    [Fact]
+    public async Task B_nao_mexe_na_recorrencia_de_A()
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        var start = new DateOnly(today.Year, today.Month, 1).AddMonths(-1).ToString("yyyy-MM-dd");
+        int ruleA;
+        using (var a = AsA())
+        using (var created = await a.PostAsJsonAsync("/api/recurrences",
+                   new { description = "Aluguel A", amount = -900m, startDate = start, categoryId = fixture.CategoryA }, Ct))
+        {
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            ruleA = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
+        }
+
+        using (var b = AsB())
+        {
+            using var update = await b.PutAsJsonAsync($"/api/recurrences/{ruleA}",
+                new { description = "Invadida", amount = -1m, paused = true }, Ct);
+            Assert.Equal(HttpStatusCode.NotFound, update.StatusCode);
+            using var delete = await b.DeleteAsync($"/api/recurrences/{ruleA}", Ct);
+            Assert.Equal(HttpStatusCode.NotFound, delete.StatusCode);
+            using var withCategoryOfA = await b.PostAsJsonAsync("/api/recurrences",
+                new { description = "Com categoria de A", amount = -1m, startDate = start, categoryId = fixture.CategoryA }, Ct);
+            Assert.Equal(HttpStatusCode.BadRequest, withCategoryOfA.StatusCode);
+            Assert.Empty((await Json(b.GetAsync("/api/recurrences", Ct))).EnumerateArray());
+
+            using var sync = await b.PostAsJsonAsync("/api/recurrences/sync", new { today = today.ToString("yyyy-MM-dd") }, Ct);
+            Assert.Equal(0, (await sync.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("created").GetInt32());
+        }
+
+        using (var a = AsA())
+        {
+            var rule = Assert.Single((await Json(a.GetAsync("/api/recurrences", Ct))).EnumerateArray());
+            Assert.Equal("Aluguel A", rule.GetProperty("description").GetString());
+            Assert.False(rule.GetProperty("paused").GetBoolean());
+            Assert.Equal(start, rule.GetProperty("nextDate").GetString());
+            var generated = await Json(a.GetAsync("/api/transactions?search=Aluguel%20A", Ct));
+            Assert.Equal(0, generated.GetProperty("totalCount").GetInt32());
+            using var cleanup = await a.DeleteAsync($"/api/recurrences/{ruleA}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+        await AssertDataOfAUnchanged();
+    }
+
     // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()

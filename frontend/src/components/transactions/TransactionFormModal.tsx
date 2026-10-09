@@ -1,12 +1,15 @@
 import { useRef, useState, type FormEvent } from 'react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
-import type { Category, Transaction } from '../../api/types'
+import { ApiError } from '../../api/client'
+import type { Category, Recurrence, Transaction } from '../../api/types'
 import { useCategories } from '../../hooks/useCategories'
+import { useCreateRecurrence, useUpdateRecurrence } from '../../hooks/useRecurrences'
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactions'
 import { isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
 import { parseMoneyInput, toInputText } from '../../lib/money'
+import { dayOfMonth } from '../../lib/recurrences'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Icon } from '../ui/Icon'
@@ -16,7 +19,7 @@ import { MoneyInput } from '../ui/MoneyInput'
 import { Select } from '../ui/Select'
 import { NewCategoryModal } from './NewCategoryModal'
 
-const FIELDS = ['description', 'amount', 'date', 'categoryId'] as const
+const FIELDS = ['description', 'amount', 'date', 'endDate', 'categoryId'] as const
 type Field = (typeof FIELDS)[number]
 
 type Kind = 'income' | 'expense'
@@ -27,12 +30,17 @@ interface Values {
   amount: string
   date: string
   categoryId: string // '' = sem categoria
+  // Só em nova movimentação: lançar todo mês a partir de "date" (8.5a).
+  repeat: boolean
+  endDate: string // '' = sem data final
 }
 
 // Mesma regra do TransactionRequest da API (StringLength(255), conferido no backend).
 const DESCRIPTION_MAX = 255
 
-function validate(values: Values, t: TFunction<['transactions', 'common']>): FieldErrors<Field> {
+// startDate: a primeira data da recorrência, quando a data final importa (nova com "Repetir" ou
+// edição de uma recorrência); null quando não há data final no formulário.
+function validate(values: Values, startDate: string | null, t: TFunction<['transactions', 'common']>): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
   const description = values.description.trim()
 
@@ -49,6 +57,11 @@ function validate(values: Values, t: TFunction<['transactions', 'common']>): Fie
   if (!values.date) errors.date = t('common:validation.dateRequired')
   else if (!isValidIsoDate(values.date)) errors.date = t('common:validation.dateInvalid')
 
+  if (startDate !== null && values.endDate) {
+    if (!isValidIsoDate(values.endDate)) errors.endDate = t('common:validation.dateInvalid')
+    else if (isValidIsoDate(startDate) && values.endDate < startDate) errors.endDate = t('recurring.endBeforeStart')
+  }
+
   return errors
 }
 
@@ -58,61 +71,88 @@ export interface TransactionPreset {
   description: string
 }
 
-function initialValues(transaction?: Transaction, preset?: TransactionPreset): Values {
-  if (!transaction) {
-    return { kind: preset?.kind ?? 'expense', description: preset?.description ?? '', amount: '', date: today(), categoryId: '' }
+function initialValues(transaction?: Transaction, preset?: TransactionPreset, recurrence?: Recurrence): Values {
+  // Na edição, o tipo vem do sinal gravado e o valor aparece sempre positivo.
+  const saved = transaction ?? recurrence
+  if (!saved) {
+    return {
+      kind: preset?.kind ?? 'expense', description: preset?.description ?? '', amount: '', date: today(), categoryId: '',
+      repeat: false, endDate: '',
+    }
   }
   return {
-    // Na edição, o tipo vem do sinal gravado e o valor aparece sempre positivo.
-    kind: transaction.amount > 0 ? 'income' : 'expense',
-    description: transaction.description,
-    amount: toInputText(transaction.amount),
-    date: transaction.date,
-    categoryId: transaction.categoryId === null ? '' : String(transaction.categoryId),
+    kind: saved.amount > 0 ? 'income' : 'expense',
+    description: saved.description,
+    amount: toInputText(saved.amount),
+    date: transaction?.date ?? recurrence!.startDate,
+    categoryId: saved.categoryId === null ? '' : String(saved.categoryId),
+    repeat: false,
+    endDate: recurrence?.endDate ?? '',
   }
 }
 
+// A API chama a primeira data da recorrência de startDate; no formulário, é o campo "Data".
+function withDateField(error: unknown): unknown {
+  if (error instanceof ApiError && error.fieldErrors.startDate) {
+    const { startDate, ...others } = error.fieldErrors
+    return new ApiError(error.status, error.detail, { ...others, date: startDate })
+  }
+  return error
+}
+
 interface TransactionFormModalProps {
-  // Sem transaction: nova movimentação.
+  // Sem transaction nem recurrence: nova movimentação.
   transaction?: Transaction
+  // Edição de um lançamento recorrente (8.5a): sem a data, que não muda, e com a data final.
+  recurrence?: Recurrence
   // Só para nova movimentação. Com preset, o foco começa no valor.
   preset?: TransactionPreset
   onClose: () => void
 }
 
-export function TransactionFormModal({ transaction, preset, onClose }: TransactionFormModalProps) {
+export function TransactionFormModal({ transaction, recurrence, preset, onClose }: TransactionFormModalProps) {
   const { t } = useTranslation(['transactions', 'common'])
   const isEdit = transaction !== undefined
-  const [values, setValues] = useState<Values>(() => initialValues(transaction, preset))
+  const isRecurrenceEdit = recurrence !== undefined
+  const isNew = !isEdit && !isRecurrenceEdit
+  const [values, setValues] = useState<Values>(() => initialValues(transaction, preset, recurrence))
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreatingCategory, setIsCreatingCategory] = useState(false)
   const descriptionRef = useRef<HTMLInputElement>(null)
   const amountRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
+  const endDateRef = useRef<HTMLInputElement>(null)
   const categoryRef = useRef<HTMLSelectElement>(null)
 
   const categories = useCategories()
   const create = useCreateTransaction()
   const update = useUpdateTransaction()
-  const isPending = create.isPending || update.isPending
+  const createRecurrence = useCreateRecurrence()
+  const updateRecurrence = useUpdateRecurrence()
+  const isPending = create.isPending || update.isPending || createRecurrence.isPending || updateRecurrence.isPending
+
+  const isRecurring = isRecurrenceEdit || (isNew && values.repeat)
+  const startDate = isRecurrenceEdit ? recurrence.startDate : values.date
+  const day = isRecurrenceEdit ? recurrence.dayOfMonth : (isValidIsoDate(values.date) ? dayOfMonth(values.date) : null)
 
   // Enquanto a lista carrega, a categoria gravada já aparece no campo.
+  const saved = transaction ?? recurrence
   const categoryOptions: Category[] = categories.data
-    ?? (transaction?.categoryId != null ? [{ id: transaction.categoryId, name: transaction.categoryName ?? '' }] : [])
+    ?? (saved?.categoryId != null ? [{ id: saved.categoryId, name: saved.categoryName ?? '' }] : [])
   // Categoria apagada enquanto o formulário estava aberto vira "Sem categoria".
   const categoryValue = categoryOptions.some((category) => String(category.id) === values.categoryId) ? values.categoryId : ''
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
     setErrors(fieldErrors)
-    const refs = { description: descriptionRef, amount: amountRef, date: dateRef, categoryId: categoryRef }
+    const refs = { description: descriptionRef, amount: amountRef, date: dateRef, endDate: endDateRef, categoryId: categoryRef }
     const first = firstInvalidField(fieldErrors, FIELDS)
     if (first) refs[first].current?.focus()
   }
 
   function change<K extends keyof Values>(field: K, value: Values[K]) {
     setValues((current) => ({ ...current, [field]: value }))
-    if (field !== 'kind') setErrors((current) => ({ ...current, [field]: undefined }))
+    if (field !== 'kind' && field !== 'repeat') setErrors((current) => ({ ...current, [field]: undefined }))
   }
 
   function handleCategoryCreated(category: Category) {
@@ -124,7 +164,7 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values, t)
+    const fieldErrors = validate(values, isRecurring ? startDate : null, t)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -135,17 +175,30 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
       date: values.date,
       categoryId: categoryValue === '' ? null : Number(categoryValue),
     }
+    const endDate = values.endDate === '' ? null : values.endDate
     const options = {
       onSuccess: onClose,
       onError: (error: unknown) => {
-        const result = splitApiError(error, FIELDS)
+        const result = splitApiError(withDateField(error), FIELDS)
         showErrors(result.fieldErrors)
         setFormError(result.formError)
       },
     }
 
-    if (isEdit) update.mutate({ id: transaction.id, request }, options)
-    else create.mutate(request, options)
+    if (isRecurrenceEdit) {
+      updateRecurrence.mutate({
+        id: recurrence.id,
+        request: { description: request.description, amount: request.amount, categoryId: request.categoryId, endDate, paused: recurrence.paused },
+      }, options)
+    } else if (isEdit) {
+      update.mutate({ id: transaction.id, request }, options)
+    } else if (values.repeat) {
+      createRecurrence.mutate({
+        description: request.description, amount: request.amount, categoryId: request.categoryId, startDate: request.date, endDate,
+      }, options)
+    } else {
+      create.mutate(request, options)
+    }
   }
 
   const kindOption = (kind: Kind, label: string) => {
@@ -172,14 +225,39 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
     )
   }
 
+  const title = isRecurrenceEdit ? t('recurring.editTitle') : isEdit ? t('form.editTitle') : t('form.newTitle')
+  const repeatHint = day === null ? undefined
+    : [t('recurring.repeatHint', { day }), day > 28 ? t('recurring.shortMonthHint') : ''].filter(Boolean).join(' ')
+
+  const endDateField = (
+    <Input
+      ref={endDateRef}
+      label={t('recurring.endDate')}
+      hint={t('recurring.endDateHint')}
+      type="date"
+      min={isValidIsoDate(startDate) ? startDate : '0001-01-01'}
+      max="9999-12-31"
+      value={values.endDate}
+      onChange={(event) => change('endDate', event.target.value)}
+      error={errors.endDate}
+    />
+  )
+
   return (
     <Modal
-      title={isEdit ? t('form.editTitle') : t('form.newTitle')}
-      initialFocusRef={preset && !isEdit ? amountRef : descriptionRef}
+      title={title}
+      initialFocusRef={preset && isNew ? amountRef : descriptionRef}
       onClose={() => { if (!isPending) onClose() }}
     >
       <form noValidate onSubmit={handleSubmit} className="space-y-4">
         {formError && <FormAlert>{formError}</FormAlert>}
+        {isRecurrenceEdit && (
+          <p className="text-sm text-muted">
+            <span className="font-medium text-foreground">{t('recurring.everyMonth', { day: recurrence.dayOfMonth })}</span>
+            {' · '}
+            {t('recurring.editHint')}
+          </p>
+        )}
 
         <fieldset>
           <legend className="mb-1.5 text-sm font-medium text-foreground">{t('form.type')}</legend>
@@ -209,17 +287,43 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
             onChange={(text) => change('amount', text)}
             error={errors.amount}
           />
-          <Input
-            ref={dateRef}
-            label={t('common:fields.date')}
-            type="date"
-            min="0001-01-01"
-            max="9999-12-31"
-            value={values.date}
-            onChange={(event) => change('date', event.target.value)}
-            error={errors.date}
-          />
+          {isRecurrenceEdit ? endDateField : (
+            <Input
+              ref={dateRef}
+              label={values.repeat ? t('recurring.firstDate') : t('common:fields.date')}
+              type="date"
+              min="0001-01-01"
+              max="9999-12-31"
+              value={values.date}
+              onChange={(event) => change('date', event.target.value)}
+              error={errors.date}
+            />
+          )}
         </div>
+
+        {isNew && (
+          <div className="space-y-3 rounded-lg border border-border p-3">
+            <label className="flex cursor-pointer items-start gap-2 text-sm font-medium text-foreground">
+              <input
+                type="checkbox"
+                checked={values.repeat}
+                onChange={(event) => change('repeat', event.target.checked)}
+                aria-describedby={values.repeat && repeatHint ? 'repetir-dica' : undefined}
+                className="mt-0.5 size-4 shrink-0 accent-primary"
+              />
+              <span className="flex items-center gap-1.5">
+                <Icon name="repeat" className="size-4 text-muted" />
+                {t('recurring.repeat')}
+              </span>
+            </label>
+            {values.repeat && (
+              <>
+                {repeatHint && <p id="repetir-dica" className="text-sm text-muted">{repeatHint}</p>}
+                {endDateField}
+              </>
+            )}
+          </div>
+        )}
 
         <div>
           <Select
@@ -247,7 +351,7 @@ export function TransactionFormModal({ transaction, preset, onClose }: Transacti
         <div className="flex flex-col-reverse gap-2 pt-2 sm:flex-row sm:justify-end">
           <Button variant="secondary" onClick={onClose} disabled={isPending}>{t('common:actions.cancel')}</Button>
           <Button type="submit" isLoading={isPending}>
-            {isEdit ? t('form.submitEdit') : t('form.submitNew')}
+            {isNew ? t('form.submitNew') : t('form.submitEdit')}
           </Button>
         </div>
       </form>

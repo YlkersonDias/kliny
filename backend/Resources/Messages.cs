@@ -210,6 +210,26 @@ public static class Messages
         "Informe o mês no formato AAAA-MM.",
         "Enter the month as YYYY-MM.");
 
+    public static string RecurrenceNotFound => Text(
+        "Lançamento recorrente não encontrado.",
+        "Recurring entry not found.");
+
+    public static string RecurrenceEndBeforeStart => Text(
+        "A data final deve ser igual ou posterior à primeira.",
+        "The end date must be on or after the first date.");
+
+    public static string RecurrenceStartOutOfRange => Text(
+        "A primeira data deve estar a no máximo um ano de hoje.",
+        "The first date must be within one year of today.");
+
+    public static string RecurrenceLimitReached => Text(
+        "Você chegou ao limite de {0} lançamentos recorrentes.",
+        "You have reached the limit of {0} recurring entries.");
+
+    public static string TodayInvalid => Text(
+        "A data de hoje não confere com a do servidor. Confira o relógio do aparelho.",
+        "Today's date does not match the server's. Check your device's clock.");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

@@ -74,6 +74,57 @@ namespace Backend.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Backend.Models.Recurrence", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<decimal>("Amount")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<int>("DayOfMonth")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(255)
+                        .HasColumnType("varchar(255)");
+
+                    b.Property<DateOnly?>("EndDate")
+                        .HasColumnType("date");
+
+                    b.Property<DateOnly>("NextDate")
+                        .IsConcurrencyToken()
+                        .HasColumnType("date");
+
+                    b.Property<bool>("Paused")
+                        .HasColumnType("tinyint(1)");
+
+                    b.Property<DateOnly>("StartDate")
+                        .HasColumnType("date");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId", "NextDate");
+
+                    b.ToTable("Recurrences");
+                });
+
             modelBuilder.Entity("Backend.Models.Transaction", b =>
                 {
                     b.Property<int>("Id")
@@ -101,6 +152,9 @@ namespace Backend.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)");
 
+                    b.Property<int?>("RecurrenceId")
+                        .HasColumnType("int");
+
                     b.Property<int>("UserId")
                         .HasColumnType("int");
 
@@ -110,6 +164,8 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("RecurrenceId");
 
                     b.HasIndex("VaultId");
 
@@ -225,11 +281,34 @@ namespace Backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Backend.Models.Recurrence", b =>
+                {
+                    b.HasOne("Backend.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Backend.Models.Transaction", b =>
                 {
                     b.HasOne("Backend.Models.Category", "Category")
                         .WithMany("Transactions")
                         .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Backend.Models.Recurrence", "Recurrence")
+                        .WithMany("Transactions")
+                        .HasForeignKey("RecurrenceId")
                         .OnDelete(DeleteBehavior.SetNull);
 
                     b.HasOne("Backend.Models.User", "User")
@@ -244,6 +323,8 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
+
+                    b.Navigation("Recurrence");
 
                     b.Navigation("User");
 
@@ -262,6 +343,11 @@ namespace Backend.Migrations
                 });
 
             modelBuilder.Entity("Backend.Models.Category", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Backend.Models.Recurrence", b =>
                 {
                     b.Navigation("Transactions");
                 });
