@@ -1,6 +1,7 @@
 {
   "skipToContent": "Skip to content",
   "homeLink": "{{appName}}, home page",
+  "settings": "Settings",
   "settingsLink": "{{name}}, settings",
   "signOut": "Sign out",
   "nav": {

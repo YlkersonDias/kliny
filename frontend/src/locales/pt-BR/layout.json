@@ -1,6 +1,7 @@
 {
   "skipToContent": "Pular para o conteúdo",
   "homeLink": "{{appName}}, página inicial",
+  "settings": "Configurações",
   "settingsLink": "{{name}}, configurações",
   "signOut": "Sair",
   "nav": {
