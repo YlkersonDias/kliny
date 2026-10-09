@@ -3,6 +3,7 @@ import { Trans, useTranslation } from 'react-i18next'
 import { useSearchParams } from 'react-router'
 import type { Transaction } from '../api/types'
 import { CategoryManagerModal } from '../components/transactions/CategoryManagerModal'
+import { RecurrenceManagerModal } from '../components/transactions/RecurrenceManagerModal'
 import { TransactionFiltersBar } from '../components/transactions/TransactionFiltersBar'
 import { TransactionFormModal } from '../components/transactions/TransactionFormModal'
 import { TransactionList } from '../components/transactions/TransactionList'
@@ -40,6 +41,7 @@ export default function TransactionsPage() {
   const [form, setForm] = useState<{ transaction?: Transaction } | null>(null)
   const [deleting, setDeleting] = useState<Transaction | null>(null)
   const [managingCategories, setManagingCategories] = useState(false)
+  const [managingRecurrences, setManagingRecurrences] = useState(false)
 
   // Trocar um filtro volta para a página 1; trocar de página entra no histórico.
   function updateFilters(patch: Partial<TransactionFilters>) {
@@ -139,6 +141,10 @@ export default function TransactionsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
         <div className="flex flex-wrap gap-2">
+          <Button variant="secondary" onClick={() => setManagingRecurrences(true)}>
+            <Icon name="repeat" className="size-4" />
+            {t('recurring.manage')}
+          </Button>
           <Button variant="secondary" onClick={() => setManagingCategories(true)}>
             <Icon name="tag" className="size-4" />
             {t('manageCategories')}
@@ -163,6 +169,7 @@ export default function TransactionsPage() {
 
       {form && <TransactionFormModal transaction={form.transaction} onClose={() => setForm(null)} />}
       {deleting && <DeleteTransactionDialog transaction={deleting} onClose={() => setDeleting(null)} />}
+      {managingRecurrences && <RecurrenceManagerModal onClose={() => setManagingRecurrences(false)} />}
       {managingCategories && (
         <CategoryManagerModal
           onClose={() => setManagingCategories(false)}

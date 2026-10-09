@@ -14,7 +14,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // Uma categoria com orçamento, uma receita com categoria, um cofre com depósito e retirada (histórico).
+    // Uma categoria com orçamento, uma recorrência já gerada, uma receita com categoria, um cofre com depósito e retirada (histórico).
     private async Task<(string Token, int UserId)> SeedAsync(string email)
     {
         var token = await api.RegisterAsync(email);
@@ -24,6 +24,11 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
             new { description = "Salário", amount = 900m, date = "2021-05-01", categoryId = category }, Ct));
         using (var budget = await client.PutAsJsonAsync($"/api/budgets/{category}", new { amount = 500m }, Ct))
             budget.EnsureSuccessStatusCode();
+        // Recorrência com uma ocorrência já gerada (a movimentação aponta para a regra).
+        var today = DateOnly.FromDateTime(DateTime.UtcNow);
+        await IdOf(client.PostAsJsonAsync("/api/recurrences",
+            new { description = "Aluguel", amount = -100m, startDate = today.ToString("yyyy-MM-dd"), categoryId = category }, Ct));
+        (await client.PostAsJsonAsync("/api/recurrences/sync", new { today = today.ToString("yyyy-MM-dd") }, Ct)).EnsureSuccessStatusCode();
         var vault = await IdOf(client.PostAsJsonAsync("/api/vaults", new { name = "Reserva", goal = 300m }, Ct));
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/deposit", new { amount = 200m, date = "2021-05-02" }, Ct)).EnsureSuccessStatusCode();
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/withdraw", new { amount = 50m, date = "2021-05-03" }, Ct)).EnsureSuccessStatusCode();
@@ -54,6 +59,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
             UNION ALL SELECT 'categories', COUNT(*) FROM Categories WHERE UserId = @id
             UNION ALL SELECT 'vaults', COUNT(*) FROM Vaults WHERE UserId = @id
             UNION ALL SELECT 'budgets', COUNT(*) FROM Budgets WHERE UserId = @id
+            UNION ALL SELECT 'recurrences', COUNT(*) FROM Recurrences WHERE UserId = @id
             UNION ALL SELECT 'transactions', COUNT(*) FROM Transactions WHERE UserId = @id
             """, connection);
         command.Parameters.AddWithValue("@id", userId);

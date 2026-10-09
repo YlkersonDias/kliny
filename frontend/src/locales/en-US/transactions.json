@@ -74,5 +74,41 @@
     "confirm": "Delete",
     "question": "Delete <name/> on {{date}}?",
     "irreversible": "This action can't be undone."
+  },
+  "recurring": {
+    "manage": "Recurring",
+    "repeat": "Repeat every month",
+    "repeatHint": "Adds it on day {{day}} from this date on, including past months, through the end of this month; after that, one a month.",
+    "shortMonthHint": "In shorter months, on the last day.",
+    "firstDate": "First date",
+    "endDate": "Until (optional)",
+    "endDateHint": "Without a date, it repeats until you stop it.",
+    "endBeforeStart": "The end date must be on or after the first date.",
+    "editTitle": "Edit recurring entry",
+    "everyMonth": "Every month on day {{day}}",
+    "editHint": "Changes apply to the next entries; the ones already added don't change.",
+    "badge": "Recurring",
+    "manager": {
+      "title": "Recurring entries",
+      "note": "The ones already added are in Transactions and are edited there, one by one.",
+      "loading": "Loading recurring entries…",
+      "empty": "No recurring entries. When adding a transaction, check “Repeat every month”.",
+      "next": "Next: {{date}}",
+      "until": "until {{date}}",
+      "paused": "Paused",
+      "ended": "Ended on {{date}}",
+      "pause": "Pause",
+      "resume": "Resume",
+      "pauseLabel": "Pause {{description}}",
+      "resumeLabel": "Resume {{description}}",
+      "edit": "Edit {{description}}",
+      "delete": "Delete {{description}}"
+    },
+    "delete": {
+      "title": "Delete recurring entry",
+      "confirm": "Delete",
+      "question": "Delete <name/>?",
+      "note": "Nothing else will be added. The transactions already added stay in Transactions."
+    }
   }
 }

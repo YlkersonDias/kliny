@@ -96,6 +96,11 @@ public class MigrationsTests : IAsyncLifetime
             INSERT INTO Transactions (UserId, Description, Amount, Date, CategoryId, VaultId)
             VALUES (@user, 'Salário', 1000, '2021-03-01', @category, NULL),
                    (@user, 'Depósito no cofre Reserva', -100, '2021-03-02', NULL, @vault);
+            INSERT INTO Budgets (UserId, CategoryId, Amount) VALUES (@user, @category, 800);
+            INSERT INTO Recurrences (UserId, Description, Amount, CategoryId, StartDate, DayOfMonth, NextDate, Paused, CreatedAt)
+            VALUES (@user, 'Aluguel', -1500, @category, '2021-03-05', 5, '2021-04-05', 0, UTC_TIMESTAMP(6));
+            INSERT INTO Transactions (UserId, Description, Amount, Date, CategoryId, VaultId, RecurrenceId)
+            VALUES (@user, 'Aluguel', -1500, '2021-03-05', @category, NULL, LAST_INSERT_ID());
             """, connection);
         await command.ExecuteNonQueryAsync(Ct);
     }

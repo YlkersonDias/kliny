@@ -7,4 +7,5 @@ public record TransactionResponse(
     DateOnly Date,
     int? CategoryId,
     string? CategoryName,
-    int? VaultId);
+    int? VaultId,
+    int? RecurrenceId);

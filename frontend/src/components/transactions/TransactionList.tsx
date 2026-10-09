@@ -7,6 +7,7 @@ import {
   TransactionAmount as Amount,
   TransactionCategory as CategoryLabel,
   TransactionKindIcon as KindIcon,
+  RecurringMark,
 } from './TransactionParts'
 
 interface TransactionListProps {
@@ -62,6 +63,7 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
                 <div className="flex items-center gap-3">
                   <KindIcon transaction={transaction} />
                   <span className="break-words text-foreground">{transaction.description}</span>
+                  <RecurringMark transaction={transaction} />
                 </div>
               </td>
               <td className="px-4 py-3"><CategoryLabel transaction={transaction} /></td>
@@ -81,8 +83,9 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
             <KindIcon transaction={transaction} />
             <div className="min-w-0 flex-1">
               <div className="flex items-baseline justify-between gap-3">
-                <p className="min-w-0 truncate font-medium text-foreground" title={transaction.description}>
-                  {transaction.description}
+                <p className="flex min-w-0 items-center gap-1.5 font-medium text-foreground">
+                  <span className="truncate" title={transaction.description}>{transaction.description}</span>
+                  <RecurringMark transaction={transaction} />
                 </p>
                 <Amount transaction={transaction} />
               </div>

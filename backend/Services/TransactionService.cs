@@ -124,5 +124,6 @@ public class TransactionService(AppDbContext db) : ITransactionService
             t.Date,
             t.CategoryId,
             t.Category != null ? t.Category.Name : null,
-            t.VaultId));
+            t.VaultId,
+            t.RecurrenceId));
 }

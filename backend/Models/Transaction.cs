@@ -18,7 +18,11 @@ public class Transaction
     // Um envio repetido com a mesma chave devolve o lançamento já gravado, sem criar outro.
     public string? IdempotencyKey { get; set; }
 
+    // Gerada por um lançamento recorrente (8.5a). Fica nula se a regra for apagada.
+    public int? RecurrenceId { get; set; }
+
     public User User { get; set; } = null!;
     public Category? Category { get; set; }
     public Vault? Vault { get; set; }
+    public Recurrence? Recurrence { get; set; }
 }

@@ -74,5 +74,41 @@
     "confirm": "Apagar",
     "question": "Apagar <name/> de {{date}}?",
     "irreversible": "Essa ação não pode ser desfeita."
+  },
+  "recurring": {
+    "manage": "Recorrentes",
+    "repeat": "Repetir todo mês",
+    "repeatHint": "Lança todo dia {{day}} a partir dessa data, inclusive os meses que já passaram, até o fim do mês atual; depois, um por mês.",
+    "shortMonthHint": "Nos meses mais curtos, no último dia.",
+    "firstDate": "Primeira data",
+    "endDate": "Até (opcional)",
+    "endDateHint": "Sem data, repete até você parar.",
+    "endBeforeStart": "A data final deve ser igual ou posterior à primeira.",
+    "editTitle": "Editar lançamento recorrente",
+    "everyMonth": "Todo dia {{day}}",
+    "editHint": "As mudanças valem para os próximos lançamentos; os já lançados não mudam.",
+    "badge": "Recorrente",
+    "manager": {
+      "title": "Lançamentos recorrentes",
+      "note": "Os já lançados aparecem em Movimentações e se editam lá, um a um.",
+      "loading": "Carregando lançamentos recorrentes…",
+      "empty": "Nenhum lançamento recorrente. Ao lançar uma movimentação, marque “Repetir todo mês”.",
+      "next": "Próximo: {{date}}",
+      "until": "até {{date}}",
+      "paused": "Pausado",
+      "ended": "Terminou em {{date}}",
+      "pause": "Pausar",
+      "resume": "Retomar",
+      "pauseLabel": "Pausar {{description}}",
+      "resumeLabel": "Retomar {{description}}",
+      "edit": "Editar {{description}}",
+      "delete": "Apagar {{description}}"
+    },
+    "delete": {
+      "title": "Apagar lançamento recorrente",
+      "confirm": "Apagar",
+      "question": "Apagar <name/>?",
+      "note": "Nada mais será lançado. As movimentações já lançadas continuam em Movimentações."
+    }
   }
 }
