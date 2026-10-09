@@ -154,6 +154,14 @@ public static class Messages
         "A data inicial não pode ser depois da data final.",
         "The start date cannot be after the end date.");
 
+    public static string SearchTooLong => Text(
+        "A busca deve ter no máximo 100 caracteres.",
+        "Search must be at most 100 characters.");
+
+    public static string SortInvalid => Text(
+        "Ordem inválida.",
+        "Invalid sort order.");
+
     public static string CategoryAndUncategorized => Text(
         "Escolha uma categoria ou \"sem categoria\", não os dois.",
         "Choose a category or \"uncategorized\", not both.");

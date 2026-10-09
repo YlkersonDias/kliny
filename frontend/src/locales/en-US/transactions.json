@@ -16,7 +16,8 @@
     "monthTitle": "No transactions this month.",
     "monthDescription": "Add an income or an expense to get started.",
     "periodTitle": "No transactions in this period.",
-    "periodDescription": "Choose another period or add a new transaction."
+    "periodDescription": "Choose another period or add a new transaction.",
+    "searchDescription": "No description contains “<search/>” with these filters. Try another word or period."
   },
   "filters": {
     "label": "Filters",
@@ -28,7 +29,14 @@
     "income": "Income",
     "expense": "Expenses",
     "vault": "Vaults",
-    "clear": "Clear filters"
+    "clear": "Clear filters",
+    "search": "Search",
+    "searchPlaceholder": "Description, such as groceries or rent",
+    "sort": "Sort by",
+    "sortRecent": "Newest",
+    "sortOldest": "Oldest",
+    "sortHighest": "Highest amount",
+    "sortLowest": "Lowest amount"
   },
   "list": {
     "date": "Date",
