@@ -1,0 +1,101 @@
+# Kliny em produção num PC com Docker (S.7). Comandos e passo a passo em deploy/README.md.
+# Nenhuma porta é publicada no PC: o único caminho de fora é o túnel da Cloudflare (cloudflared),
+# que conecta para fora e entrega os pedidos ao nginx (web) pela rede interna.
+# Os segredos vêm do deploy/.env (fora do Git), criado pelo deploy/criar-segredos.ps1.
+name: kliny
+
+x-hardening: &hardening
+  restart: unless-stopped
+  security_opt:
+    - no-new-privileges:true
+
+services:
+  mysql:
+    <<: *hardening
+    image: mysql:8.4
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:?defina no deploy/.env}
+      # root só de dentro do próprio container (a imagem cria root@'%' por padrão).
+      MYSQL_ROOT_HOST: localhost
+      MYSQL_DATABASE: kliny
+      KLINY_APP_PASSWORD: ${KLINY_APP_PASSWORD:?defina no deploy/.env}
+      KLINY_MIGRATOR_PASSWORD: ${KLINY_MIGRATOR_PASSWORD:?defina no deploy/.env}
+      KLINY_BACKUP_PASSWORD: ${KLINY_BACKUP_PASSWORD:?defina no deploy/.env}
+    volumes:
+      - mysql-data:/var/lib/mysql
+      - ./mysql-init:/docker-entrypoint-initdb.d:ro
+      - ${BACKUP_DIR:?defina no deploy/.env}:/backups
+      - ./mysql-backup.sh:/kliny/backup.sh:ro
+    networks: [kliny]
+    healthcheck:
+      # Pela rede (127.0.0.1), para não dar "pronto" durante a inicialização, que roda sem rede.
+      # O ping responde mesmo sem login.
+      test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
+      interval: 5s
+      timeout: 5s
+      retries: 30
+
+  # Só roda quando chamado: docker compose --profile migrate run --rm migrate
+  migrate:
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+      target: migrate
+    profiles: [migrate]
+    security_opt:
+      - no-new-privileges:true
+    environment:
+      MIGRATOR_CONNECTION: Server=mysql;Port=3306;Database=kliny;User=kliny_migrator;Password=${KLINY_MIGRATOR_PASSWORD};AllowPublicKeyRetrieval=true
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [kliny]
+
+  api:
+    <<: *hardening
+    build:
+      context: ..
+      dockerfile: deploy/api.Dockerfile
+      target: api
+    cap_drop: [ALL]
+    environment:
+      ASPNETCORE_ENVIRONMENT: Production
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=kliny;User=kliny_app;Password=${KLINY_APP_PASSWORD};AllowPublicKeyRetrieval=true
+      Jwt__Key: ${JWT_KEY:?defina no deploy/.env}
+      # Só o nginx, nesta rede, pode informar o IP real e o HTTPS (ForwardedHeaders).
+      ForwardedHeaders__KnownNetworks__0: 172.30.0.0/24
+      AllowedHosts: kliny.app.br;www.kliny.app.br;localhost
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks: [kliny]
+
+  web:
+    <<: *hardening
+    build:
+      context: ..
+      dockerfile: deploy/web.Dockerfile
+    cap_drop: [ALL]
+    depends_on: [api]
+    networks: [kliny]
+
+  # Só com o perfil "tunnel" (precisa do TUNNEL_TOKEN): docker compose --profile tunnel up -d
+  cloudflared:
+    <<: *hardening
+    image: cloudflare/cloudflared:2026.10.0
+    profiles: [tunnel]
+    command: tunnel --no-autoupdate run
+    cap_drop: [ALL]
+    environment:
+      TUNNEL_TOKEN: ${TUNNEL_TOKEN:-}
+    depends_on: [web]
+    networks: [kliny]
+
+volumes:
+  mysql-data:
+
+networks:
+  kliny:
+    ipam:
+      config:
+        - subnet: 172.30.0.0/24

@@ -85,3 +85,34 @@ jobs:
       # S.4: a <meta> da CSP vem antes dos scripts e tem os hashes certos dos scripts inline do build.
       - name: Conferir a CSP do build
         run: npm run check:csp
+
+  deploy:
+    name: Deploy (imagens Docker)
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@v7
+
+      # S.7: as imagens do deploy no PC (deploy/) continuam montando. Nada é publicado: só o build.
+      - name: Conferir o docker-compose.yml
+        working-directory: deploy
+        run: docker compose -f docker-compose.yml -f docker-compose.local.yml --profile migrate --profile tunnel config --quiet
+        env:
+          MYSQL_ROOT_PASSWORD: ci
+          KLINY_APP_PASSWORD: ci
+          KLINY_MIGRATOR_PASSWORD: ci
+          KLINY_BACKUP_PASSWORD: ci
+          JWT_KEY: ci
+          BACKUP_DIR: /tmp/backups
+
+      - name: Montar a API
+        run: docker build -f deploy/api.Dockerfile --target api -t kliny-api .
+
+      - name: Montar as migrations
+        run: docker build -f deploy/api.Dockerfile --target migrate -t kliny-migrate .
+
+      - name: Montar o frontend (com a conferência da CSP)
+        run: docker build -f deploy/web.Dockerfile -t kliny-web .
+
+      - name: Conferir a configuração do nginx
+        run: docker run --rm --add-host api:127.0.0.1 kliny-web nginx -t

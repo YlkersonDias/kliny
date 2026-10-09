@@ -1,0 +1,7 @@
+# Só para testar no próprio PC, sem o túnel: publica o site em http://localhost:8080, acessível
+# só deste computador (127.0.0.1). Nunca usar junto com o túnel em produção.
+#   docker compose -f docker-compose.yml -f docker-compose.local.yml up -d --build
+services:
+  web:
+    ports:
+      - "127.0.0.1:8080:8080"
