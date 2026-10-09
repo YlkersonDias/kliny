@@ -7,6 +7,7 @@ using Backend.RateLimiting;
 using Backend.Security;
 using Backend.Services;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -113,9 +114,32 @@ builder.Services.AddHsts(options =>
     options.Preload = false;
 });
 
+// S.7: atrás do proxy (o nginx do deploy), o IP de quem acessa e o HTTPS chegam nos cabeçalhos
+// X-Forwarded-For e X-Forwarded-Proto. Só são aceitos de um proxy das redes de
+// ForwardedHeaders:KnownNetworks (a rede interna do Docker); de qualquer outro endereço, são
+// ignorados, senão qualquer um escolheria o próprio IP e fugiria do limite de tentativas.
+// Sem redes configuradas, vale só o loopback (o padrão do ASP.NET Core).
+builder.Services.Configure<ForwardedHeadersOptions>(options =>
+{
+    options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
+    // Só o último salto: o nginx põe o IP real (que ele recebeu da Cloudflare) no X-Forwarded-For.
+    options.ForwardLimit = 1;
+    var networks = builder.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [];
+    if (networks.Length > 0)
+    {
+        options.KnownIPNetworks.Clear();
+        options.KnownProxies.Clear();
+        foreach (var network in networks)
+            options.KnownIPNetworks.Add(System.Net.IPNetwork.Parse(network));
+    }
+});
+
 var app = builder.Build();
 
-// Primeiro de tudo: os cabeçalhos de segurança saem em toda resposta, inclusive nos erros.
+// Antes de tudo: o IP e o esquema reais valem para o limite de tentativas, o HSTS e os logs.
+app.UseForwardedHeaders();
+
+// Os cabeçalhos de segurança saem em toda resposta, inclusive nos erros.
 app.UseSecurityHeaders();
 
 // Antes do resto: as mensagens de erro do ApiExceptionHandler também saem no idioma pedido.
