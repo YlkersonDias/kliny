@@ -69,11 +69,12 @@ export function AppLayout() {
           <Navigation variant="sidebar" />
         </div>
         <div className="border-t border-border p-3">
-          <p className="truncate px-3 pb-1 pt-1.5 text-sm font-semibold text-foreground" title={user?.name}>
+          {/* Nome, Configurações e Sair com o mesmo px-4 do Button: os ícones ficam alinhados. */}
+          <p className="truncate px-4 pb-1 pt-1.5 text-sm font-semibold text-foreground" title={user?.name}>
             {user?.name}
           </p>
           <div className="mb-1 flex items-center gap-1">
-            <div className="min-w-0 flex-1">{settingsLink('px-3 py-2.5', false)}</div>
+            <div className="min-w-0 flex-1">{settingsLink('px-4 py-2.5', false)}</div>
             <ThemeToggle />
           </div>
           <Button variant="ghost" className="w-full justify-start" onClick={handleSignOut}>
