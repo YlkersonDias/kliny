@@ -13,9 +13,28 @@ export function me(signal?: AbortSignal): Promise<User> {
   return apiRequest('/auth/me', { signal })
 }
 
-// Exclui a conta e todos os dados, de forma irreversível. Exige a senha atual.
-export function deleteAccount(password: string): Promise<void> {
-  return apiRequest('/auth/delete-account', { method: 'POST', body: { password } })
+// Entra com o comprovante do botão do Google; cria a conta se ela não existir.
+export function googleSignIn(credential: string): Promise<AuthResponse> {
+  return apiRequest('/auth/google', { method: 'POST', body: { credential }, auth: false })
+}
+
+export function linkGoogle(credential: string): Promise<User> {
+  return apiRequest('/auth/google/link', { method: 'POST', body: { credential } })
+}
+
+export function unlinkGoogle(): Promise<User> {
+  return apiRequest('/auth/google/unlink', { method: 'POST' })
+}
+
+// Confirmação para excluir a conta: a senha atual ou, em conta sem senha, um comprovante novo do Google.
+export interface DeleteAccountConfirmation {
+  password?: string
+  googleCredential?: string
+}
+
+// Exclui a conta e todos os dados, de forma irreversível.
+export function deleteAccount(confirmation: DeleteAccountConfirmation): Promise<void> {
+  return apiRequest('/auth/delete-account', { method: 'POST', body: confirmation })
 }
 
 // "Sair de todos os dispositivos" (S.5): a API invalida todos os tokens do usuário, inclusive este.

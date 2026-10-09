@@ -45,5 +45,8 @@
     "available": "Há uma nova versão do {{appName}}.",
     "reload": "Atualizar",
     "later": "Agora não"
+  },
+  "google": {
+    "unavailable": "Não foi possível carregar o botão do Google. Confira a conexão e recarregue a página."
   }
 }

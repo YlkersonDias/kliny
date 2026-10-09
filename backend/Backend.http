@@ -60,6 +60,19 @@ GET {{baseUrl}}/api/auth/me
 POST {{baseUrl}}/api/auth/logout-all
 Authorization: Bearer {{token}}
 
+### Entrar com o Google com um comprovante inválido (401, mesma mensagem de qualquer recusa).
+### Um comprovante de verdade só sai do botão do Google na tela (vale 1 hora e é do seu ClientId).
+POST {{baseUrl}}/api/auth/google
+Content-Type: application/json
+
+{
+  "credential": "comprovante-invalido"
+}
+
+### Desvincular o Google (200; 400 se a conta não tem senha)
+POST {{baseUrl}}/api/auth/google/unlink
+Authorization: Bearer {{token}}
+
 ############################## Categorias ##############################
 
 ### Listar categorias (200)

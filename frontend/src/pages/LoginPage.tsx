@@ -3,6 +3,7 @@ import { Link, useLocation } from 'react-router'
 import { useMutation } from '@tanstack/react-query'
 import { useTranslation } from 'react-i18next'
 import { useAuth } from '../auth/useAuth'
+import { GoogleSignIn } from '../components/auth/GoogleSignIn'
 import { AuthLayout } from '../components/layout/AuthLayout'
 import { Button } from '../components/ui/Button'
 import { FormAlert } from '../components/ui/FormAlert'
@@ -87,6 +88,8 @@ export default function LoginPage() {
           {mutation.isPending ? t('login.submitting') : t('login.submit')}
         </Button>
       </form>
+
+      <GoogleSignIn text="signin_with" showPrivacyNotice />
 
       <p className="mt-6 text-center text-sm text-muted">
         {t('login.noAccount')}{' '}

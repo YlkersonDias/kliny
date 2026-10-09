@@ -62,6 +62,34 @@ public static class Messages
         "A senha é longa demais: com acentos ou emojis, o limite de 72 caracteres fica menor.",
         "The password is too long: with accents or emojis, the 72-character limit gets shorter.");
 
+    public static string GoogleSignInFailed => Text(
+        "Não foi possível entrar com esta conta do Google. Use uma conta Gmail ou do Google Workspace, ou entre com e-mail e senha.",
+        "Could not sign in with this Google account. Use a Gmail or Google Workspace account, or sign in with email and password.");
+
+    public static string GoogleCredentialRequired => Text(
+        "Comprovante do Google ausente ou inválido.",
+        "Missing or invalid Google credential.");
+
+    public static string GoogleLinkFailed => Text(
+        "Não foi possível confirmar a conta do Google. Tente de novo.",
+        "Could not confirm the Google account. Try again.");
+
+    public static string GoogleAlreadyLinked => Text(
+        "Esta conta do Google já está vinculada a outra conta do Kliny.",
+        "This Google account is already linked to another Kliny account.");
+
+    public static string GoogleLinkedToAnother => Text(
+        "Sua conta já tem outra conta do Google vinculada. Desvincule-a antes.",
+        "Your account already has another Google account linked. Unlink it first.");
+
+    public static string GoogleUnlinkNeedsPassword => Text(
+        "Esta conta não tem senha: sem o Google, não haveria como entrar. Por isso o Google não pode ser desvinculado.",
+        "This account has no password: without Google there would be no way to sign in, so Google cannot be unlinked.");
+
+    public static string GoogleReauthFailed => Text(
+        "Entre com a mesma conta do Google vinculada a esta conta para confirmar.",
+        "Sign in with the same Google account linked to this account to confirm.");
+
     public static string WrongPassword => Text(
         "Senha incorreta.",
         "Incorrect password.");

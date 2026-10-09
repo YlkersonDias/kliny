@@ -41,7 +41,7 @@ public class AuthServiceLockoutTests : IDisposable
             Key = new string('k', 64),
         }));
         var throttle = new LoginThrottle(MsOptions.Create(new RateLimitOptions()), _time);
-        _auth = new AuthService(_db, tokens, throttle);
+        _auth = new AuthService(_db, tokens, throttle, new FakeGoogleTokenValidator());
     }
 
     public void Dispose() => _db.Dispose();

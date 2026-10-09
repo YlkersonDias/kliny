@@ -2,6 +2,7 @@ import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { APP_NAME, PRIVACY } from '../config/app'
 import { usePageTitle } from '../hooks/usePageTitle'
+import { isGoogleEnabled } from '../lib/googleIdentity'
 
 const SECTIONS = ['use', 'browser', 'security', 'retention', 'rights', 'changes'] as const
 
@@ -33,6 +34,7 @@ export default function PrivacyPage() {
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted">
             <li>{t('data.account')}</li>
             <li>{t('data.finances')}</li>
+            {isGoogleEnabled && <li>{t('data.google')}</li>}
             <li>{t('data.nothingElse')}</li>
           </ul>
         </section>

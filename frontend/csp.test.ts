@@ -1,6 +1,9 @@
 import { createHash } from 'node:crypto'
+import { readFileSync } from 'node:fs'
 import { describe, expect, it } from 'vitest'
-import { contentSecurityPolicy, CSP_META, injectCspMeta, inlineScriptHashes } from './csp.ts'
+import {
+  contentSecurityPolicy, CSP_META, GOOGLE_GSI, GOOGLE_SCRIPT, GOOGLE_STYLE, injectCspMeta, inlineScriptHashes,
+} from './csp.ts'
 
 const HTML = `<!doctype html>
 <html lang="pt-BR">
@@ -38,13 +41,32 @@ describe('contentSecurityPolicy', () => {
   it('libera só a própria origem, os scripts inline pelo hash e nada de plugins nem <base>', () => {
     const policy = contentSecurityPolicy(HTML)
     expect(policy).toContain("default-src 'self'")
-    expect(policy).toContain(`script-src 'self' ${inlineScriptHashes(HTML).join(' ')}`)
+    expect(policy).toContain(`script-src 'self' ${GOOGLE_SCRIPT} ${inlineScriptHashes(HTML).join(' ')}`)
     expect(policy).toContain("object-src 'none'")
     expect(policy).toContain("base-uri 'none'")
     expect(policy).not.toContain('unsafe-inline')
     expect(policy).not.toContain('unsafe-eval')
     // Ignorado pelo navegador numa <meta>: fica para o cabeçalho do servidor (S.7).
     expect(policy).not.toContain('frame-ancestors')
+  })
+})
+
+describe('Google Identity Services', () => {
+  it('libera só os endereços do Google que a documentação pede, cada um na sua diretiva', () => {
+    const directives = Object.fromEntries(
+      contentSecurityPolicy(HTML).split('; ').map((d) => [d.split(' ')[0], d.split(' ').slice(1)]),
+    )
+    expect(directives['script-src']).toContain('https://accounts.google.com/gsi/client')
+    expect(directives['style-src']).toEqual(["'self'", 'https://accounts.google.com/gsi/style'])
+    expect(directives['connect-src']).toEqual(["'self'", 'https://accounts.google.com/gsi/'])
+    expect(directives['frame-src']).toEqual(['https://accounts.google.com/gsi/'])
+    expect(directives['img-src']).toEqual(["'self'"])
+    expect(GOOGLE_STYLE.startsWith(GOOGLE_GSI)).toBe(true)
+  })
+
+  it('o app carrega o script do Google exatamente do endereço liberado', () => {
+    const loader = readFileSync('src/lib/googleIdentity.ts', 'utf8')
+    expect(loader).toContain(`GOOGLE_SCRIPT = '${GOOGLE_SCRIPT}'`)
   })
 })
 

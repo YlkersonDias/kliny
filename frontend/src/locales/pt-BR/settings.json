@@ -21,7 +21,7 @@
     "description": "Se você entrou em outro aparelho, como um computador emprestado, pode encerrar todas as sessões de uma vez.",
     "button": "Sair de todos os dispositivos",
     "confirmTitle": "Sair de todos os dispositivos?",
-    "confirmText": "Você vai sair deste e de todos os outros aparelhos em que entrou. Para voltar, entre de novo com seu e-mail e senha.",
+    "confirmText": "Você vai sair deste e de todos os outros aparelhos em que entrou. Para voltar, entre de novo.",
     "confirm": "Sair de todos",
     "error": "Não foi possível sair de todos os dispositivos."
   },
@@ -35,6 +35,16 @@
     "password": "Senha",
     "understand": "Entendo que todos os meus dados serão apagados e que isso não pode ser desfeito.",
     "confirm": "Excluir conta",
-    "error": "Não foi possível excluir a conta."
+    "error": "Não foi possível excluir a conta.",
+    "confirmTextGoogle": "Todos os seus dados serão apagados para sempre, em todos os aparelhos. Para confirmar, entre de novo com a sua conta do Google.",
+    "googleConfirmed": "Conta do Google confirmada."
+  },
+  "google": {
+    "title": "Conta Google",
+    "linked": "Você pode entrar com o Google ou com o seu e-mail e senha.",
+    "linkedOnly": "Esta conta foi criada com o Google e entra só por ele, porque não tem senha.",
+    "notLinked": "Vincule uma conta do Google para entrar também com ela, sem digitar a senha.",
+    "unlink": "Desvincular o Google",
+    "error": "Não foi possível alterar o vínculo com o Google."
   }
 }

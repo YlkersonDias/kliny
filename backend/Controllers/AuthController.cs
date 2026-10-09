@@ -2,16 +2,18 @@ using Backend.DTOs.Auth;
 using Backend.Extensions;
 using Backend.RateLimiting;
 using Backend.Resources;
+using Backend.Security;
 using Backend.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
+using Microsoft.Extensions.Options;
 
 namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IAuthService authService) : ControllerBase
+public class AuthController(IAuthService authService, IOptions<GoogleOptions> googleOptions) : ControllerBase
 {
     // Público: as únicas rotas sem login (o Program.cs exige login em todo o resto).
     [AllowAnonymous]
@@ -43,6 +45,48 @@ public class AuthController(IAuthService authService) : ControllerBase
             : Ok(response);
     }
 
+    // Login com o Google: o frontend manda o comprovante (ID token) do Google Identity Services.
+    // Mesmo limite por IP do login; recusa sempre com a mesma mensagem (regra 4).
+    [AllowAnonymous]
+    [HttpPost("google")]
+    [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
+    [ProducesResponseType<AuthResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status404NotFound)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> Google(GoogleCredentialRequest request)
+    {
+        if (!googleOptions.Value.Enabled)
+            return NotFound();
+        var response = await authService.GoogleSignInAsync(request.Credential);
+        return response is null
+            ? Problem(Messages.GoogleSignInFailed, statusCode: StatusCodes.Status401Unauthorized)
+            : Ok(response);
+    }
+
+    [Authorize]
+    [HttpPost("google/link")]
+    [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
+    [ProducesResponseType<UserResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    [ProducesResponseType(StatusCodes.Status409Conflict)]
+    public async Task<IActionResult> LinkGoogle(GoogleCredentialRequest request)
+    {
+        if (!googleOptions.Value.Enabled)
+            return NotFound();
+        return Ok(await authService.LinkGoogleAsync(User.GetUserId(), request.Credential));
+    }
+
+    [Authorize]
+    [HttpPost("google/unlink")]
+    [ProducesResponseType<UserResponse>(StatusCodes.Status200OK)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status401Unauthorized)]
+    public async Task<IActionResult> UnlinkGoogle() =>
+        Ok(await authService.UnlinkGoogleAsync(User.GetUserId()));
+
     [Authorize]
     [HttpGet("me")]
     [ProducesResponseType<UserResponse>(StatusCodes.Status200OK)]
@@ -65,7 +109,7 @@ public class AuthController(IAuthService authService) : ControllerBase
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> DeleteAccount(DeleteAccountRequest request)
     {
-        await authService.DeleteAccountAsync(User.GetUserId(), request.Password);
+        await authService.DeleteAccountAsync(User.GetUserId(), request.Password, request.GoogleCredential);
         return NoContent();
     }
 

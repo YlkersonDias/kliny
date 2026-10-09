@@ -20,13 +20,20 @@ export function inlineScriptHashes(html: string): string[] {
   )
 }
 
+// Login com o Google: os endereços que a documentação do Google Identity Services pede na CSP
+// (o script, os estilos, o iframe do botão e os pedidos dele), e nada além deles.
+export const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client'
+export const GOOGLE_STYLE = 'https://accounts.google.com/gsi/style'
+export const GOOGLE_GSI = 'https://accounts.google.com/gsi/'
+
 export function contentSecurityPolicy(html: string): string {
   return [
     "default-src 'self'",
-    ['script-src', "'self'", ...inlineScriptHashes(html)].join(' '),
-    "style-src 'self'",
+    ['script-src', "'self'", GOOGLE_SCRIPT, ...inlineScriptHashes(html)].join(' '),
+    `style-src 'self' ${GOOGLE_STYLE}`,
     "img-src 'self'",
-    "connect-src 'self'",
+    `connect-src 'self' ${GOOGLE_GSI}`,
+    `frame-src ${GOOGLE_GSI}`,
     "font-src 'self'",
     "object-src 'none'",
     "base-uri 'none'",

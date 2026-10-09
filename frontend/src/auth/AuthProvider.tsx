@@ -3,7 +3,8 @@ import { useQueryClient } from '@tanstack/react-query'
 import * as authApi from '../api/auth'
 import i18n from '../i18n'
 import { setUnauthorizedHandler } from '../api/client'
-import type { AuthResponse, LoginRequest, RegisterRequest } from '../api/types'
+import type { AuthResponse, LoginRequest, RegisterRequest, User } from '../api/types'
+import { disableGoogleAutoSelect } from '../lib/googleIdentity'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
 
@@ -20,6 +21,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     clearSession()
     setSession(null)
     setNotice(message)
+    disableGoogleAutoSelect()
     // O próximo usuário do navegador não pode ver os dados do anterior.
     queryClient.clear()
   }, [queryClient])
@@ -75,6 +77,18 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     startSession(await authApi.register(request))
   }, [startSession])
 
+  const signInWithGoogle = useCallback(async (credential: string) => {
+    startSession(await authApi.googleSignIn(credential))
+  }, [startSession])
+
+  const updateUser = useCallback((user: User) => {
+    const current = getCurrentSession()
+    if (current === null) return
+    const updated = { ...current, user }
+    saveSession(updated)
+    setSession(updated)
+  }, [])
+
   const signOut = useCallback(() => endSession(null), [endSession])
 
   // Só encerra a sessão local depois que a API confirmou: se falhar, os outros aparelhos
@@ -85,8 +99,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   }, [endSession])
 
   // Como no signOutEverywhere: a sessão local só termina depois que a API confirmou.
-  const deleteAccount = useCallback(async (password: string) => {
-    await authApi.deleteAccount(password)
+  const deleteAccount = useCallback(async (confirmation: authApi.DeleteAccountConfirmation) => {
+    await authApi.deleteAccount(confirmation)
     endSession(i18n.t('auth:accountDeleted'))
   }, [endSession])
 
@@ -96,10 +110,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     notice,
     signIn,
     signUp,
+    signInWithGoogle,
+    updateUser,
     signOut,
     signOutEverywhere,
     deleteAccount,
-  }), [session, isValidating, notice, signIn, signUp, signOut, signOutEverywhere, deleteAccount])
+  }), [session, isValidating, notice, signIn, signUp, signInWithGoogle, updateUser, signOut, signOutEverywhere, deleteAccount])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }

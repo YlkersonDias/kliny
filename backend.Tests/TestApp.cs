@@ -69,5 +69,13 @@ public sealed class FakeAuthService : IAuthService
 
     public Task RevokeAllTokensAsync(int userId) => Task.CompletedTask;
 
-    public Task DeleteAccountAsync(int userId, string password) => Task.CompletedTask;
+    public Task DeleteAccountAsync(int userId, string? password, string? googleCredential) => Task.CompletedTask;
+
+    public Task<AuthResponse?> GoogleSignInAsync(string credential) => Task.FromResult<AuthResponse?>(null);
+
+    public Task<UserResponse> LinkGoogleAsync(int userId, string credential) =>
+        Task.FromResult(new UserResponse(userId, "Teste", "teste@kliny.test", DateTime.UtcNow, GoogleLinked: true));
+
+    public Task<UserResponse> UnlinkGoogleAsync(int userId) =>
+        Task.FromResult(new UserResponse(userId, "Teste", "teste@kliny.test", DateTime.UtcNow));
 }

@@ -163,6 +163,42 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Equal(200m, Assert.Single(timeline.EnumerateArray()).GetProperty("income").GetDecimal());
     }
 
+    // Vínculo com o Google: B não toma a conta Google de A, e o que B faz no próprio vínculo não
+    // mexe no de A (as rotas não recebem Id: o usuário vem sempre do token).
+    [Fact]
+    public async Task B_nao_vincula_o_Google_de_A_nem_mexe_no_vinculo_dela()
+    {
+        var googleOfA = FakeGoogleTokenValidator.Credential("g-dono-a", "a-google@outlook.com");
+        using (var a = AsA())
+        using (var link = await a.PostAsJsonAsync("/api/auth/google/link", new { credential = googleOfA }, Ct))
+            Assert.Equal(HttpStatusCode.OK, link.StatusCode);
+
+        using (var b = AsB())
+        {
+            using var steal = await b.PostAsJsonAsync("/api/auth/google/link", new { credential = googleOfA }, Ct);
+            Assert.Equal(HttpStatusCode.Conflict, steal.StatusCode);
+            using var unlink = await b.PostAsJsonAsync("/api/auth/google/unlink", new { }, Ct);
+            Assert.Equal(HttpStatusCode.OK, unlink.StatusCode);
+            Assert.False((await Json(b.GetAsync("/api/auth/me", Ct))).GetProperty("googleLinked").GetBoolean());
+        }
+
+        using (var a = AsA())
+        {
+            var me = await Json(a.GetAsync("/api/auth/me", Ct));
+            Assert.True(me.GetProperty("googleLinked").GetBoolean());
+
+            // Entrar com o Google de A continua levando a A.
+            using var anonymous = fixture.Api.Client();
+            var signIn = await Json(anonymous.PostAsJsonAsync("/api/auth/google", new { credential = googleOfA }, Ct));
+            Assert.Equal(me.GetProperty("id").GetInt32(), signIn.GetProperty("user").GetProperty("id").GetInt32());
+
+            using var unlink = await a.PostAsJsonAsync("/api/auth/google/unlink", new { }, Ct);
+            Assert.Equal(HttpStatusCode.OK, unlink.StatusCode);
+        }
+
+        await AssertDataOfAUnchanged();
+    }
+
     // A, vista por ela mesma, continua como o fixture criou.
     private async Task AssertDataOfAUnchanged()
     {
