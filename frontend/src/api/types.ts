@@ -80,6 +80,14 @@ export interface TransactionQuery {
   pageSize?: number
 }
 
+// Orçamento por categoria (8.2): limite mensal e o gasto do mês pedido (positivo, sem operações de cofre).
+export interface Budget {
+  categoryId: number
+  categoryName: string
+  limit: number
+  spent: number
+}
+
 // Lista fechada aceita pela API; ausente = mais recentes primeiro.
 export type TransactionSort = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 

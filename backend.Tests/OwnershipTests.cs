@@ -163,6 +163,35 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Equal(200m, Assert.Single(timeline.EnumerateArray()).GetProperty("income").GetDecimal());
     }
 
+    // Orçamento (8.2): B não cria orçamento na categoria de A, não vê, não altera nem apaga o de A.
+    [Fact]
+    public async Task B_nao_mexe_no_orcamento_de_A()
+    {
+        using (var a = AsA())
+        using (var set = await a.PutAsJsonAsync($"/api/budgets/{fixture.CategoryA}", new { amount = 300m }, Ct))
+            Assert.Equal(HttpStatusCode.OK, set.StatusCode);
+
+        using (var b = AsB())
+        {
+            using var steal = await b.PutAsJsonAsync($"/api/budgets/{fixture.CategoryA}", new { amount = 1m }, Ct);
+            Assert.Equal(HttpStatusCode.NotFound, steal.StatusCode);
+            using var delete = await b.DeleteAsync($"/api/budgets/{fixture.CategoryA}", Ct);
+            Assert.Equal(HttpStatusCode.NotFound, delete.StatusCode);
+            var listB = await Json(b.GetAsync("/api/budgets?month=2020-01", Ct));
+            Assert.Empty(listB.EnumerateArray());
+        }
+
+        using (var a = AsA())
+        {
+            var listA = await Json(a.GetAsync("/api/budgets?month=2020-01", Ct));
+            var only = Assert.Single(listA.EnumerateArray());
+            Assert.Equal(300m, only.GetProperty("limit").GetDecimal());
+            using var cleanup = await a.DeleteAsync($"/api/budgets/{fixture.CategoryA}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+        await AssertDataOfAUnchanged();
+    }
+
     // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()

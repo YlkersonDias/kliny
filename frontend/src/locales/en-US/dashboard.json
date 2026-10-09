@@ -52,5 +52,29 @@
     "negative": "If your account is overdrawn, add it as an expense.",
     "start": "Add starting balance",
     "createVault": "Create a vault"
+  },
+  "budgets": {
+    "title": "Monthly budget",
+    "manage": "Set budgets",
+    "none": "Set a monthly spending limit per category and track here how much has been used.",
+    "spentOf": "{{spent}} of {{limit}}",
+    "remaining": "{{amount}} left",
+    "near": "Close to the limit · {{amount}} left",
+    "reached": "Limit reached",
+    "over": "Over by {{amount}}",
+    "percent": "{{percent}}%",
+    "progressLabel": "{{category}} budget",
+    "progressValue": "{{percent}}% of the {{limit}} limit used.",
+    "loadError": "Could not load the budget. {{message}}",
+    "form": {
+      "title": "Monthly budgets",
+      "description": "The limit applies to every month and counts only the category's expenses. Leave it blank for no budget.",
+      "placeholder": "No budget",
+      "positive": "The limit must be greater than zero.",
+      "noCategories": "You have no categories yet. Create them in Transactions, under \"Manage categories\".",
+      "goToTransactions": "Go to Transactions",
+      "save": "Save budgets",
+      "saveError": "Could not save. {{message}}"
+    }
   }
 }
