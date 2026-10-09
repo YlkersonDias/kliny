@@ -41,7 +41,9 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
         {
             entity.Property(u => u.Name).HasMaxLength(100).IsRequired();
             entity.Property(u => u.Email).HasMaxLength(255).IsRequired();
-            entity.Property(u => u.PasswordHash).HasMaxLength(255).IsRequired();
+            entity.Property(u => u.PasswordHash).HasMaxLength(255);
+            entity.Property(u => u.GoogleSubject).HasMaxLength(255);
+            entity.HasIndex(u => u.GoogleSubject).IsUnique();
             entity.HasIndex(u => u.Email).IsUnique();
         });
 

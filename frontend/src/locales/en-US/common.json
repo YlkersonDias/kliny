@@ -45,5 +45,8 @@
     "available": "A new version of {{appName}} is available.",
     "reload": "Update",
     "later": "Not now"
+  },
+  "google": {
+    "unavailable": "Could not load the Google button. Check your connection and reload the page."
   }
 }

@@ -5,6 +5,10 @@ export interface User {
   name: string
   email: string
   createdAt: string
+  // Opcionais: sessões guardadas antes do login com o Google não têm os dois (o /me completa).
+  // false só em conta criada pelo Google, que não tem senha.
+  hasPassword?: boolean
+  googleLinked?: boolean
 }
 
 export interface AuthResponse {

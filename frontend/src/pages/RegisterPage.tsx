@@ -5,6 +5,7 @@ import type { TFunction } from 'i18next'
 import { Trans, useTranslation } from 'react-i18next'
 import { ApiError } from '../api/client'
 import { useAuth } from '../auth/useAuth'
+import { GoogleSignIn } from '../components/auth/GoogleSignIn'
 import { AuthLayout } from '../components/layout/AuthLayout'
 import { Button } from '../components/ui/Button'
 import { FormAlert } from '../components/ui/FormAlert'
@@ -144,6 +145,8 @@ export default function RegisterPage() {
           {mutation.isPending ? t('register.submitting') : t('register.submit')}
         </Button>
       </form>
+
+      <GoogleSignIn text="signup_with" />
 
       <p className="mt-4 text-center text-xs text-muted">
         <Trans

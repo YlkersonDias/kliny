@@ -21,7 +21,7 @@
     "description": "If you signed in on another device, such as a borrowed computer, you can end all sessions at once.",
     "button": "Sign out of all devices",
     "confirmTitle": "Sign out of all devices?",
-    "confirmText": "You will be signed out of this device and every other device you signed in on. To come back, sign in again with your email and password.",
+    "confirmText": "You will be signed out of this and every other device you signed in on. To come back, sign in again.",
     "confirm": "Sign out of all",
     "error": "Could not sign out of all devices."
   },
@@ -35,6 +35,16 @@
     "password": "Password",
     "understand": "I understand that all my data will be erased and that this cannot be undone.",
     "confirm": "Delete account",
-    "error": "Could not delete the account."
+    "error": "Could not delete the account.",
+    "confirmTextGoogle": "All your data will be deleted forever, on every device. To confirm, sign in again with your Google account.",
+    "googleConfirmed": "Google account confirmed."
+  },
+  "google": {
+    "title": "Google account",
+    "linked": "You can sign in with Google or with your email and password.",
+    "linkedOnly": "This account was created with Google and signs in only through it, because it has no password.",
+    "notLinked": "Link a Google account to also sign in with it, without typing your password.",
+    "unlink": "Unlink Google",
+    "error": "Could not change the Google link."
   }
 }

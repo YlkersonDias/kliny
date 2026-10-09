@@ -16,6 +16,7 @@ public partial class AuthorizationTests
     [
         "POST api/auth/register",
         "POST api/auth/login",
+        "POST api/auth/google",
     ];
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -44,7 +45,7 @@ public partial class AuthorizationTests
     }
 
     [Fact]
-    public void So_cadastro_e_login_tem_AllowAnonymous()
+    public void So_cadastro_e_os_logins_tem_AllowAnonymous()
     {
         using var app = new TestApp();
         app.CreateClient().Dispose();
@@ -63,7 +64,7 @@ public partial class AuthorizationTests
     [Theory]
     [InlineData("Testing")]
     [InlineData("Development")]
-    public async Task Toda_rota_fora_cadastro_e_login_responde_401_sem_token(string environment)
+    public async Task Toda_rota_fora_cadastro_e_os_logins_responde_401_sem_token(string environment)
     {
         using var app = new TestApp(environment: environment);
         var client = app.CreateClient();

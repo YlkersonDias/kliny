@@ -2,6 +2,7 @@ using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
 using Backend.Data;
+using Backend.Security;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -152,6 +153,10 @@ public sealed class MySqlApi : IAsyncLifetime
         {
             builder.UseEnvironment("Testing");
             builder.UseSetting("Jwt:Key", new string('k', 64));
+            // O login com o Google, o vínculo e a exclusão de conta dividem o limite por IP do login
+            // (10 por minuto), e cada classe de teste faz mais que isso. O limite por IP é conferido
+            // no RateLimitingTests, sem MySQL; o bloqueio por e-mail continua o de produção.
+            builder.UseSetting("RateLimits:LoginPerIp:PermitLimit", "1000");
 
             builder.ConfigureServices(services =>
             {
@@ -162,6 +167,9 @@ public sealed class MySqlApi : IAsyncLifetime
                     services.Remove(descriptor);
                 services.ConfigureDbContext<AppDbContext>(options =>
                     options.UseMySql(connectionString, ServerVersion));
+
+                // Os testes não falam com o Google: o comprovante é montado pelo FakeGoogleTokenValidator.
+                services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
             });
         }
     }
