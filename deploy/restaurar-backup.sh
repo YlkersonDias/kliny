@@ -1,0 +1,49 @@
+#!/bin/sh
+# Roda num container descartável da imagem mysql:8.4, chamado pelo deploy/restaurar-backup.ps1.
+# Abre um backup cifrado com a chave privada (/chave/<arquivo>) e a frase-senha (entrada padrão),
+# confere o conteúdo e, no modo "importar", põe no banco com o kliny_migrator. Uso:
+#   restaurar-backup.sh conferir|importar <backup> <arquivo da chave privada>
+# O conteúdo aberto fica só no /tmp deste container, que some no fim.
+set -eu
+mode="$1"
+backup="/backups/$2"
+key="/chave/$3"
+
+IFS= read -r phrase || true
+phrase="$(printf '%s' "$phrase" | tr -d '\r')"
+
+work="$(mktemp -d)"
+trap 'rm -rf "$work"' EXIT
+export GNUPGHOME="$work/gnupg"
+mkdir -m 700 "$GNUPGHOME"
+gz="$work/dump.sql.gz"
+
+gpg --batch --quiet --import "$key" 2>/dev/null || { echo "Não foi possível ler a chave privada." >&2; exit 1; }
+# Tudo aberto antes de tocar no banco: um arquivo corrompido no meio não deixa o banco pela metade.
+if ! printf '%s' "$phrase" | gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 0 \
+    --output "$gz" --decrypt "$backup" 2>/dev/null; then
+  echo "Não foi possível abrir o backup (frase-senha errada, chave de outro par ou arquivo corrompido)." >&2
+  exit 1
+fi
+
+gunzip -t "$gz"
+for table in __EFMigrationsHistory Users Transactions; do
+  if ! gunzip -c "$gz" | grep -q "CREATE TABLE \`$table\`"; then
+    echo "O backup não tem a tabela $table." >&2
+    exit 1
+  fi
+done
+if ! gunzip -c "$gz" | tail -n 1 | grep -q "Dump completed"; then
+  echo "O backup está incompleto." >&2
+  exit 1
+fi
+
+if [ "$mode" = "conferir" ]; then
+  echo "Backup conferido: abre com esta chave e está completo."
+  exit 0
+fi
+
+gunzip -c "$gz" > "$work/dump.sql"
+rm -f "$gz"
+MYSQL_PWD="$KLINY_MIGRATOR_PASSWORD" mysql -h mysql -ukliny_migrator --ssl-mode=REQUIRED kliny < "$work/dump.sql"
+echo "Backup restaurado."

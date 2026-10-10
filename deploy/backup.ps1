@@ -1,5 +1,6 @@
-﻿# Backup do banco do Kliny (S.7): um mysqldump compactado e conferido na pasta BACKUP_DIR do
-# deploy/.env, com o usuário kliny_backup (só leitura), e uma cópia em BACKUP_COPY_DIR (outro
+﻿# Backup do banco do Kliny (S.7): um mysqldump compactado, conferido e cifrado com a chave pública
+# dos backups (deploy/chave-backup/publica.asc) na pasta BACKUP_DIR do deploy/.env, com o usuário
+# kliny_backup (só leitura), e uma cópia em BACKUP_COPY_DIR (outro
 # disco), se estiver no .env. Nas duas pastas, apaga os backups com mais de 14 dias, o prazo dito
 # na política de privacidade (PRIVACY.backupRetention). Roda com o Kliny no ar; a tarefa agendada
 # o chama todo dia (ver deploy/README.md, "Backup do banco").
@@ -80,7 +81,7 @@ try {
         $name = ($created -replace '^Backup criado: ', '') -replace ' \(.*$', ''
         New-Item -ItemType Directory -Force -Path $copyDir | Out-Null
         Copy-Item -Path (Join-Path $backupDir $name) -Destination $copyDir -Force
-        Get-ChildItem -Path $copyDir -Filter 'kliny-*.sql.gz' |
+        Get-ChildItem -Path $copyDir -Filter 'kliny-*.sql.gz*' |
             Where-Object { $_.LastWriteTime -lt (Get-Date).AddDays(-$RetentionDays) } |
             Remove-Item -Force
         $message += "; cópia em $copyDir"

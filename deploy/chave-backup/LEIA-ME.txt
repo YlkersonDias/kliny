@@ -1,0 +1,2 @@
+# Aqui fica só a chave pública dos backups (publica.asc), criada pelo deploy/criar-chave-backup.ps1.
+# Ela cifra, mas não abre. A chave privada nunca fica nesta pasta (ver deploy/README.md).
