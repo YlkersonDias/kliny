@@ -65,6 +65,10 @@ services:
       # Só o nginx, nesta rede, pode informar o IP real e o HTTPS (ForwardedHeaders).
       ForwardedHeaders__KnownNetworks__0: 172.30.0.0/24
       AllowedHosts: kliny.app.br;www.kliny.app.br;localhost
+      # Recuperação de senha: o link do e-mail aponta para o site (nunca para o Host da requisição).
+      # Sem RESEND_API_KEY no .env, nenhum e-mail é enviado.
+      Email__AppUrl: https://kliny.app.br
+      Email__ApiKey: ${RESEND_API_KEY:-}
     depends_on:
       mysql:
         condition: service_healthy

@@ -13,7 +13,8 @@ namespace Backend.Controllers;
 
 [ApiController]
 [Route("api/auth")]
-public class AuthController(IAuthService authService, IOptions<GoogleOptions> googleOptions) : ControllerBase
+public class AuthController(
+    IAuthService authService, IPasswordResetService passwordResetService, IOptions<GoogleOptions> googleOptions) : ControllerBase
 {
     // Público: as únicas rotas sem login (o Program.cs exige login em todo o resto).
     [AllowAnonymous]
@@ -43,6 +44,33 @@ public class AuthController(IAuthService authService, IOptions<GoogleOptions> go
         return response is null
             ? Problem(Messages.InvalidCredentials, statusCode: StatusCodes.Status401Unauthorized)
             : Ok(response);
+    }
+
+    // "Esqueci minha senha": responde sempre 204, exista a conta ou não (regra 4); o link sai por
+    // e-mail em segundo plano. Limite por IP próprio, além do limite por conta no service.
+    [AllowAnonymous]
+    [HttpPost("forgot-password")]
+    [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> ForgotPassword(ForgotPasswordRequest request)
+    {
+        await passwordResetService.RequestAsync(request.Email);
+        return NoContent();
+    }
+
+    // Troca a senha pelo token do link. Link inválido, vencido ou já usado: 400, sempre a mesma mensagem.
+    [AllowAnonymous]
+    [HttpPost("reset-password")]
+    [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
+    [ProducesResponseType(StatusCodes.Status204NoContent)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> ResetPassword(ResetPasswordRequest request)
+    {
+        await passwordResetService.ResetAsync(request.Token, request.Password);
+        return NoContent();
     }
 
     // Login com o Google: o frontend manda o comprovante (ID token) do Google Identity Services.

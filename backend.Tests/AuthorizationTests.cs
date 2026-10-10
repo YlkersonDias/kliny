@@ -17,6 +17,8 @@ public partial class AuthorizationTests
         "POST api/auth/register",
         "POST api/auth/login",
         "POST api/auth/google",
+        "POST api/auth/forgot-password",
+        "POST api/auth/reset-password",
     ];
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

@@ -1,3 +1,7 @@
+// Mesmas regras do RegisterRequest e do ResetPasswordRequest da API.
+export const PASSWORD_MIN = 8
+export const PASSWORD_MAX = 72
+
 // O BCrypt da API só usa os primeiros 72 bytes da senha em UTF-8 (S.6): um "é" ocupa 2 bytes e um
 // emoji, 4. Mesmo limite do MaxUtf8Bytes do RegisterRequest e do LoginRequest.
 export const PASSWORD_MAX_BYTES = 72

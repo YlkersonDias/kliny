@@ -29,6 +29,7 @@ public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null
         builder.ConfigureServices(services =>
         {
             services.AddSingleton<IAuthService, FakeAuthService>();
+            services.AddSingleton<IPasswordResetService, FakePasswordResetService>();
             services.AddSingleton<IStartupFilter, ClientIpStartupFilter>();
         });
     }
@@ -78,4 +79,12 @@ public sealed class FakeAuthService : IAuthService
 
     public Task<UserResponse> UnlinkGoogleAsync(int userId) =>
         Task.FromResult(new UserResponse(userId, "Teste", "teste@kliny.test", DateTime.UtcNow));
+}
+
+// Recuperação de senha sem banco: só para os testes de limite e de rota, que não chegam ao service.
+public sealed class FakePasswordResetService : IPasswordResetService
+{
+    public Task RequestAsync(string email) => Task.CompletedTask;
+
+    public Task ResetAsync(string token, string newPassword) => Task.CompletedTask;
 }

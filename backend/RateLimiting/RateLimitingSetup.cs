@@ -13,6 +13,7 @@ public static class RateLimitingSetup
 {
     public const string LoginPolicy = "login";
     public const string RegisterPolicy = "register";
+    public const string PasswordResetPolicy = "password-reset";
 
     // A janela deslizante anda em 6 pedaços: na de 1 minuto, a cada 10 segundos.
     private const int SegmentsPerWindow = 6;
@@ -32,6 +33,7 @@ public static class RateLimitingSetup
         {
             options.AddPolicy(LoginPolicy, context => PerIp(context, limits => limits.LoginPerIp));
             options.AddPolicy(RegisterPolicy, context => PerIp(context, limits => limits.RegisterPerIp));
+            options.AddPolicy(PasswordResetPolicy, context => PerIp(context, limits => limits.PasswordResetPerIp));
             options.OnRejected = OnRejectedAsync;
         });
 
@@ -63,9 +65,12 @@ public static class RateLimitingSetup
         var context = rejected.HttpContext;
         var policy = context.GetEndpoint()?.Metadata.GetMetadata<EnableRateLimitingAttribute>()?.PolicyName;
         // A janela inteira: é quando, com certeza, uma tentativa volta a ser aceita.
-        var retryAfter = policy == RegisterPolicy
-            ? Limit(context, limits => limits.RegisterPerIp).Window
-            : Limit(context, limits => limits.LoginPerIp).Window;
+        var retryAfter = policy switch
+        {
+            RegisterPolicy => Limit(context, limits => limits.RegisterPerIp).Window,
+            PasswordResetPolicy => Limit(context, limits => limits.PasswordResetPerIp).Window,
+            _ => Limit(context, limits => limits.LoginPerIp).Window,
+        };
 
         context.Response.StatusCode = StatusCodes.Status429TooManyRequests;
         TooManyRequests.SetRetryAfter(context.Response, retryAfter);
