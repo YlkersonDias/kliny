@@ -4,7 +4,7 @@
   "intro": "{{appName}} is a personal finance app. This page explains what data it keeps, why, and what you can do about it.",
   "who": {
     "title": "Who looks after your data",
-    "body": "{{appName}} and the data kept in it are the responsibility of the project's developer, a private individual. Their full identification is given to anyone who asks for it at <contact/>, which also handles any request about your data."
+    "body": "{{appName}} and the data kept in it are the responsibility of the project's developer, a private individual. For more information, write to <contact/>, which also handles any request about your data."
   },
   "data": {
     "title": "What we keep",
