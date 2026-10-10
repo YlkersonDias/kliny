@@ -53,6 +53,18 @@ export function RecurringMark({ transaction }: { transaction: Transaction }) {
   )
 }
 
+// Parcela de uma compra parcelada (8.5b); o "(n/N)" já está na descrição.
+export function InstallmentMark({ transaction }: { transaction: Transaction }) {
+  const { t } = useTranslation('transactions')
+  if (transaction.installmentPlanId === null) return null
+  return (
+    <span className="inline-flex shrink-0 text-muted" title={t('installments.badge')}>
+      <Icon name="card" className="size-4" />
+      <span className="sr-only">{t('installments.badge')}</span>
+    </span>
+  )
+}
+
 export function TransactionCategory({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation(['transactions', 'common'])
   if (transaction.vaultId !== null) return <span className="text-vault-text">{t('kind.vault')}</span>

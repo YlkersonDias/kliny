@@ -8,4 +8,5 @@ public record TransactionResponse(
     int? CategoryId,
     string? CategoryName,
     int? VaultId,
-    int? RecurrenceId);
+    int? RecurrenceId,
+    int? InstallmentPlanId);

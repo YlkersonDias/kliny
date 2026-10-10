@@ -230,6 +230,34 @@ public static class Messages
         "A data de hoje não confere com a do servidor. Confira o relógio do aparelho.",
         "Today's date does not match the server's. Check your device's clock.");
 
+    public static string InstallmentNotFound => Text(
+        "Compra parcelada não encontrada.",
+        "Installment purchase not found.");
+
+    public static string InstallmentDescriptionMaxLength => Text(
+        "A descrição deve ter no máximo 245 caracteres.",
+        "The description must be at most 245 characters.");
+
+    public static string InstallmentCountRange => Text(
+        "Informe de 2 a 120 parcelas.",
+        "Enter 2 to 120 installments.");
+
+    public static string InstallmentTotalPositive => Text(
+        "O valor total deve ser maior que zero.",
+        "The total must be greater than zero.");
+
+    public static string InstallmentTotalTooSmall => Text(
+        "O valor total precisa dar pelo menos R$ 0,01 por parcela.",
+        "The total must be at least R$0.01 per installment.");
+
+    public static string InstallmentLimitReached => Text(
+        "Você chegou ao limite de {0} compras parceladas.",
+        "You have reached the limit of {0} installment purchases.");
+
+    public static string InstallmentScopeInvalid => Text(
+        "Escolha apagar todas as parcelas ou só as futuras.",
+        "Choose to delete all installments or only the future ones.");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

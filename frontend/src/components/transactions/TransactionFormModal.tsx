@@ -4,13 +4,18 @@ import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/client'
 import type { Category, Recurrence, Transaction } from '../../api/types'
 import { useCategories } from '../../hooks/useCategories'
+import { useCreateInstallment } from '../../hooks/useInstallments'
 import { useCreateRecurrence, useUpdateRecurrence } from '../../hooks/useRecurrences'
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactions'
-import { isValidIsoDate, today } from '../../lib/dates'
+import { formatDate, isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
-import { parseMoneyInput, toInputText } from '../../lib/money'
+import {
+  INSTALLMENT_DESCRIPTION_MAX, INSTALLMENT_MAX, INSTALLMENT_MIN, lastInstallmentDate, parseInstallmentCount, splitInstallments,
+} from '../../lib/installments'
+import { formatMoney, parseMoneyInput, toInputText } from '../../lib/money'
 import { dayOfMonth } from '../../lib/recurrences'
 import { Button } from '../ui/Button'
+import { ChoiceChip } from '../ui/ChoiceChip'
 import { FormAlert } from '../ui/FormAlert'
 import { Icon } from '../ui/Icon'
 import { Input } from '../ui/Input'
@@ -19,10 +24,13 @@ import { MoneyInput } from '../ui/MoneyInput'
 import { Select } from '../ui/Select'
 import { NewCategoryModal } from './NewCategoryModal'
 
-const FIELDS = ['description', 'amount', 'date', 'endDate', 'categoryId'] as const
+const FIELDS = ['description', 'amount', 'date', 'count', 'endDate', 'categoryId'] as const
 type Field = (typeof FIELDS)[number]
 
 type Kind = 'income' | 'expense'
+
+// Só em nova movimentação: lançar uma vez, todo mês (8.5a) ou em parcelas (8.5b, só gasto).
+type Repeat = 'none' | 'monthly' | 'installments'
 
 interface Values {
   kind: Kind
@@ -30,36 +38,45 @@ interface Values {
   amount: string
   date: string
   categoryId: string // '' = sem categoria
-  // Só em nova movimentação: lançar todo mês a partir de "date" (8.5a).
-  repeat: boolean
+  repeat: Repeat
   endDate: string // '' = sem data final
+  count: string // número de parcelas digitado
 }
 
 // Mesma regra do TransactionRequest da API (StringLength(255), conferido no backend).
 const DESCRIPTION_MAX = 255
 
-// startDate: a primeira data da recorrência, quando a data final importa (nova com "Repetir" ou
-// edição de uma recorrência); null quando não há data final no formulário.
-function validate(values: Values, startDate: string | null, t: TFunction<['transactions', 'common']>): FieldErrors<Field> {
+interface Rules {
+  // A primeira data da recorrência, quando há data final no formulário; senão, null.
+  startDate: string | null
+  installments: boolean
+}
+
+function validate(values: Values, rules: Rules, t: TFunction<['transactions', 'common']>): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}
   const description = values.description.trim()
+  const descriptionMax = rules.installments ? INSTALLMENT_DESCRIPTION_MAX : DESCRIPTION_MAX
 
   if (!description) errors.description = t('form.descriptionRequired')
-  else if (description.length > DESCRIPTION_MAX) errors.description = t('common:validation.descriptionMax', { max: DESCRIPTION_MAX })
+  else if (description.length > descriptionMax) errors.description = t('common:validation.descriptionMax', { max: descriptionMax })
 
+  const amount = parseMoneyInput(values.amount)
   if (!values.amount.trim()) errors.amount = t('common:validation.amountRequired')
-  else {
-    const amount = parseMoneyInput(values.amount)
-    if (amount === null) errors.amount = t('common:validation.amountInvalid')
-    else if (amount === 0) errors.amount = t('common:validation.amountPositive')
-  }
+  else if (amount === null) errors.amount = t('common:validation.amountInvalid')
+  else if (amount === 0) errors.amount = t('common:validation.amountPositive')
 
   if (!values.date) errors.date = t('common:validation.dateRequired')
   else if (!isValidIsoDate(values.date)) errors.date = t('common:validation.dateInvalid')
 
-  if (startDate !== null && values.endDate) {
+  if (rules.installments) {
+    const count = parseInstallmentCount(values.count)
+    if (count === null) errors.count = t('installments.countRange', { min: INSTALLMENT_MIN, max: INSTALLMENT_MAX })
+    else if (amount !== null && amount > 0 && Math.round(amount * 100) < count) errors.amount = t('installments.totalTooSmall')
+  }
+
+  if (rules.startDate !== null && values.endDate) {
     if (!isValidIsoDate(values.endDate)) errors.endDate = t('common:validation.dateInvalid')
-    else if (isValidIsoDate(startDate) && values.endDate < startDate) errors.endDate = t('recurring.endBeforeStart')
+    else if (isValidIsoDate(rules.startDate) && values.endDate < rules.startDate) errors.endDate = t('recurring.endBeforeStart')
   }
 
   return errors
@@ -77,7 +94,7 @@ function initialValues(transaction?: Transaction, preset?: TransactionPreset, re
   if (!saved) {
     return {
       kind: preset?.kind ?? 'expense', description: preset?.description ?? '', amount: '', date: today(), categoryId: '',
-      repeat: false, endDate: '',
+      repeat: 'none', endDate: '', count: '',
     }
   }
   return {
@@ -86,18 +103,20 @@ function initialValues(transaction?: Transaction, preset?: TransactionPreset, re
     amount: toInputText(saved.amount),
     date: transaction?.date ?? recurrence!.startDate,
     categoryId: saved.categoryId === null ? '' : String(saved.categoryId),
-    repeat: false,
+    repeat: 'none',
     endDate: recurrence?.endDate ?? '',
+    count: '',
   }
 }
 
-// A API chama a primeira data da recorrência de startDate; no formulário, é o campo "Data".
-function withDateField(error: unknown): unknown {
-  if (error instanceof ApiError && error.fieldErrors.startDate) {
-    const { startDate, ...others } = error.fieldErrors
-    return new ApiError(error.status, error.detail, { ...others, date: startDate })
-  }
-  return error
+// Nomes da API que no formulário são outro campo: a primeira data é "date", e o total é "amount".
+const API_FIELDS: Record<string, Field> = { startDate: 'date', firstDate: 'date', total: 'amount' }
+
+function withFormFields(error: unknown): unknown {
+  if (!(error instanceof ApiError)) return error
+  const fieldErrors: Record<string, string> = {}
+  for (const [field, message] of Object.entries(error.fieldErrors)) fieldErrors[API_FIELDS[field] ?? field] = message
+  return new ApiError(error.status, error.detail, fieldErrors)
 }
 
 interface TransactionFormModalProps {
@@ -122,6 +141,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const descriptionRef = useRef<HTMLInputElement>(null)
   const amountRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
+  const countRef = useRef<HTMLInputElement>(null)
   const endDateRef = useRef<HTMLInputElement>(null)
   const categoryRef = useRef<HTMLSelectElement>(null)
 
@@ -130,9 +150,15 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const update = useUpdateTransaction()
   const createRecurrence = useCreateRecurrence()
   const updateRecurrence = useUpdateRecurrence()
+  const createInstallment = useCreateInstallment()
   const isPending = create.isPending || update.isPending || createRecurrence.isPending || updateRecurrence.isPending
+    || createInstallment.isPending
 
-  const isRecurring = isRecurrenceEdit || (isNew && values.repeat)
+  // Parcelado só vale para gasto: trocar para receita volta a "Não repete" sem apagar o que foi digitado.
+  const repeat: Repeat = !isNew ? 'none'
+    : values.repeat === 'installments' && values.kind !== 'expense' ? 'none' : values.repeat
+  const isRecurring = isRecurrenceEdit || repeat === 'monthly'
+  const isInstallments = repeat === 'installments'
   const startDate = isRecurrenceEdit ? recurrence.startDate : values.date
   const day = isRecurrenceEdit ? recurrence.dayOfMonth : (isValidIsoDate(values.date) ? dayOfMonth(values.date) : null)
 
@@ -145,7 +171,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
     setErrors(fieldErrors)
-    const refs = { description: descriptionRef, amount: amountRef, date: dateRef, endDate: endDateRef, categoryId: categoryRef }
+    const refs = { description: descriptionRef, amount: amountRef, date: dateRef, count: countRef, endDate: endDateRef, categoryId: categoryRef }
     const first = firstInvalidField(fieldErrors, FIELDS)
     if (first) refs[first].current?.focus()
   }
@@ -164,7 +190,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
     event.preventDefault()
     setFormError(null)
 
-    const fieldErrors = validate(values, isRecurring ? startDate : null, t)
+    const fieldErrors = validate(values, { startDate: isRecurring ? startDate : null, installments: isInstallments }, t)
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
@@ -179,7 +205,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
     const options = {
       onSuccess: onClose,
       onError: (error: unknown) => {
-        const result = splitApiError(withDateField(error), FIELDS)
+        const result = splitApiError(withFormFields(error), FIELDS)
         showErrors(result.fieldErrors)
         setFormError(result.formError)
       },
@@ -192,9 +218,14 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
       }, options)
     } else if (isEdit) {
       update.mutate({ id: transaction.id, request }, options)
-    } else if (values.repeat) {
+    } else if (repeat === 'monthly') {
       createRecurrence.mutate({
         description: request.description, amount: request.amount, categoryId: request.categoryId, startDate: request.date, endDate,
+      }, options)
+    } else if (repeat === 'installments') {
+      createInstallment.mutate({
+        description: request.description, total: amount, count: parseInstallmentCount(values.count)!, firstDate: request.date,
+        categoryId: request.categoryId,
       }, options)
     } else {
       create.mutate(request, options)
@@ -226,8 +257,25 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   }
 
   const title = isRecurrenceEdit ? t('recurring.editTitle') : isEdit ? t('form.editTitle') : t('form.newTitle')
-  const repeatHint = day === null ? undefined
-    : [t('recurring.repeatHint', { day }), day > 28 ? t('recurring.shortMonthHint') : ''].filter(Boolean).join(' ')
+  const shortMonth = day !== null && day > 28 ? t('recurring.shortMonthHint') : ''
+  const repeatHint = day === null ? undefined : [t('recurring.repeatHint', { day }), shortMonth].filter(Boolean).join(' ')
+
+  // Prévia das parcelas: quanto fica cada uma e quando termina.
+  const total = parseMoneyInput(values.amount)
+  const count = parseInstallmentCount(values.count)
+  let installmentPreview: string | undefined
+  if (isInstallments && total !== null && total > 0 && count !== null && Math.round(total * 100) >= count && isValidIsoDate(values.date)) {
+    const { first, each } = splitInstallments(total, count)
+    installmentPreview = [
+      t('installments.preview', {
+        count, each: formatMoney(each), from: formatDate(values.date), to: formatDate(lastInstallmentDate(values.date, count)),
+      }),
+      first !== each ? t('installments.previewFirst', { first: formatMoney(first) }) : '',
+      shortMonth,
+    ].filter(Boolean).join(' ')
+  }
+
+  const dateLabel = isInstallments ? t('installments.firstDate') : repeat === 'monthly' ? t('recurring.firstDate') : t('common:fields.date')
 
   const endDateField = (
     <Input
@@ -271,7 +319,8 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
           ref={descriptionRef}
           label={t('form.description')}
           autoComplete="off"
-          maxLength={DESCRIPTION_MAX}
+          maxLength={isInstallments ? INSTALLMENT_DESCRIPTION_MAX : DESCRIPTION_MAX}
+          hint={isInstallments ? t('installments.descriptionHint') : undefined}
           value={values.description}
           onChange={(event) => change('description', event.target.value)}
           error={errors.description}
@@ -280,9 +329,9 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
         <div className="grid gap-4 sm:grid-cols-2">
           <MoneyInput
             ref={amountRef}
-            label={t('common:fields.amount')}
+            label={isInstallments ? t('installments.total') : t('common:fields.amount')}
             placeholder={t('common:amountPlaceholder')}
-            hint={t('form.amountHint')}
+            hint={isInstallments ? t('installments.totalHint') : t('form.amountHint')}
             value={values.amount}
             onChange={(text) => change('amount', text)}
             error={errors.amount}
@@ -290,7 +339,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
           {isRecurrenceEdit ? endDateField : (
             <Input
               ref={dateRef}
-              label={values.repeat ? t('recurring.firstDate') : t('common:fields.date')}
+              label={dateLabel}
               type="date"
               min="0001-01-01"
               max="9999-12-31"
@@ -303,23 +352,38 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
 
         {isNew && (
           <div className="space-y-3 rounded-lg border border-border p-3">
-            <label className="flex cursor-pointer items-start gap-2 text-sm font-medium text-foreground">
-              <input
-                type="checkbox"
-                checked={values.repeat}
-                onChange={(event) => change('repeat', event.target.checked)}
-                aria-describedby={values.repeat && repeatHint ? 'repetir-dica' : undefined}
-                className="mt-0.5 size-4 shrink-0 accent-primary"
-              />
-              <span className="flex items-center gap-1.5">
+            <fieldset>
+              <legend className="mb-1.5 flex items-center gap-1.5 text-sm font-medium text-foreground">
                 <Icon name="repeat" className="size-4 text-muted" />
-                {t('recurring.repeat')}
-              </span>
-            </label>
-            {values.repeat && (
+                {t('repeat.label')}
+              </legend>
+              <div className="flex flex-wrap gap-2">
+                <ChoiceChip name="repetir" value="none" compact checked={repeat === 'none'} label={t('repeat.none')} onChange={() => change('repeat', 'none')} />
+                <ChoiceChip name="repetir" value="monthly" compact checked={repeat === 'monthly'} label={t('repeat.monthly')} onChange={() => change('repeat', 'monthly')} />
+                {values.kind === 'expense' && (
+                  <ChoiceChip name="repetir" value="installments" compact checked={repeat === 'installments'} label={t('repeat.installments')} onChange={() => change('repeat', 'installments')} />
+                )}
+              </div>
+            </fieldset>
+            {repeat === 'monthly' && (
               <>
-                {repeatHint && <p id="repetir-dica" className="text-sm text-muted">{repeatHint}</p>}
+                {repeatHint && <p className="text-sm text-muted">{repeatHint}</p>}
                 {endDateField}
+              </>
+            )}
+            {isInstallments && (
+              <>
+                <Input
+                  ref={countRef}
+                  label={t('installments.count')}
+                  inputMode="numeric"
+                  autoComplete="off"
+                  maxLength={3}
+                  hint={installmentPreview}
+                  value={values.count}
+                  onChange={(event) => change('count', event.target.value)}
+                  error={errors.count}
+                />
               </>
             )}
           </div>

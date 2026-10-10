@@ -74,6 +74,47 @@ namespace Backend.Migrations
                     b.ToTable("Categories");
                 });
 
+            modelBuilder.Entity("Backend.Models.InstallmentPlan", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    MySqlPropertyBuilderExtensions.UseMySqlIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<int?>("CategoryId")
+                        .HasColumnType("int");
+
+                    b.Property<int>("Count")
+                        .HasColumnType("int");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("datetime(6)");
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasMaxLength(245)
+                        .HasColumnType("varchar(245)");
+
+                    b.Property<DateOnly>("FirstDate")
+                        .HasColumnType("date");
+
+                    b.Property<decimal>("Total")
+                        .HasPrecision(18, 2)
+                        .HasColumnType("decimal(18,2)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("CategoryId");
+
+                    b.HasIndex("UserId", "FirstDate");
+
+                    b.ToTable("InstallmentPlans");
+                });
+
             modelBuilder.Entity("Backend.Models.Recurrence", b =>
                 {
                     b.Property<int>("Id")
@@ -152,6 +193,9 @@ namespace Backend.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)");
 
+                    b.Property<int?>("InstallmentPlanId")
+                        .HasColumnType("int");
+
                     b.Property<int?>("RecurrenceId")
                         .HasColumnType("int");
 
@@ -164,6 +208,8 @@ namespace Backend.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("CategoryId");
+
+                    b.HasIndex("InstallmentPlanId");
 
                     b.HasIndex("RecurrenceId");
 
@@ -281,6 +327,24 @@ namespace Backend.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Backend.Models.InstallmentPlan", b =>
+                {
+                    b.HasOne("Backend.Models.Category", "Category")
+                        .WithMany()
+                        .HasForeignKey("CategoryId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
+                    b.HasOne("Backend.Models.User", "User")
+                        .WithMany()
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Category");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Backend.Models.Recurrence", b =>
                 {
                     b.HasOne("Backend.Models.Category", "Category")
@@ -306,6 +370,11 @@ namespace Backend.Migrations
                         .HasForeignKey("CategoryId")
                         .OnDelete(DeleteBehavior.SetNull);
 
+                    b.HasOne("Backend.Models.InstallmentPlan", "InstallmentPlan")
+                        .WithMany("Transactions")
+                        .HasForeignKey("InstallmentPlanId")
+                        .OnDelete(DeleteBehavior.SetNull);
+
                     b.HasOne("Backend.Models.Recurrence", "Recurrence")
                         .WithMany("Transactions")
                         .HasForeignKey("RecurrenceId")
@@ -323,6 +392,8 @@ namespace Backend.Migrations
                         .OnDelete(DeleteBehavior.Restrict);
 
                     b.Navigation("Category");
+
+                    b.Navigation("InstallmentPlan");
 
                     b.Navigation("Recurrence");
 
@@ -343,6 +414,11 @@ namespace Backend.Migrations
                 });
 
             modelBuilder.Entity("Backend.Models.Category", b =>
+                {
+                    b.Navigation("Transactions");
+                });
+
+            modelBuilder.Entity("Backend.Models.InstallmentPlan", b =>
                 {
                     b.Navigation("Transactions");
                 });

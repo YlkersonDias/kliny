@@ -238,6 +238,46 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
+    // Compra parcelada (8.5b): B não vê nem apaga a de A e não usa a categoria de A numa compra.
+    [Fact]
+    public async Task B_nao_mexe_na_compra_parcelada_de_A()
+    {
+        var today = DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd");
+        var first = new DateOnly(DateTime.UtcNow.Year, DateTime.UtcNow.Month, 1).AddMonths(1).ToString("yyyy-MM-dd");
+        int planA;
+        using (var a = AsA())
+        using (var created = await a.PostAsJsonAsync($"/api/installments?today={today}",
+                   new { description = "TV A", total = 900m, count = 3, firstDate = first, categoryId = fixture.CategoryA }, Ct))
+        {
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            planA = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
+        }
+
+        using (var b = AsB())
+        {
+            foreach (var scope in new[] { "all", "future" })
+            {
+                using var delete = await b.DeleteAsync($"/api/installments/{planA}?scope={scope}&today={today}", Ct);
+                Assert.Equal(HttpStatusCode.NotFound, delete.StatusCode);
+            }
+            using var withCategoryOfA = await b.PostAsJsonAsync($"/api/installments?today={today}",
+                new { description = "Com categoria de A", total = 10m, count = 2, firstDate = first, categoryId = fixture.CategoryA }, Ct);
+            Assert.Equal(HttpStatusCode.BadRequest, withCategoryOfA.StatusCode);
+            Assert.Empty((await Json(b.GetAsync($"/api/installments?today={today}", Ct))).EnumerateArray());
+            var search = await Json(b.GetAsync("/api/transactions?search=TV%20A", Ct));
+            Assert.Equal(0, search.GetProperty("totalCount").GetInt32());
+        }
+
+        using (var a = AsA())
+        {
+            var plan = Assert.Single((await Json(a.GetAsync($"/api/installments?today={today}", Ct))).EnumerateArray());
+            Assert.Equal(3, plan.GetProperty("remaining").GetInt32());
+            using var cleanup = await a.DeleteAsync($"/api/installments/{planA}?scope=all&today={today}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+        await AssertDataOfAUnchanged();
+    }
+
     // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()

@@ -76,8 +76,7 @@
     "irreversible": "Essa ação não pode ser desfeita."
   },
   "recurring": {
-    "manage": "Recorrentes",
-    "repeat": "Repetir todo mês",
+    "manage": "Recorrentes e parcelas",
     "repeatHint": "Lança todo dia {{day}} a partir dessa data, inclusive os meses que já passaram, até o fim do mês atual; depois, um por mês.",
     "shortMonthHint": "Nos meses mais curtos, no último dia.",
     "firstDate": "Primeira data",
@@ -89,7 +88,7 @@
     "editHint": "As mudanças valem para os próximos lançamentos; os já lançados não mudam.",
     "badge": "Recorrente",
     "manager": {
-      "title": "Lançamentos recorrentes",
+      "title": "Recorrentes e parcelas",
       "note": "Os já lançados aparecem em Movimentações e se editam lá, um a um.",
       "loading": "Carregando lançamentos recorrentes…",
       "empty": "Nenhum lançamento recorrente. Ao lançar uma movimentação, marque “Repetir todo mês”.",
@@ -102,13 +101,55 @@
       "pauseLabel": "Pausar {{description}}",
       "resumeLabel": "Retomar {{description}}",
       "edit": "Editar {{description}}",
-      "delete": "Apagar {{description}}"
+      "delete": "Apagar {{description}}",
+      "recurringTitle": "Lançamentos recorrentes"
     },
     "delete": {
       "title": "Apagar lançamento recorrente",
       "confirm": "Apagar",
       "question": "Apagar <name/>?",
       "note": "Nada mais será lançado. As movimentações já lançadas continuam em Movimentações."
+    }
+  },
+  "repeat": {
+    "label": "Repetir",
+    "none": "Não repete",
+    "monthly": "Todo mês",
+    "installments": "Parcelado"
+  },
+  "installments": {
+    "total": "Valor total",
+    "totalHint": "O valor da compra inteira.",
+    "count": "Número de parcelas",
+    "countRange": "Informe de {{min}} a {{max}} parcelas.",
+    "totalTooSmall": "O valor total precisa dar pelo menos R$ 0,01 por parcela.",
+    "firstDate": "Primeira parcela",
+    "descriptionHint": "Cada parcela recebe o número no fim, como “(3/10)”.",
+    "preview": "{{count}}x de {{each}}, de {{from}} a {{to}}.",
+    "previewFirst": "A primeira fica em {{first}}, com a sobra dos centavos.",
+    "badge": "Parcela",
+    "manager": {
+      "title": "Compras parceladas",
+      "loading": "Carregando compras parceladas…",
+      "empty": "Nenhuma compra parcelada. Ao lançar um gasto, escolha “Parcelado”.",
+      "split": "em {{count}}x",
+      "remaining_zero": "faltam {{count}} · até {{date}}",
+      "remaining_one": "falta {{count}} · até {{date}}",
+      "remaining_other": "faltam {{count}} · até {{date}}",
+      "done": "Todas já passaram",
+      "delete": "Apagar {{description}}"
+    },
+    "delete": {
+      "title": "Apagar compra parcelada",
+      "confirm": "Apagar",
+      "question": "Apagar <name/> ({{total}})?",
+      "which": "Quais parcelas apagar",
+      "future_zero": "Só as futuras (nenhuma)",
+      "future_one": "Só a futura ({{count}})",
+      "future_other": "Só as {{count}} futuras",
+      "all": "Todas as parcelas",
+      "futureNote": "Para quando você quitou antes: as parcelas até hoje continuam em Movimentações, sem o vínculo com a compra.",
+      "allNote": "Todas as parcelas saem de Movimentações, inclusive as que já passaram. Isso não pode ser desfeito."
     }
   }
 }
