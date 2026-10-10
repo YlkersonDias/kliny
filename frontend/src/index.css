@@ -30,6 +30,8 @@
   --color-border: #e2e8f0;     /* slate-200 */
   --color-foreground: #0f172a; /* slate-900 */
   --color-muted: #475569;      /* slate-600 */
+  --color-burrow: #bbbbdd;     /* a "toca" da landing (8.6): o mesmo lilás nos dois temas, sem texto sobre ela */
+  --font-display: "Bricolage Grotesque", ui-sans-serif, system-ui, sans-serif; /* títulos da landing */
 }
 
 /*
@@ -115,4 +117,55 @@
   main[tabindex="-1"]:focus {
     outline: none;
   }
+}
+
+/*
+  Landing (8.6). A fonte dos títulos fica no próprio site (licença OFL 1.1, publicada em /licencas/) e só
+  é baixada quando um título da landing a usa. Só o subconjunto latino, que cobre o português.
+*/
+@font-face {
+  font-family: "Bricolage Grotesque";
+  font-style: normal;
+  font-weight: 500 800;
+  font-stretch: 75% 100%;
+  font-display: swap;
+  src: url("./assets/fonts/bricolage-grotesque-latin.woff2") format("woff2");
+  unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308,
+    U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD;
+}
+
+/* Entrada em cascata da abertura: o único momento orquestrado da página. */
+@keyframes landing-rise {
+  from { opacity: 0; transform: translateY(3rem); }
+  to { opacity: 1; transform: none; }
+}
+.landing-rise {
+  opacity: 0;
+  animation: landing-rise 0.8s cubic-bezier(0.33, 1, 0.68, 1) forwards;
+}
+
+/* Flutuação dos cartões em volta da toca, cada um num ritmo, para nunca andarem juntos. */
+@keyframes landing-float-a {
+  0%, 100% { transform: translate(0, 0); }
+  25% { transform: translate(6px, -9px); }
+  50% { transform: translate(0, -14px); }
+  75% { transform: translate(-6px, -6px); }
+}
+@keyframes landing-float-b {
+  0%, 100% { transform: translate(0, 0); }
+  50% { transform: translate(-8px, 10px); }
+}
+@keyframes landing-float-c {
+  0%, 100% { transform: translate(0, 0) rotate(0); }
+  33% { transform: translate(7px, 6px) rotate(0.6deg); }
+  66% { transform: translate(-5px, -8px) rotate(-0.6deg); }
+}
+.landing-float-a { animation: landing-float-a 9s ease-in-out infinite; }
+.landing-float-b { animation: landing-float-b 7s ease-in-out -2s infinite; }
+.landing-float-c { animation: landing-float-c 11s ease-in-out -4s infinite; }
+.landing-float-d { animation: landing-float-b 8.5s ease-in-out -5s infinite; }
+
+@media (prefers-reduced-motion: reduce) {
+  .landing-rise { animation: none; opacity: 1; }
+  .landing-float-a, .landing-float-b, .landing-float-c, .landing-float-d { animation: none; }
 }
