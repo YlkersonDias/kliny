@@ -26,6 +26,8 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d:ro
       - ${BACKUP_DIR:?defina no deploy/.env}:/backups
       - ./mysql-backup.sh:/kliny/backup.sh:ro
+      # Só a chave pública dos backups (cifra, mas não abre). A privada fica fora do PC.
+      - ./chave-backup:/kliny/chave:ro
     networks: [kliny]
     healthcheck:
       # Pela rede (127.0.0.1), para não dar "pronto" durante a inicialização, que roda sem rede.
@@ -45,7 +47,9 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-      MIGRATOR_CONNECTION: Server=mysql;Port=3306;Database=kliny;User=kliny_migrator;Password=${KLINY_MIGRATOR_PASSWORD};AllowPublicKeyRetrieval=true
+      # SslMode=Required: a conexão com o MySQL é sempre cifrada (o MySQL 8.4 gera o certificado
+      # sozinho). Não confere o certificado: o MySQL só é alcançável pela rede interna do Docker.
+      MIGRATOR_CONNECTION: Server=mysql;Port=3306;Database=kliny;User=kliny_migrator;Password=${KLINY_MIGRATOR_PASSWORD};SslMode=Required;AllowPublicKeyRetrieval=true
     depends_on:
       mysql:
         condition: service_healthy
@@ -60,7 +64,7 @@ services:
     cap_drop: [ALL]
     environment:
       ASPNETCORE_ENVIRONMENT: Production
-      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=kliny;User=kliny_app;Password=${KLINY_APP_PASSWORD};AllowPublicKeyRetrieval=true
+      ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=kliny;User=kliny_app;Password=${KLINY_APP_PASSWORD};SslMode=Required;AllowPublicKeyRetrieval=true
       Jwt__Key: ${JWT_KEY:?defina no deploy/.env}
       # Só o nginx, nesta rede, pode informar o IP real e o HTTPS (ForwardedHeaders).
       ForwardedHeaders__KnownNetworks__0: 172.30.0.0/24
