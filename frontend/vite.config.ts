@@ -51,6 +51,10 @@ export default defineConfig({
       },
       workbox: {
         globPatterns: ['**/*.{js,css,html,png,webp,webmanifest}'],
+        // Imagens só da landing (8.6) e a da pré-visualização do link: quem usa o app instalado já tem
+        // conta e nunca vê a landing, então não precisa baixá-las. A fonte dos títulos (woff2) já
+        // fica de fora pelo globPatterns.
+        globIgnores: ['**/mascote/kliny-calculadora-*', '**/mascote/kliny-cadeado-*', '**/kliny-compartilhar.png'],
         // App de uma página: navegação offline cai no index.html, menos /api.
         navigateFallback: '/index.html',
         navigateFallbackDenylist: [/^\/api(\/|$)/],

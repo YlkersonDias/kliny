@@ -3,6 +3,7 @@ import ptCategories from '../locales/pt-BR/categories.json'
 import ptCommon from '../locales/pt-BR/common.json'
 import ptDashboard from '../locales/pt-BR/dashboard.json'
 import ptErrors from '../locales/pt-BR/errors.json'
+import ptLanding from '../locales/pt-BR/landing.json'
 import ptLayout from '../locales/pt-BR/layout.json'
 import ptPrivacy from '../locales/pt-BR/privacy.json'
 import ptReports from '../locales/pt-BR/reports.json'
@@ -14,6 +15,7 @@ import enCategories from '../locales/en-US/categories.json'
 import enCommon from '../locales/en-US/common.json'
 import enDashboard from '../locales/en-US/dashboard.json'
 import enErrors from '../locales/en-US/errors.json'
+import enLanding from '../locales/en-US/landing.json'
 import enLayout from '../locales/en-US/layout.json'
 import enPrivacy from '../locales/en-US/privacy.json'
 import enReports from '../locales/en-US/reports.json'
@@ -29,7 +31,7 @@ export const defaultNS = 'common'
 const ptBR = {
   common: ptCommon, errors: ptErrors, auth: ptAuth, layout: ptLayout, settings: ptSettings,
   dashboard: ptDashboard, transactions: ptTransactions, categories: ptCategories, vaults: ptVaults, reports: ptReports,
-  privacy: ptPrivacy,
+  privacy: ptPrivacy, landing: ptLanding,
 }
 
 // satisfies: chave do português que falta no inglês não compila. A chave a mais e as variáveis
@@ -37,7 +39,7 @@ const ptBR = {
 const enUS = {
   common: enCommon, errors: enErrors, auth: enAuth, layout: enLayout, settings: enSettings,
   dashboard: enDashboard, transactions: enTransactions, categories: enCategories, vaults: enVaults, reports: enReports,
-  privacy: enPrivacy,
+  privacy: enPrivacy, landing: enLanding,
 } satisfies typeof ptBR
 
 export const resources = {
