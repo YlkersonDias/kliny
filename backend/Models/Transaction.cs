@@ -24,6 +24,10 @@ public class Transaction
     // Parcela de uma compra parcelada (8.5b). Fica nula se a compra for apagada.
     public int? InstallmentPlanId { get; set; }
 
+    // Importada de um extrato (8.3): SHA-256 da linha no banco de origem, única por usuário, para
+    // a mesma linha nunca entrar duas vezes. Nula nas movimentações lançadas no app.
+    public string? ImportKey { get; set; }
+
     public User User { get; set; } = null!;
     public Category? Category { get; set; }
     public Vault? Vault { get; set; }

@@ -282,6 +282,26 @@ public static class Messages
         "Você chegou ao limite de {0} regras.",
         "You have reached the limit of {0} rules.");
 
+    public static string ImportLinesRequired => Text(
+        "Escolha ao menos uma movimentação para importar.",
+        "Choose at least one transaction to import.");
+
+    public static string ImportTooManyLines => Text(
+        "No máximo {0} movimentações por importação. Exporte um período menor.",
+        "At most {0} transactions per import. Export a shorter period.");
+
+    public static string ImportLineInvalid => Text(
+        "Uma linha do extrato está num formato inválido.",
+        "A statement line is in an invalid format.");
+
+    public static string ImportDateOutOfRange => Text(
+        "A data deve ser de 2000 em diante e até um ano depois de hoje.",
+        "The date must be from 2000 onwards and up to one year from today.");
+
+    public static string ImportDuplicateLine => Text(
+        "A mesma linha do extrato aparece duas vezes.",
+        "The same statement line appears twice.");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

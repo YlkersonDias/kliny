@@ -155,6 +155,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             // Por usuário: a chave de um nunca encontra o lançamento de outro. O MySQL aceita
             // vários NULL num índice único, então as movimentações comuns não são afetadas.
             entity.HasIndex(t => new { t.UserId, t.IdempotencyKey }).IsUnique();
+            entity.Property(t => t.ImportKey).HasMaxLength(64);
+            entity.HasIndex(t => new { t.UserId, t.ImportKey }).IsUnique();
 
             entity.HasOne(t => t.User)
                 .WithMany(u => u.Transactions)

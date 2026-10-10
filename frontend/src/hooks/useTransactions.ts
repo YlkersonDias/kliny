@@ -18,7 +18,7 @@ export function useTransactions(query: TransactionQuery, { enabled = true }: { e
 }
 
 // Movimentações mudam também os relatórios (Dashboard e Relatórios).
-function useInvalidateAfterChange() {
+export function useInvalidateAfterChange() {
   const queryClient = useQueryClient()
   return () => Promise.all([
     queryClient.invalidateQueries({ queryKey: transactionKeys.all }),

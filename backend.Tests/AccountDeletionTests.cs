@@ -14,7 +14,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // Uma categoria com orçamento, uma recorrência já gerada, uma compra parcelada, uma regra de categoria, uma receita com categoria, um cofre com depósito e retirada (histórico).
+    // Uma categoria com orçamento, uma recorrência já gerada, uma compra parcelada, uma regra de categoria, uma movimentação importada, uma receita com categoria, um cofre com depósito e retirada (histórico).
     private async Task<(string Token, int UserId)> SeedAsync(string email)
     {
         var token = await api.RegisterAsync(email);
@@ -32,6 +32,10 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         await IdOf(client.PostAsJsonAsync($"/api/installments?today={today:yyyy-MM-dd}",
             new { description = "Geladeira", total = 300m, count = 3, firstDate = today.ToString("yyyy-MM-dd"), categoryId = category }, Ct));
         await IdOf(client.PostAsJsonAsync("/api/category-rules", new { pattern = "mercado", categoryId = category }, Ct));
+        (await client.PostAsJsonAsync("/api/imports", new
+        {
+            lines = new[] { new { source = "341:0001", externalId = "F1", date = "2021-05-04", amount = -12m, description = "Importada", occurrence = 1 } },
+        }, Ct)).EnsureSuccessStatusCode();
         var vault = await IdOf(client.PostAsJsonAsync("/api/vaults", new { name = "Reserva", goal = 300m }, Ct));
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/deposit", new { amount = 200m, date = "2021-05-02" }, Ct)).EnsureSuccessStatusCode();
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/withdraw", new { amount = 50m, date = "2021-05-03" }, Ct)).EnsureSuccessStatusCode();

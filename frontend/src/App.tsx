@@ -3,6 +3,7 @@ import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import DashboardPage from './pages/DashboardPage'
+import ImportPage from './pages/ImportPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PrivacyPage from './pages/PrivacyPage'
@@ -27,6 +28,7 @@ export default function App() {
         <Route element={<AppLayout />}>
           <Route index element={<DashboardPage />} />
           <Route path="/movimentacoes" element={<TransactionsPage />} />
+          <Route path="/movimentacoes/importar" element={<ImportPage />} />
           <Route path="/cofres" element={<VaultsPage />} />
           <Route path="/cofres/:id" element={<VaultDetailPage />} />
           <Route path="/relatorios" element={<ReportsPage />} />

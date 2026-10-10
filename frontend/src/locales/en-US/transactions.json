@@ -152,5 +152,6 @@
       "futureNote": "For when you paid it off early: installments up to today stay in Transactions, without the link to the purchase.",
       "allNote": "All installments leave Transactions, including past ones. This can't be undone."
     }
-  }
+  },
+  "importButton": "Import statement"
 }

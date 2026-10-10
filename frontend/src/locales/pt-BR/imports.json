@@ -1,0 +1,60 @@
+{
+  "title": "Importar extrato",
+  "back": "Voltar para Movimentações",
+  "choose": {
+    "intro": "Exporte o extrato no app ou no site do seu banco, no formato OFX, e escolha o arquivo aqui.",
+    "privacy": "O arquivo é lido só neste aparelho e não é enviado. Você revisa as movimentações, e só as que confirmar entram no {{appName}}.",
+    "where": "Costuma ficar em Extrato → Exportar (ou Compartilhar) → OFX. Alguns bancos chamam de “Money” ou “Quicken”. Funciona com extrato de conta e de cartão de crédito.",
+    "pick": "Escolher arquivo OFX",
+    "reading": "Lendo o arquivo…",
+    "loading": "Carregando suas categorias…"
+  },
+  "errors": {
+    "tooBig": "O arquivo passa de 1 MB. Exporte um período menor.",
+    "notOfx": "Esse arquivo não é um extrato OFX. Exporte de novo escolhendo o formato OFX.",
+    "empty": "O arquivo não tem movimentações.",
+    "nothingValid": "Nenhuma movimentação do arquivo tem data e valor válidos.",
+    "tooMany": "O arquivo tem {{total}} movimentações, e o limite é {{max}} por vez. Exporte um período menor.",
+    "read": "Não foi possível ler o arquivo."
+  },
+  "review": {
+    "summary_zero": "{{count}} movimentações de {{from}} a {{to}}, no arquivo <file/>.",
+    "summary_one": "{{count}} movimentação de {{from}} a {{to}}, no arquivo <file/>.",
+    "summary_other": "{{count}} movimentações de {{from}} a {{to}}, no arquivo <file/>.",
+    "counts": "Novas: {{fresh}} · Já importadas: {{imported}} · Para conferir: {{toCheck}}",
+    "skipped_zero": "{{count}} linhas do arquivo ficaram de fora, sem data ou valor válidos.",
+    "skipped_one": "{{count}} linha do arquivo ficou de fora, sem data ou valor válidos.",
+    "skipped_other": "{{count}} linhas do arquivo ficaram de fora, sem data ou valor válidos.",
+    "rules_zero": "{{count}} categorias preenchidas pelas suas regras. Você pode trocar em cada linha.",
+    "rules_one": "{{count}} categoria preenchida pelas suas regras. Você pode trocar em cada linha.",
+    "rules_other": "{{count}} categorias preenchidas pelas suas regras. Você pode trocar em cada linha.",
+    "transferNotice": "Pagamento de fatura, caixinha e aplicação aparecem no extrato como saída, mas não são gasto: se você também lança as compras do cartão ou guarda o dinheiro num cofre, contariam em dobro. Por isso essas linhas vêm desmarcadas.",
+    "similarNotice": "As linhas “parecidas” têm a mesma data e o mesmo valor de um lançamento que você já tem. Vêm desmarcadas para não duplicar.",
+    "selectAll": "Marcar todas",
+    "selectNone": "Desmarcar todas",
+    "submit_zero": "Importar {{count}} movimentações",
+    "submit_one": "Importar {{count}} movimentação",
+    "submit_other": "Importar {{count}} movimentações",
+    "another": "Escolher outro arquivo",
+    "listLabel": "Movimentações do arquivo",
+    "category": "Categoria de {{description}}",
+    "noCategory": "Sem categoria",
+    "income": "Entrada",
+    "expense": "Saída"
+  },
+  "flag": {
+    "imported": "Já importada",
+    "similar": "Parecida com um lançamento seu",
+    "transfer": "Fatura, caixinha ou aplicação?"
+  },
+  "done": {
+    "title_zero": "{{count}} movimentações importadas.",
+    "title_one": "{{count}} movimentação importada.",
+    "title_other": "{{count}} movimentações importadas.",
+    "skipped_zero": "{{count}} já tinham sido importadas e ficaram de fora.",
+    "skipped_one": "{{count}} já tinha sido importada e ficou de fora.",
+    "skipped_other": "{{count}} já tinham sido importadas e ficaram de fora.",
+    "view": "Ver movimentações",
+    "another": "Importar outro arquivo"
+  }
+}

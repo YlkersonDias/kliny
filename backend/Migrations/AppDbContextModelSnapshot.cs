@@ -225,6 +225,10 @@ namespace Backend.Migrations
                         .HasMaxLength(64)
                         .HasColumnType("varchar(64)");
 
+                    b.Property<string>("ImportKey")
+                        .HasMaxLength(64)
+                        .HasColumnType("varchar(64)");
+
                     b.Property<int?>("InstallmentPlanId")
                         .HasColumnType("int");
 
@@ -250,6 +254,9 @@ namespace Backend.Migrations
                     b.HasIndex("UserId", "Date");
 
                     b.HasIndex("UserId", "IdempotencyKey")
+                        .IsUnique();
+
+                    b.HasIndex("UserId", "ImportKey")
                         .IsUnique();
 
                     b.ToTable("Transactions");
