@@ -1,16 +1,14 @@
 #!/bin/sh
 # Roda num container descartável da imagem mysql:8.4, chamado pelo deploy/restaurar-backup.ps1.
-# Abre um backup cifrado com a chave privada (/chave/<arquivo>) e a frase-senha (entrada padrão),
-# confere o conteúdo e, no modo "importar", põe no banco com o kliny_migrator. Uso:
-#   restaurar-backup.sh conferir|importar <backup> <arquivo da chave privada>
+# Abre um backup cifrado com a chave privada e a frase-senha, confere o conteúdo e, no modo
+# "importar", põe no banco com o kliny_migrator. Uso:
+#   restaurar-backup.sh conferir|importar <backup em /backups>
+# Pela entrada padrão chegam a frase-senha (primeira linha) e, depois, a chave privada: o pen drive
+# não é montado no container, porque o Docker Desktop pode não enxergá-lo (ver chave-backup.sh).
 # O conteúdo aberto fica só no /tmp deste container, que some no fim.
 set -eu
 mode="$1"
 backup="/backups/$2"
-key="/chave/$3"
-
-IFS= read -r phrase || true
-phrase="$(printf '%s' "$phrase" | tr -d '\r')"
 
 work="$(mktemp -d)"
 trap 'rm -rf "$work"' EXIT
@@ -18,7 +16,12 @@ export GNUPGHOME="$work/gnupg"
 mkdir -m 700 "$GNUPGHOME"
 gz="$work/dump.sql.gz"
 
-gpg --batch --quiet --import "$key" 2>/dev/null || { echo "Não foi possível ler a chave privada." >&2; exit 1; }
+IFS= read -r phrase || true
+phrase="$(printf '%s' "$phrase" | tr -d '\r')"
+tr -d '\r' > "$work/chave.asc"
+
+gpg --batch --quiet --import "$work/chave.asc" 2>/dev/null || { echo "Não foi possível ler a chave privada." >&2; exit 1; }
+rm -f "$work/chave.asc"
 # Tudo aberto antes de tocar no banco: um arquivo corrompido no meio não deixa o banco pela metade.
 if ! printf '%s' "$phrase" | gpg --batch --quiet --pinentry-mode loopback --passphrase-fd 0 \
     --output "$gz" --decrypt "$backup" 2>/dev/null; then

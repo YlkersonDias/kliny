@@ -9,9 +9,12 @@ param(
     [Parameter(Mandatory = $true)][string]$Chave,
     [switch]$Conferir,
     [string]$Projeto = 'kliny',
-    [string]$EnvFile = (Join-Path $PSScriptRoot '.env')
+    # Vazio: o deploy\.env. (No PowerShell 5.1, o $PSScriptRoot ainda está vazio no valor padrão de
+    # um parâmetro: o padrão é calculado abaixo.)
+    [string]$EnvFile = ''
 )
 $ErrorActionPreference = 'Stop'
+if (-not $EnvFile) { $EnvFile = Join-Path $PSScriptRoot '.env' }
 
 function Read-EnvValue([string]$name) {
     $line = Get-Content $EnvFile | Where-Object { $_ -match "^$name=" } | Select-Object -First 1
@@ -19,16 +22,28 @@ function Read-EnvValue([string]$name) {
     return ''
 }
 
+$temp = $null
 try {
     if (-not (Split-Path $Arquivo -IsAbsolute)) {
         $backupDir = Read-EnvValue 'BACKUP_DIR'
         if (-not $backupDir) { throw "BACKUP_DIR não está no $EnvFile" }
         $Arquivo = Join-Path $backupDir $Arquivo
     }
+    foreach ($path in @($Arquivo, $Chave)) {
+        $root = [System.IO.Path]::GetPathRoot([System.IO.Path]::GetFullPath($path))
+        if (-not (Test-Path $root)) { throw "o disco $root não está disponível: conecte o pen drive e, se ele tiver BitLocker, destranque (dois cliques nele no Explorador)" }
+    }
     if (-not (Test-Path $Arquivo -PathType Leaf)) { throw "não achei o backup $Arquivo" }
     if (-not (Test-Path $Chave -PathType Leaf)) { throw "não achei a chave privada $Chave" }
-    $Arquivo = (Resolve-Path $Arquivo).Path
-    $Chave = (Resolve-Path $Chave).Path
+
+    # O pen drive não é montado no container (o Docker Desktop pode não enxergá-lo): o backup, já
+    # cifrado, vai para uma pasta temporária, e a chave segue pela entrada padrão.
+    $temp = Join-Path ([System.IO.Path]::GetTempPath()) ("kliny-restaurar-" + [guid]::NewGuid().ToString('N'))
+    New-Item -ItemType Directory -Path $temp | Out-Null
+    $nome = Split-Path $Arquivo -Leaf
+    Copy-Item -LiteralPath $Arquivo -Destination (Join-Path $temp $nome)
+    $textoChave = [System.IO.File]::ReadAllText((Resolve-Path -LiteralPath $Chave).Path)
+    if ($textoChave -notmatch '-----BEGIN PGP PRIVATE KEY BLOCK-----') { throw "$Chave não é uma chave privada" }
 
     $mode = 'conferir'
     $docker = @('run', '--rm', '-i')
@@ -52,17 +67,17 @@ try {
 
     $docker += @(
         '-v', "${PSScriptRoot}\restaurar-backup.sh:/kliny/restaurar-backup.sh:ro",
-        '-v', "$(Split-Path $Arquivo -Parent):/backups:ro",
-        '-v', "$(Split-Path $Chave -Parent):/chave:ro",
-        '--entrypoint', 'sh', 'mysql:8.4', '/kliny/restaurar-backup.sh',
-        $mode, (Split-Path $Arquivo -Leaf), (Split-Path $Chave -Leaf))
-    $frase | & docker @docker
+        '-v', "${temp}:/backups:ro",
+        '--entrypoint', 'sh', 'mysql:8.4', '/kliny/restaurar-backup.sh', $mode, $nome)
+    # Primeira linha: a frase-senha; depois, a chave privada.
+    @($frase) + ($textoChave -split "`r?`n") | & docker @docker
     $code = $LASTEXITCODE
-    Remove-Variable frase
+    Remove-Variable frase, textoChave
     if ($code -ne 0) { throw 'não deu certo (mensagem acima)' }
 } catch {
     Write-Output "FALHA  $_"
     exit 1
 } finally {
     Remove-Item Env:KLINY_MIGRATOR_PASSWORD -ErrorAction SilentlyContinue
+    if ($temp) { Remove-Item -Recurse -Force $temp -ErrorAction SilentlyContinue }
 }
