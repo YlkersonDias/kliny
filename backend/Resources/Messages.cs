@@ -351,6 +351,46 @@ public static class Messages
         + "After the change, Kliny signs out of every device where your account is open.\n\n"
         + "If you did not ask for this, you can ignore this email: your password stays the same.\n\nKliny");
 
+    // Avisos de segurança: vão só para o e-mail da própria conta, com o nome da dona dela.
+    public static string PasswordChangedSubject => Text(
+        "A senha da sua conta no Kliny foi trocada",
+        "Your Kliny password was changed");
+
+    // {0}: nome; {1}: link de "Esqueci minha senha"; {2}: e-mail do suporte.
+    public static string PasswordChangedBody => Text(
+        "Olá, {0}.\n\nA senha da sua conta no Kliny foi trocada, e o Kliny saiu de todos os aparelhos em que ela estava aberta.\n\n"
+        + "Se foi você, não precisa fazer nada.\n\n"
+        + "Se não foi você, crie uma senha nova agora em {1} (isso tira de novo qualquer pessoa da sua conta) e escreva para {2}.\n\nKliny",
+        "Hello, {0}.\n\nThe password of your Kliny account was changed, and Kliny signed out of every device where it was open.\n\n"
+        + "If it was you, there is nothing to do.\n\n"
+        + "If it was not you, create a new password now at {1} (this signs anyone out of your account again) and write to {2}.\n\nKliny");
+
+    public static string GoogleLinkedSubject => Text(
+        "Uma conta Google foi vinculada à sua conta no Kliny",
+        "A Google account was linked to your Kliny account");
+
+    // {0}: nome; {1}: link das configurações; {2}: link de "Esqueci minha senha"; {3}: e-mail do suporte.
+    public static string GoogleLinkedBody => Text(
+        "Olá, {0}.\n\nUma conta Google foi vinculada à sua conta no Kliny. A partir de agora, ela também entra no Kliny pelo botão do Google.\n\n"
+        + "Se foi você, não precisa fazer nada.\n\n"
+        + "Se não foi você, entre no Kliny, desvincule a conta Google em Configurações ({1}), crie uma senha nova em {2} e escreva para {3}.\n\nKliny",
+        "Hello, {0}.\n\nA Google account was linked to your Kliny account. From now on, it can also sign in to Kliny with the Google button.\n\n"
+        + "If it was you, there is nothing to do.\n\n"
+        + "If it was not you, sign in to Kliny, unlink the Google account in Settings ({1}), create a new password at {2} and write to {3}.\n\nKliny");
+
+    public static string GoogleUnlinkedSubject => Text(
+        "A conta Google foi desvinculada da sua conta no Kliny",
+        "The Google account was unlinked from your Kliny account");
+
+    // {0}: nome; {1}: link de "Esqueci minha senha"; {2}: e-mail do suporte.
+    public static string GoogleUnlinkedBody => Text(
+        "Olá, {0}.\n\nA conta Google foi desvinculada da sua conta no Kliny: agora você entra só com o e-mail e a senha.\n\n"
+        + "Se foi você, não precisa fazer nada.\n\n"
+        + "Se não foi você, alguém entrou na sua conta: crie uma senha nova agora em {1} (isso tira essa pessoa da conta) e escreva para {2}.\n\nKliny",
+        "Hello, {0}.\n\nThe Google account was unlinked from your Kliny account: you now sign in only with your email and password.\n\n"
+        + "If it was you, there is nothing to do.\n\n"
+        + "If it was not you, someone got into your account: create a new password now at {1} (this signs that person out) and write to {2}.\n\nKliny");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

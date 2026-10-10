@@ -41,10 +41,18 @@ public class AuthServiceLockoutTests : IDisposable
             Key = new string('k', 64),
         }));
         var throttle = new LoginThrottle(MsOptions.Create(new RateLimitOptions()), _time);
-        _auth = new AuthService(_db, tokens, throttle, new FakeGoogleTokenValidator());
+        _auth = new AuthService(_db, tokens, throttle, new FakeGoogleTokenValidator(), new NoNotifier());
     }
 
     public void Dispose() => _db.Dispose();
+
+    // Os avisos de segurança não fazem parte do que estes testes conferem.
+    private sealed class NoNotifier : ISecurityNotifier
+    {
+        public void PasswordChanged(User user) { }
+        public void GoogleLinked(User user) { }
+        public void GoogleUnlinked(User user) { }
+    }
 
     private Task<AuthResponse?> Login(string email, string password) =>
         _auth.LoginAsync(new LoginRequest { Email = email, Password = password });

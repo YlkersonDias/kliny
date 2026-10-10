@@ -98,6 +98,7 @@ builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>(client =>
     client.Timeout = TimeSpan.FromSeconds(15);
 });
 builder.Services.AddHostedService<EmailWorker>();
+builder.Services.AddSingleton<ISecurityNotifier, SecurityNotifier>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSingleton<RegistrationEmailThrottle>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
