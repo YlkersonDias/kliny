@@ -152,5 +152,6 @@
       "futureNote": "Para quando você quitou antes: as parcelas até hoje continuam em Movimentações, sem o vínculo com a compra.",
       "allNote": "Todas as parcelas saem de Movimentações, inclusive as que já passaram. Isso não pode ser desfeito."
     }
-  }
+  },
+  "importButton": "Importar extrato"
 }

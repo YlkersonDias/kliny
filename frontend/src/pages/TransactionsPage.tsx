@@ -1,6 +1,6 @@
 import { useEffect, useState } from 'react'
 import { Trans, useTranslation } from 'react-i18next'
-import { useSearchParams } from 'react-router'
+import { Link, useSearchParams } from 'react-router'
 import type { Transaction } from '../api/types'
 import { CategoryManagerModal } from '../components/transactions/CategoryManagerModal'
 import { RecurrenceManagerModal } from '../components/transactions/RecurrenceManagerModal'
@@ -8,6 +8,7 @@ import { TransactionFiltersBar } from '../components/transactions/TransactionFil
 import { TransactionFormModal } from '../components/transactions/TransactionFormModal'
 import { TransactionList } from '../components/transactions/TransactionList'
 import { Button } from '../components/ui/Button'
+import { buttonClass } from '../components/ui/buttonStyles'
 import { ConfirmDialog } from '../components/ui/ConfirmDialog'
 import { EmptyState } from '../components/ui/EmptyState'
 import { Icon } from '../components/ui/Icon'
@@ -141,6 +142,10 @@ export default function TransactionsPage() {
       <div className="flex flex-wrap items-center justify-between gap-3">
         <h1 className="text-2xl font-semibold text-foreground">{t('title')}</h1>
         <div className="flex flex-wrap gap-2">
+          <Link to="/movimentacoes/importar" className={buttonClass('secondary')}>
+            <Icon name="expense" className="size-4" />
+            {t('importButton')}
+          </Link>
           <Button variant="secondary" onClick={() => setManagingRecurrences(true)}>
             <Icon name="repeat" className="size-4" />
             {t('recurring.manage')}

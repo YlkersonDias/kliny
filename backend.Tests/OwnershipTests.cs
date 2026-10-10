@@ -328,6 +328,42 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
+    // Importação (8.3): a chave de importação é por usuário. A mesma linha que A importou é nova
+    // para B (nem "já importada" nem "parecida"), e a importação de B não toca em nada de A.
+    [Fact]
+    public async Task B_nao_enxerga_nem_bloqueia_a_importacao_de_A()
+    {
+        var line = new { source = "341:9999", externalId = "OWN1", date = "2019-06-01", amount = -33.33m, description = "Importada Dono", occurrence = 1 };
+        using (var a = AsA())
+        using (var imported = await a.PostAsJsonAsync("/api/imports", new { lines = new[] { line } }, Ct))
+            Assert.Equal(1, (await imported.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("created").GetInt32());
+
+        using (var b = AsB())
+        {
+            using var check = await b.PostAsJsonAsync("/api/imports/check", new { lines = new[] { line } }, Ct);
+            Assert.Equal("new", (await check.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("statuses")[0].GetString());
+            using var withCategoryOfA = await b.PostAsJsonAsync("/api/imports",
+                new { lines = new[] { new { line.source, line.externalId, line.date, line.amount, line.description, line.occurrence, categoryId = fixture.CategoryA } } }, Ct);
+            Assert.Equal(HttpStatusCode.BadRequest, withCategoryOfA.StatusCode);
+            using var imported = await b.PostAsJsonAsync("/api/imports", new { lines = new[] { line } }, Ct);
+            Assert.Equal(1, (await imported.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("created").GetInt32());
+            var mine = Assert.Single((await Json(b.GetAsync("/api/transactions?search=Importada%20Dono&from=2019-01-01&to=2019-12-31", Ct)))
+                .GetProperty("items").EnumerateArray());
+            using var cleanup = await b.DeleteAsync($"/api/transactions/{mine.GetProperty("id").GetInt32()}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+
+        using (var a = AsA())
+        {
+            var ofA = Assert.Single((await Json(a.GetAsync("/api/transactions?search=Importada%20Dono&from=2019-01-01&to=2019-12-31", Ct)))
+                .GetProperty("items").EnumerateArray());
+            Assert.Equal(-33.33m, ofA.GetProperty("amount").GetDecimal());
+            using var cleanup = await a.DeleteAsync($"/api/transactions/{ofA.GetProperty("id").GetInt32()}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+        await AssertDataOfAUnchanged();
+    }
+
     // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()

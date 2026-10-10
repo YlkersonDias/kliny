@@ -35,6 +35,7 @@ export default function PrivacyPage() {
             <li>{t('data.account')}</li>
             <li>{t('data.finances')}</li>
             {isGoogleEnabled && <li>{t('data.google')}</li>}
+            <li>{t('data.import')}</li>
             <li>{t('data.nothingElse')}</li>
           </ul>
         </section>

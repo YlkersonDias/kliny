@@ -83,6 +83,28 @@ export interface CategoryRuleRequest {
   categoryId: number
 }
 
+// Importação de extrato (8.3). A linha vai como o leitor do arquivo a montou (sinal do banco).
+export interface ImportLine {
+  source: string
+  externalId: string | null
+  date: string
+  amount: number
+  description: string
+  occurrence: number
+  categoryId?: number | null
+}
+
+export type ImportLineStatus = 'new' | 'imported' | 'similar'
+
+export interface ImportCheckResponse {
+  statuses: ImportLineStatus[]
+}
+
+export interface ImportResponse {
+  created: number
+  skipped: number
+}
+
 // Lançamento recorrente (8.5a): todo mês no dia de startDate (31 cai no último dia dos meses curtos).
 // amount com o sinal da movimentação; nextDate é a próxima ocorrência ainda não lançada.
 export interface Recurrence {

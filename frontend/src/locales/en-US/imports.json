@@ -1,0 +1,60 @@
+{
+  "title": "Import statement",
+  "back": "Back to Transactions",
+  "choose": {
+    "intro": "Export the statement from your bank's app or website in OFX format and choose the file here.",
+    "privacy": "The file is read only on this device and is not uploaded. You review the transactions, and only the ones you confirm go into {{appName}}.",
+    "where": "It is usually under Statement → Export (or Share) → OFX. Some banks call it “Money” or “Quicken”. Works with checking account and credit card statements.",
+    "pick": "Choose OFX file",
+    "reading": "Reading the file…",
+    "loading": "Loading your categories…"
+  },
+  "errors": {
+    "tooBig": "The file is larger than 1 MB. Export a shorter period.",
+    "notOfx": "This file is not an OFX statement. Export it again choosing the OFX format.",
+    "empty": "The file has no transactions.",
+    "nothingValid": "No transaction in the file has a valid date and amount.",
+    "tooMany": "The file has {{total}} transactions, and the limit is {{max}} at a time. Export a shorter period.",
+    "read": "The file could not be read."
+  },
+  "review": {
+    "summary_zero": "{{count}} transactions from {{from}} to {{to}}, in the file <file/>.",
+    "summary_one": "{{count}} transaction from {{from}} to {{to}}, in the file <file/>.",
+    "summary_other": "{{count}} transactions from {{from}} to {{to}}, in the file <file/>.",
+    "counts": "New: {{fresh}} · Already imported: {{imported}} · To check: {{toCheck}}",
+    "skipped_zero": "{{count}} lines of the file were left out, without a valid date or amount.",
+    "skipped_one": "{{count}} line of the file was left out, without a valid date or amount.",
+    "skipped_other": "{{count}} lines of the file were left out, without a valid date or amount.",
+    "rules_zero": "{{count}} categories filled in by your rules. You can change each line.",
+    "rules_one": "{{count}} category filled in by your rules. You can change each line.",
+    "rules_other": "{{count}} categories filled in by your rules. You can change each line.",
+    "transferNotice": "Card bill payments, savings boxes and investments show up in the statement as money out, but they are not spending: if you also record the card purchases or keep the money in a vault, they would count twice. That is why these lines come unchecked.",
+    "similarNotice": "“Similar” lines have the same date and amount as a transaction you already have. They come unchecked so nothing is duplicated.",
+    "selectAll": "Check all",
+    "selectNone": "Uncheck all",
+    "submit_zero": "Import {{count}} transactions",
+    "submit_one": "Import {{count}} transaction",
+    "submit_other": "Import {{count}} transactions",
+    "another": "Choose another file",
+    "listLabel": "Transactions in the file",
+    "category": "Category of {{description}}",
+    "noCategory": "No category",
+    "income": "Money in",
+    "expense": "Money out"
+  },
+  "flag": {
+    "imported": "Already imported",
+    "similar": "Similar to one of yours",
+    "transfer": "Card bill, savings or investment?"
+  },
+  "done": {
+    "title_zero": "{{count}} transactions imported.",
+    "title_one": "{{count}} transaction imported.",
+    "title_other": "{{count}} transactions imported.",
+    "skipped_zero": "{{count}} had already been imported and were left out.",
+    "skipped_one": "{{count}} had already been imported and was left out.",
+    "skipped_other": "{{count}} had already been imported and were left out.",
+    "view": "View transactions",
+    "another": "Import another file"
+  }
+}
