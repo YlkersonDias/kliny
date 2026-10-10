@@ -10,14 +10,17 @@ $ErrorActionPreference = 'Stop'
 
 $saida = Join-Path $PSScriptRoot 'chave-backup'
 $publica = Join-Path $saida 'publica.asc'
-$privada = Join-Path $Pasta 'kliny-backup-chave-privada.asc'
 
 try {
     $Pasta = [System.IO.Path]::GetFullPath($Pasta)
+    $root = [System.IO.Path]::GetPathRoot($Pasta)
+    # Pen drive desconectado ou ainda trancado pelo BitLocker.
+    if (-not (Test-Path $root)) { throw "o disco $root não está disponível: conecte o pen drive e, se ele tiver BitLocker, destranque (dois cliques nele no Explorador)" }
     # A privada no mesmo disco do Kliny não protege nada: quem levasse o disco levaria as duas.
-    if ([System.IO.Path]::GetPathRoot($Pasta) -eq [System.IO.Path]::GetPathRoot($PSScriptRoot)) {
-        throw "a chave privada precisa ficar em outro disco (o pen drive), e não em $([System.IO.Path]::GetPathRoot($Pasta))"
+    if ($root -eq [System.IO.Path]::GetPathRoot($PSScriptRoot)) {
+        throw "a chave privada precisa ficar em outro disco (o pen drive), e não em $root"
     }
+    $privada = Join-Path $Pasta 'kliny-backup-chave-privada.asc'
     # Trocar a chave deixaria os backups antigos só com a privada antiga: nunca por cima, sem querer.
     if (Test-Path $publica) { throw "já existe uma chave em $publica. Para trocar, veja deploy/README.md." }
     if (Test-Path $privada) { throw "já existe $privada" }
@@ -30,14 +33,28 @@ try {
     if ($frase.Length -lt 12) { throw 'a frase-senha precisa ter pelo menos 12 caracteres' }
 
     # A frase vai pela entrada padrão do container, em UTF-8 sem BOM (o padrão do PowerShell 5.1
-    # trocaria acentos por "?").
+    # trocaria acentos por "?"). A chave privada volta pela saída padrão (ver chave-backup.sh): o
+    # pen drive não é montado no container, porque o Docker Desktop pode não enxergá-lo.
     $OutputEncoding = New-Object System.Text.UTF8Encoding $false
-    $frase | & docker run --rm -i --network none `
+    $linhas = @($frase | & docker run --rm -i --network none `
         -v "${PSScriptRoot}\chave-backup.sh:/kliny/chave-backup.sh:ro" `
-        -v "${saida}:/saida" -v "${Pasta}:/privada" `
-        --entrypoint sh mysql:8.4 /kliny/chave-backup.sh
-    if ($LASTEXITCODE -ne 0) { throw 'a criação da chave falhou' }
+        -v "${saida}:/saida" `
+        --entrypoint sh mysql:8.4 /kliny/chave-backup.sh)
+    $code = $LASTEXITCODE
     Remove-Variable frase
+    $chave = ($linhas -join "`n") + "`n"
+    Remove-Variable linhas
+    if ($code -ne 0 -or $chave -notmatch '-----BEGIN PGP PRIVATE KEY BLOCK-----' -or $chave -notmatch '-----END PGP PRIVATE KEY BLOCK-----') {
+        # Sem a privada, a pública não serve: os backups ficariam sem forma de abrir.
+        Remove-Item $publica -ErrorAction SilentlyContinue
+        throw 'a criação da chave falhou'
+    }
+    [System.IO.File]::WriteAllText($privada, $chave, (New-Object System.Text.ASCIIEncoding))
+    Remove-Variable chave
+    if (-not (Test-Path $privada -PathType Leaf)) {
+        Remove-Item $publica -ErrorAction SilentlyContinue
+        throw "a chave privada não foi gravada em $privada"
+    }
 
     Write-Output ''
     Write-Output "Chave pública: $publica"
