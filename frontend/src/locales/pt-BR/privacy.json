@@ -4,8 +4,7 @@
   "intro": "O {{appName}} é um app de controle financeiro pessoal. Esta página explica quais dados ele guarda, para quê e o que você pode fazer com eles.",
   "who": {
     "title": "Quem cuida dos seus dados",
-    "body": "O responsável pelo {{appName}} e pelos dados guardados nele é {{controller}}. Para qualquer pedido sobre os seus dados, escreva para {{contact}}.",
-    "missing": "[a definir antes da publicação]"
+    "body": "O responsável pelo {{appName}} e pelos dados guardados nele é o desenvolvedor do projeto, uma pessoa física. Para mais informações é pelo e-mail <contact/>, que também atende qualquer pedido sobre os seus dados."
   },
   "data": {
     "title": "O que guardamos",
@@ -29,7 +28,7 @@
   },
   "retention": {
     "title": "Por quanto tempo",
-    "body": "Enquanto a sua conta existir. Ao excluir a conta, os seus dados são apagados do banco na hora. As cópias de segurança do banco são guardadas por {{backupRetention}} e depois apagadas."
+    "body": "Enquanto a sua conta existir. Ao excluir a conta, os seus dados são apagados do banco na hora. As cópias de segurança do banco são guardadas por {{backupRetentionDays}} dias e depois apagadas."
   },
   "rights": {
     "title": "Seus direitos",

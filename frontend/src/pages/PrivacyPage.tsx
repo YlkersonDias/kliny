@@ -1,4 +1,4 @@
-import { useTranslation } from 'react-i18next'
+import { Trans, useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
 import { APP_NAME, PRIVACY } from '../config/app'
 import { usePageTitle } from '../hooks/usePageTitle'
@@ -6,13 +6,11 @@ import { isGoogleEnabled } from '../lib/googleIdentity'
 
 const SECTIONS = ['use', 'browser', 'security', 'retention', 'rights', 'changes'] as const
 
-// Política de privacidade, pública (com e sem login). Descreve o que o Kliny faz de verdade; quem
-// responde pelos dados, o contato e o prazo das cópias de segurança vêm de PRIVACY (config/app.ts),
-// a preencher antes de publicar.
+// Política de privacidade, pública (com e sem login). Descreve o que o Kliny faz de verdade; o
+// contato e o prazo das cópias de segurança vêm de PRIVACY (config/app.ts).
 export default function PrivacyPage() {
   const { t } = useTranslation('privacy')
   usePageTitle(t('title'))
-  const fill = (value: string) => value || t('who.missing')
 
   return (
     <div className="min-h-dvh bg-background px-4 py-10">
@@ -25,7 +23,17 @@ export default function PrivacyPage() {
         <section aria-labelledby="privacidade-responsavel" className="mt-6">
           <h2 id="privacidade-responsavel" className="text-lg font-semibold text-foreground">{t('who.title')}</h2>
           <p className="mt-2 text-muted">
-            {t('who.body', { controller: fill(PRIVACY.controller), contact: fill(PRIVACY.contact) })}
+            <Trans
+              t={t}
+              i18nKey="who.body"
+              components={{
+                contact: (
+                  <a href={`mailto:${PRIVACY.contact}`} className="font-medium text-primary underline underline-offset-2">
+                    {PRIVACY.contact}
+                  </a>
+                ),
+              }}
+            />
           </p>
         </section>
 
@@ -44,7 +52,7 @@ export default function PrivacyPage() {
           <section key={section} aria-labelledby={`privacidade-${section}`} className="mt-6">
             <h2 id={`privacidade-${section}`} className="text-lg font-semibold text-foreground">{t(`${section}.title`)}</h2>
             <p className="mt-2 text-muted">
-              {t(`${section}.body`, { backupRetention: fill(PRIVACY.backupRetention) })}
+              {t(`${section}.body`, { backupRetentionDays: PRIVACY.backupRetentionDays })}
             </p>
           </section>
         ))}

@@ -4,8 +4,7 @@
   "intro": "{{appName}} is a personal finance app. This page explains what data it keeps, why, and what you can do about it.",
   "who": {
     "title": "Who looks after your data",
-    "body": "{{appName}} and the data kept in it are the responsibility of {{controller}}. For any request about your data, write to {{contact}}.",
-    "missing": "[to be defined before publication]"
+    "body": "{{appName}} and the data kept in it are the responsibility of the project's developer, a private individual. For more information, write to <contact/>, which also handles any request about your data."
   },
   "data": {
     "title": "What we keep",
@@ -29,7 +28,7 @@
   },
   "retention": {
     "title": "How long we keep it",
-    "body": "As long as your account exists. When you delete your account, your data is removed from the database right away. Database backups are kept for {{backupRetention}} and then deleted."
+    "body": "As long as your account exists. When you delete your account, your data is removed from the database right away. Database backups are kept for {{backupRetentionDays}} days and then deleted."
   },
   "rights": {
     "title": "Your rights",
