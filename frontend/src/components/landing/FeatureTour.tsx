@@ -3,29 +3,55 @@ import { useTranslation } from 'react-i18next'
 import { LANGUAGE_SHORT_NAMES } from '../../lib/language'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { Icon } from '../ui/Icon'
-import { Mascot } from './Mascot'
 
-function Panel({ width, title, text, children }: { width: string; title: string; text: string; children: ReactNode }) {
+// Todos os cartões com a mesma largura e a mesma altura (a do mais alto, pela trilha): a descrição
+// reserva três linhas, e o exemplo ocupa o resto, com o conteúdo centralizado.
+function Panel({ title, text, children }: { title: string; text: string; children: ReactNode }) {
   return (
-    <article className={`flex w-[min(84vw,22rem)] flex-none snap-center flex-col gap-5 rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-primary/10 ${width}`}>
+    <article className="flex w-[min(84vw,24rem)] flex-none snap-center flex-col gap-5 rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-primary/10">
       <div>
         <h3 className="font-display text-2xl leading-tight font-[680] tracking-[-0.02em]">{title}</h3>
-        <p className="mt-1.5 max-w-[34ch] text-[0.95rem] text-muted">{text}</p>
+        <p className="mt-1.5 min-h-[3lh] text-[0.95rem] text-muted">{text}</p>
       </div>
       {/* Exemplo visual de uma tela do app; o título e o texto acima já dizem o que ela faz. */}
-      <div aria-hidden="true" className="rounded-2xl border border-border p-3.5 text-sm">{children}</div>
+      <div aria-hidden="true" className="flex flex-1 flex-col justify-center rounded-2xl border border-border p-3.5 text-sm">{children}</div>
     </article>
   )
 }
 
-function Row({ title, sub, amount, kind }: { title: string; sub: string; amount: string; kind: 'income' | 'expense' }) {
+function Row({ title, sub, amount, kind, mark }: {
+  title: string
+  sub: string
+  amount: string
+  kind: 'income' | 'expense'
+  mark?: 'repeat' | 'card'
+}) {
   return (
     <div className="flex items-center gap-3 border-border px-1 py-2 not-first:border-t">
       <span className="min-w-0 flex-1 truncate">
-        {title}
+        <span className="flex items-center gap-1.5">
+          {title}
+          {mark && <Icon name={mark} className="size-3.5 text-muted" />}
+        </span>
         <span className="block text-xs text-muted">{sub}</span>
       </span>
       <span className={`font-semibold tabular-nums ${kind === 'income' ? 'text-income' : 'text-expense'}`}>{amount}</span>
+    </div>
+  )
+}
+
+// Cofre com a barra da meta: âmbar até atingir e verde quando atinge, como no app.
+function Vault({ name, detail, percent, reached = false }: { name: string; detail: string; percent: number; reached?: boolean }) {
+  return (
+    <div className="px-1 py-1.5">
+      <div className="flex justify-between gap-2">
+        <span className="font-semibold">{name}</span>
+        <span className={`text-xs font-semibold ${reached ? 'text-income' : 'text-vault-text'}`}>{percent}%</span>
+      </div>
+      <span className="text-xs text-muted">{detail}</span>
+      <div className="mt-1 h-1.5 rounded-full bg-background">
+        <div className={`h-full rounded-full ${reached ? 'bg-income' : 'bg-vault'}`} style={{ width: `${percent}%` }} />
+      </div>
     </div>
   )
 }
@@ -80,49 +106,45 @@ export function FeatureTour({ tourRef, trackRef }: { tourRef: RefObject<HTMLElem
           ref={trackRef}
           role="group"
           aria-label={t('features.title')}
-          className="flex items-start gap-6 px-[max(1rem,calc((100vw-1180px)/2))] will-change-transform group-data-static:snap-x group-data-static:snap-mandatory group-data-static:overflow-x-auto group-data-static:pb-4 focus-visible:outline-2 focus-visible:outline-primary"
+          className="flex items-stretch gap-6 px-[max(1rem,calc((100vw-1180px)/2))] will-change-transform group-data-static:snap-x group-data-static:snap-mandatory group-data-static:overflow-x-auto group-data-static:pb-4 focus-visible:outline-2 focus-visible:outline-primary"
         >
-          <Panel width="sm:w-[29rem]" title={t('features.transactions')} text={t('features.transactionsText')}>
+          <Panel title={t('features.transactions')} text={t('features.transactionsText')}>
             <div className="mb-1.5 flex items-center gap-2 rounded-lg border border-border px-2.5 py-1.5 text-muted">
               <Icon name="search" className="size-3.5" />
               {t('features.transactionsSearch')}
+            </div>
+            <div className="mb-1 flex gap-1.5 text-xs">
+              <Choice label={t('features.transactionsFilterMonth')} on />
+              <Choice label={t('features.transactionsFilterExpense')} />
             </div>
             <Row title={t('features.transactionsRow1')} sub={t('features.transactionsRow1Sub')} amount={formatOutflow(187.4)} kind="expense" />
             <Row title={t('features.transactionsRow2')} sub={t('features.transactionsRow2Sub')} amount={formatOutflow(312.9)} kind="expense" />
             <Row title={t('features.transactionsRow3')} sub={t('features.transactionsRow3Sub')} amount={formatSigned(45)} kind="income" />
           </Panel>
 
-          <Panel width="sm:w-[25rem]" title={t('features.vaults')} text={t('features.vaultsText')}>
-            <div className="flex items-start gap-3">
-              <Mascot name="cofre-vazio" sizes="64px" lazy className="w-16 flex-none" />
-              <div className="min-w-0 flex-1">
-                <span className="font-semibold">{t('features.vaultsName')}</span>
-                <span className="mt-0.5 block font-display text-2xl font-bold">{formatMoney(7250)}</span>
-                <div className="mt-1.5 h-1.5 rounded-full bg-background">
-                  <div className="h-full w-[72%] rounded-full bg-vault" />
-                </div>
-                <div className="mt-1 flex justify-between text-xs text-muted">
-                  <span>{t('features.vaultsGoal', { goal: formatMoney(10000) })}</span>
-                  <span>72%</span>
-                </div>
-              </div>
-            </div>
+          <Panel title={t('features.vaults')} text={t('features.vaultsText')}>
+            <Vault name={t('features.vaultsName')} detail={t('features.vaultsOf', { saved: formatMoney(7250), goal: formatMoney(10000) })} percent={72} />
+            <Vault name={t('features.vaultsTrip')} detail={t('features.vaultsOf', { saved: formatMoney(1860), goal: formatMoney(3000) })} percent={62} />
+            <Vault name={t('features.vaultsGift')} detail={t('features.vaultsReached')} percent={100} reached />
           </Panel>
 
-          <Panel width="sm:w-[25rem]" title={t('features.budgets')} text={t('features.budgetsText')}>
+          <Panel title={t('features.budgets')} text={t('features.budgetsText')}>
             <Budget name={t('features.budgetsFood')} note={t('features.budgetsFoodLeft', { amount: formatMoney(299.5) })} noteColor="text-muted" percent={62} barColor="bg-primary" />
+            <Budget name={t('features.budgetsHome')} note={t('features.budgetsHomeReached')} noteColor="text-muted" percent={100} barColor="bg-primary" />
             <Budget name={t('features.budgetsTransport')} note={t('features.budgetsTransportNear')} noteColor="text-vault-text" percent={95} barColor="bg-vault" />
             <Budget name={t('features.budgetsFun')} note={t('features.budgetsFunOver', { amount: formatMoney(10) })} noteColor="text-expense" percent={100} barColor="bg-expense" />
           </Panel>
 
-          <Panel width="sm:w-[21rem]" title={t('features.recurring')} text={t('features.recurringText')}>
-            <Row title={t('features.recurringRent')} sub={t('features.recurringRentEvery')} amount={formatOutflow(1500)} kind="expense" />
-            <Row title={t('features.recurringFridge')} sub={t('features.recurringFridgeDate')} amount={formatOutflow(349.9)} kind="expense" />
+          <Panel title={t('features.recurring')} text={t('features.recurringText')}>
+            <Row title={t('features.recurringSalary')} sub={t('features.recurringSalaryEvery')} amount={formatSigned(4200)} kind="income" mark="repeat" />
+            <Row title={t('features.recurringRent')} sub={t('features.recurringRentEvery')} amount={formatOutflow(1500)} kind="expense" mark="repeat" />
+            <Row title={t('features.recurringStreaming')} sub={t('features.recurringStreamingEvery')} amount={formatOutflow(39.9)} kind="expense" mark="repeat" />
+            <Row title={t('features.recurringFridge')} sub={t('features.recurringFridgeDate')} amount={formatOutflow(349.9)} kind="expense" mark="card" />
           </Panel>
 
-          <Panel width="sm:w-[25rem]" title={t('features.reports')} text={t('features.reportsText')}>
+          <Panel title={t('features.reports')} text={t('features.reportsText')}>
             <div className="flex items-center gap-4">
-              <svg viewBox="0 0 42 42" className="size-28 flex-none -rotate-90">
+              <svg viewBox="0 0 42 42" className="size-24 flex-none -rotate-90">
                 {SLICES.map((slice) => (
                   <circle
                     key={slice.key}
@@ -146,17 +168,33 @@ export function FeatureTour({ tourRef, trackRef }: { tourRef: RefObject<HTMLElem
                 ))}
               </ul>
             </div>
+            <dl className="mt-3 grid grid-cols-3 gap-2 border-t border-border pt-3 text-xs">
+              <div><dt className="text-muted">{t('features.reportsIn')}</dt><dd className="font-semibold text-income tabular-nums">{formatSigned(5200)}</dd></div>
+              <div><dt className="text-muted">{t('features.reportsOut')}</dt><dd className="font-semibold text-expense tabular-nums">{formatOutflow(3480)}</dd></div>
+              <div><dt className="text-muted">{t('features.reportsLeft')}</dt><dd className="font-semibold tabular-nums">{formatSigned(1720)}</dd></div>
+            </dl>
           </Panel>
 
-          <Panel width="sm:w-[21rem]" title={t('features.yours')} text={t('features.yoursText')}>
+          <Panel title={t('features.yours')} text={t('features.yoursText')}>
+            <span className="mb-1.5 block text-xs text-muted">{t('features.yoursTheme')}</span>
             <div className="flex flex-wrap gap-1.5">
               <Choice label={t('features.yoursLight')} />
               <Choice label={t('features.yoursDark')} on />
               <Choice label={t('features.yoursSystem')} />
             </div>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="mt-3 mb-1.5 block text-xs text-muted">{t('features.yoursLanguage')}</span>
+            <div className="flex flex-wrap gap-1.5">
               <Choice label={LANGUAGE_SHORT_NAMES['pt-BR']} lang="pt-BR" on />
               <Choice label={LANGUAGE_SHORT_NAMES['en-US']} lang="en-US" />
+            </div>
+            <div className="mt-3 flex items-center gap-2.5 border-t border-border pt-3">
+              <span className="flex size-8 flex-none items-center justify-center rounded-full bg-background text-primary">
+                <Icon name="phone" className="size-4" />
+              </span>
+              <span>
+                <span className="block font-semibold">{t('features.yoursInstall')}</span>
+                <span className="block text-xs text-muted">{t('features.yoursInstallHint')}</span>
+              </span>
             </div>
           </Panel>
         </div>

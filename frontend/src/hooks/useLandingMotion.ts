@@ -24,6 +24,8 @@ export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): voi
     const items = [...stageEl.querySelectorAll<HTMLElement>('[data-parallax]')]
       .map((el) => ({ el, strength: Number(el.dataset.parallax), y: 0 }))
     let frame = 0
+    // Largura sem a barra de rolagem (innerWidth a inclui): senão o fim da trilha fica escondido atrás dela.
+    const visibleWidth = () => document.documentElement.clientWidth
 
     function layout() {
       const isStatic = reduce.matches || narrow.matches
@@ -32,7 +34,7 @@ export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): voi
       if (isStatic) trackEl!.setAttribute('tabindex', '0')
       else trackEl!.removeAttribute('tabindex')
       trackEl!.style.transform = ''
-      tourEl!.style.height = isStatic ? '' : `${tourHeight(trackEl!.scrollWidth, innerWidth, innerHeight)}px`
+      tourEl!.style.height = isStatic ? '' : `${tourHeight(trackEl!.scrollWidth, visibleWidth(), innerHeight)}px`
       if (reduce.matches) for (const item of items) item.el.style.translate = ''
     }
 
@@ -40,7 +42,7 @@ export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): voi
       frame = 0
       if (!tourEl!.hasAttribute('data-static')) {
         const progress = tourProgress(tourEl!.getBoundingClientRect().top, tourEl!.offsetHeight, innerHeight)
-        trackEl!.style.transform = `translate3d(${-progress * Math.max(0, trackEl!.scrollWidth - innerWidth)}px, 0, 0)`
+        trackEl!.style.transform = `translate3d(${-progress * Math.max(0, trackEl!.scrollWidth - visibleWidth())}px, 0, 0)`
       }
       if (reduce.matches) return
       const rect = stageEl!.getBoundingClientRect()
