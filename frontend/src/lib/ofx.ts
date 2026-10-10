@@ -8,7 +8,7 @@ import { MONEY_MAX } from './money'
 // Mesmo limite da API (ImportRequest.MaxLines) e do corpo aceito pelo nginx (1 MB).
 export const IMPORT_MAX_LINES = 1000
 export const OFX_MAX_BYTES = 1024 * 1024
-const DESCRIPTION_MAX = 255
+export const DESCRIPTION_MAX = 255
 
 export interface StatementLine {
   // Banco e só os 4 últimos dígitos da conta ("341:4321"): separa contas sem guardar o número.
@@ -81,16 +81,19 @@ export function parseOfx(text: string): OfxResult {
   }
   if (found === 0) throw new OfxError('empty')
 
+  return { lines: withOccurrences(lines), skipped }
+}
+
+// A posição de cada linha entre as do arquivo com as mesmas partes da chave (ver ImportService.Key
+// na API): duas compras iguais no mesmo dia viram as linhas 1 e 2. Usada também pelo CSV.
+export function withOccurrences(lines: readonly Omit<StatementLine, 'occurrence'>[]): StatementLine[] {
   const seen = new Map<string, number>()
-  return {
-    lines: lines.map((line) => {
-      const key = [line.source, line.externalId ?? '', line.date, line.amount.toFixed(2), line.externalId ? '' : line.description].join('\n')
-      const occurrence = (seen.get(key) ?? 0) + 1
-      seen.set(key, occurrence)
-      return { ...line, occurrence }
-    }),
-    skipped,
-  }
+  return lines.map((line) => {
+    const key = [line.source, line.externalId ?? '', line.date, line.amount.toFixed(2), line.externalId ? '' : line.description].join('\n')
+    const occurrence = (seen.get(key) ?? 0) + 1
+    seen.set(key, occurrence)
+    return { ...line, occurrence }
+  })
 }
 
 // "20261005", "20261005120000[-3:BRT]" e "2026-10-05" (alguns bancos fogem do padrão) viram "2026-10-05".

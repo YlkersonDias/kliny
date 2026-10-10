@@ -2,10 +2,10 @@
   "title": "Import statement",
   "back": "Back to Transactions",
   "choose": {
-    "intro": "Export the statement from your bank's app or website in OFX format and choose the file here.",
+    "intro": "Export the statement from your bank's app or website, in OFX or CSV, and choose the file here.",
     "privacy": "The file is read only on this device and is not uploaded. You review the transactions, and only the ones you confirm go into {{appName}}.",
-    "where": "It is usually under Statement → Export (or Share) → OFX. Some banks call it “Money” or “Quicken”. Works with checking account and credit card statements.",
-    "pick": "Choose OFX file",
+    "where": "It is usually under Statement → Export (or Share). Prefer OFX (some banks call it “Money” or “Quicken”): it already says what each thing is. With CSV, you check the columns once. Works with checking account and credit card statements.",
+    "pick": "Choose file",
     "reading": "Reading the file…",
     "loading": "Loading your categories…"
   },
@@ -15,7 +15,8 @@
     "empty": "The file has no transactions.",
     "nothingValid": "No transaction in the file has a valid date and amount.",
     "tooMany": "The file has {{total}} transactions, and the limit is {{max}} at a time. Export a shorter period.",
-    "read": "The file could not be read."
+    "read": "The file could not be read.",
+    "unknown": "This file could not be understood. Export it again as OFX or CSV."
   },
   "review": {
     "summary_zero": "{{count}} transactions from {{from}} to {{to}}, in the file <file/>.",
@@ -40,7 +41,8 @@
     "category": "Category of {{description}}",
     "noCategory": "No category",
     "income": "Money in",
-    "expense": "Money out"
+    "expense": "Money out",
+    "columns": "Adjust columns"
   },
   "flag": {
     "imported": "Already imported",
@@ -56,5 +58,44 @@
     "skipped_other": "{{count}} had already been imported and were left out.",
     "view": "View transactions",
     "another": "Import another file"
+  },
+  "columns": {
+    "title": "Which column is which?",
+    "intro": "Check the columns of the file <file/>. Your choice is saved in this browser for the next file from the same bank.",
+    "hasHeader": "The first line has the column names",
+    "column": "Column {{n}}",
+    "option": "{{name}} (e.g. {{sample}})",
+    "none": "None",
+    "choose": "Choose",
+    "date": "Date",
+    "dateFormat": "Date format",
+    "formats": {
+      "dmy": "day/month/year",
+      "ymd": "year-month-day",
+      "mdy": "month/day/year"
+    },
+    "description": "Description",
+    "description2": "Complement (optional)",
+    "description2Hint": "Joined to the description, as in “Pix sent - Maria”.",
+    "amountMode": "How the amount comes",
+    "single": "One column, with sign",
+    "split": "Two columns: money in and money out",
+    "amount": "Amount",
+    "credit": "Money in",
+    "debit": "Money out",
+    "amountMissing": "Choose the amount column.",
+    "id": "Identifier (optional)",
+    "idHint": "The bank's code for each transaction, when the file has one. With it, nothing repeats even if the bank changes the description.",
+    "invert": "Invert the sign",
+    "invertHint": "For card statements, where a purchase comes positive: this way it goes in as spending.",
+    "preview": "First lines",
+    "ignored": "Left out (no valid date or amount): {{row}}",
+    "count_zero": "{{count}} lines become transactions.",
+    "count_one": "{{count}} line becomes a transaction.",
+    "count_other": "{{count}} lines become transactions.",
+    "skipped_zero": "{{count}} are left out.",
+    "skipped_one": "{{count}} is left out.",
+    "skipped_other": "{{count}} are left out.",
+    "continue": "Continue"
   }
 }
