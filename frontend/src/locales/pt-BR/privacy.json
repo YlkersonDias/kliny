@@ -21,7 +21,7 @@
   },
   "browser": {
     "title": "O que fica no seu navegador",
-    "body": "A sessão (para você continuar conectado), o tema e o idioma escolhidos. Se você instalar o {{appName}} como app, o navegador guarda só os arquivos do próprio app, nunca os seus dados financeiros. Não usamos cookies de rastreamento. Nas telas com o botão do Google (entrar, criar conta e configurações), o botão é carregado dos servidores do Google, que seguem a política de privacidade do próprio Google."
+    "body": "A sessão (para você continuar conectado), o tema e o idioma escolhidos e, se você importar um CSV, quais colunas do arquivo são o quê (nunca o conteúdo do extrato). Se você instalar o {{appName}} como app, o navegador guarda só os arquivos do próprio app, nunca os seus dados financeiros. Não usamos cookies de rastreamento. Nas telas com o botão do Google (entrar, criar conta e configurações), o botão é carregado dos servidores do Google, que seguem a política de privacidade do próprio Google."
   },
   "security": {
     "title": "Como protegemos",

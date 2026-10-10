@@ -21,7 +21,7 @@
   },
   "browser": {
     "title": "What stays in your browser",
-    "body": "Your session (so you stay signed in), and the theme and language you chose. If you install {{appName}} as an app, the browser keeps only the app's own files, never your financial data. We do not use tracking cookies. On the screens with the Google button (sign in, create account and settings), the button is loaded from Google's servers, which follow Google's own privacy policy."
+    "body": "Your session (so you stay signed in), and the theme and language you chose and, if you import a CSV, which column of the file is which (never the statement's content). If you install {{appName}} as an app, the browser keeps only the app's own files, never your financial data. We do not use tracking cookies. On the screens with the Google button (sign in, create account and settings), the button is loaded from Google's servers, which follow Google's own privacy policy."
   },
   "security": {
     "title": "How we protect it",

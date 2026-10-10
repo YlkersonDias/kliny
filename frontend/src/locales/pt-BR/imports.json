@@ -2,10 +2,10 @@
   "title": "Importar extrato",
   "back": "Voltar para Movimentações",
   "choose": {
-    "intro": "Exporte o extrato no app ou no site do seu banco, no formato OFX, e escolha o arquivo aqui.",
+    "intro": "Exporte o extrato no app ou no site do seu banco, em OFX ou CSV, e escolha o arquivo aqui.",
     "privacy": "O arquivo é lido só neste aparelho e não é enviado. Você revisa as movimentações, e só as que confirmar entram no {{appName}}.",
-    "where": "Costuma ficar em Extrato → Exportar (ou Compartilhar) → OFX. Alguns bancos chamam de “Money” ou “Quicken”. Funciona com extrato de conta e de cartão de crédito.",
-    "pick": "Escolher arquivo OFX",
+    "where": "Costuma ficar em Extrato → Exportar (ou Compartilhar). Prefira o OFX (alguns bancos chamam de “Money” ou “Quicken”): ele já diz o que é cada coisa. No CSV, você confere as colunas uma vez. Funciona com extrato de conta e de cartão de crédito.",
+    "pick": "Escolher arquivo",
     "reading": "Lendo o arquivo…",
     "loading": "Carregando suas categorias…"
   },
@@ -15,7 +15,8 @@
     "empty": "O arquivo não tem movimentações.",
     "nothingValid": "Nenhuma movimentação do arquivo tem data e valor válidos.",
     "tooMany": "O arquivo tem {{total}} movimentações, e o limite é {{max}} por vez. Exporte um período menor.",
-    "read": "Não foi possível ler o arquivo."
+    "read": "Não foi possível ler o arquivo.",
+    "unknown": "Não foi possível entender esse arquivo. Exporte de novo em OFX ou CSV."
   },
   "review": {
     "summary_zero": "{{count}} movimentações de {{from}} a {{to}}, no arquivo <file/>.",
@@ -40,7 +41,8 @@
     "category": "Categoria de {{description}}",
     "noCategory": "Sem categoria",
     "income": "Entrada",
-    "expense": "Saída"
+    "expense": "Saída",
+    "columns": "Ajustar colunas"
   },
   "flag": {
     "imported": "Já importada",
@@ -56,5 +58,44 @@
     "skipped_other": "{{count}} já tinham sido importadas e ficaram de fora.",
     "view": "Ver movimentações",
     "another": "Importar outro arquivo"
+  },
+  "columns": {
+    "title": "Quais colunas são o quê?",
+    "intro": "Confira as colunas do arquivo <file/>. A escolha fica guardada neste navegador para o próximo arquivo do mesmo banco.",
+    "hasHeader": "A primeira linha tem os nomes das colunas",
+    "column": "Coluna {{n}}",
+    "option": "{{name}} (ex.: {{sample}})",
+    "none": "Nenhuma",
+    "choose": "Escolha",
+    "date": "Data",
+    "dateFormat": "Formato da data",
+    "formats": {
+      "dmy": "dia/mês/ano",
+      "ymd": "ano-mês-dia",
+      "mdy": "mês/dia/ano"
+    },
+    "description": "Descrição",
+    "description2": "Complemento (opcional)",
+    "description2Hint": "Juntado à descrição, como em “Pix enviado - Maria”.",
+    "amountMode": "Como vem o valor",
+    "single": "Uma coluna, com sinal",
+    "split": "Duas colunas: entrada e saída",
+    "amount": "Valor",
+    "credit": "Entrada",
+    "debit": "Saída",
+    "amountMissing": "Escolha a coluna do valor.",
+    "id": "Identificador (opcional)",
+    "idHint": "Código de cada movimentação no banco, quando o arquivo tem. Com ele, nada se repete mesmo que o banco mude a descrição.",
+    "invert": "Inverter o sinal",
+    "invertHint": "Para extrato de cartão, em que a compra vem positiva: assim ela entra como gasto.",
+    "preview": "Primeiras linhas",
+    "ignored": "Fica de fora (sem data ou valor válidos): {{row}}",
+    "count_zero": "{{count}} linhas viram movimentações.",
+    "count_one": "{{count}} linha vira movimentação.",
+    "count_other": "{{count}} linhas viram movimentações.",
+    "skipped_zero": "{{count}} ficam de fora.",
+    "skipped_one": "{{count}} fica de fora.",
+    "skipped_other": "{{count}} ficam de fora.",
+    "continue": "Continuar"
   }
 }

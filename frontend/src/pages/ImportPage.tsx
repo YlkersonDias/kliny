@@ -1,10 +1,11 @@
-import { memo, useCallback, useId, useRef, useState, type ChangeEvent } from 'react'
-import { Trans, useTranslation } from 'react-i18next'
+import { useCallback, useRef, useState, type ChangeEvent } from 'react'
+import { useTranslation } from 'react-i18next'
 import { Link } from 'react-router'
-import type { Category, ImportLine } from '../api/types'
+import type { ImportLine } from '../api/types'
 import { ApiError } from '../api/client'
+import { CsvColumnsStep } from '../components/imports/CsvColumnsStep'
+import { DoneCard, Review, type Done, type Loaded } from '../components/imports/ImportReview'
 import { Button } from '../components/ui/Button'
-import { buttonClass } from '../components/ui/buttonStyles'
 import { FormAlert } from '../components/ui/FormAlert'
 import { Icon } from '../components/ui/Icon'
 import { Spinner } from '../components/ui/Spinner'
@@ -12,24 +13,18 @@ import { useCategories } from '../hooks/useCategories'
 import { useCategoryRules } from '../hooks/useCategoryRules'
 import { useCheckImport, useImportLines } from '../hooks/useImports'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { formatDate } from '../lib/dates'
-import { formatSigned } from '../lib/money'
+import { applyMapping, guessMapping, layoutKey, parseCsv, type CsvMapping } from '../lib/csv'
+import { restoreMapping, saveMapping } from '../lib/csvMappingStore'
 import { decodeStatement, IMPORT_MAX_LINES, OFX_MAX_BYTES, OfxError, parseOfx, type StatementLine } from '../lib/ofx'
 import { buildReviewRows, dateSpan, type ReviewRow } from '../lib/statementImport'
 
-// Importação de extrato (8.3a, OFX). O arquivo é lido aqui e descartado; a API recebe só as
-// linhas marcadas. Três passos: escolher o arquivo, revisar e o resultado.
+// Importação de extrato (8.3a OFX, 8.3b CSV). O arquivo é lido aqui e descartado; a API recebe só
+// as linhas marcadas. Passos: escolher o arquivo, (no CSV) dizer as colunas, revisar e o resultado.
 
-interface Loaded {
+interface CsvFile {
   fileName: string
-  skipped: number
-  rows: ReviewRow[]
-}
-
-interface Done {
-  created: number
-  skipped: number
-  span: { from: string; to: string } | null
+  rows: string[][]
+  mapping: CsvMapping
 }
 
 export default function ImportPage() {
@@ -40,6 +35,8 @@ export default function ImportPage() {
   const check = useCheckImport()
   const save = useImportLines()
 
+  const [csv, setCsv] = useState<CsvFile | null>(null)
+  const [choosingColumns, setChoosingColumns] = useState(false)
   const [loaded, setLoaded] = useState<Loaded | null>(null)
   const [done, setDone] = useState<Done | null>(null)
   const [fileError, setFileError] = useState<string | null>(null)
@@ -56,6 +53,8 @@ export default function ImportPage() {
     setFileError(null)
     setDone(null)
     setLoaded(null)
+    setCsv(null)
+    setChoosingColumns(false)
     check.reset()
     save.reset()
 
@@ -65,17 +64,44 @@ export default function ImportPage() {
     }
 
     setReading(true)
-    let lines: StatementLine[]
-    let skipped: number
+    let text: string
     try {
-      const result = parseOfx(decodeStatement(new Uint8Array(await file.arrayBuffer())))
-      lines = result.lines
-      skipped = result.skipped
-    } catch (error) {
+      text = decodeStatement(new Uint8Array(await file.arrayBuffer()))
+    } catch {
       setReading(false)
-      setFileError(error instanceof OfxError ? t(`errors.${error.code}`) : t('errors.read'))
+      setFileError(t('errors.read'))
       return
     }
+
+    // O conteúdo decide, e não a extensão: há banco que manda OFX com outro nome.
+    if (/<OFX>/i.test(text)) {
+      let result
+      try {
+        result = parseOfx(text)
+      } catch (error) {
+        setReading(false)
+        setFileError(error instanceof OfxError ? t(`errors.${error.code}`) : t('errors.read'))
+        return
+      }
+      review(file.name, result.lines, result.skipped)
+      return
+    }
+
+    const { rows } = parseCsv(text)
+    setReading(false)
+    if (rows.length < 2 || rows.every((row) => row.length < 2)) {
+      setFileError(t('errors.unknown'))
+      return
+    }
+    const guessed = guessMapping(rows)
+    const width = Math.max(...rows.map((row) => row.length))
+    const mapping = guessed.hasHeader ? restoreMapping(layoutKey(rows[guessed.headerRow]), guessed, width) : guessed
+    setCsv({ fileName: file.name, rows, mapping })
+    setChoosingColumns(true)
+  }
+
+  // Confere as linhas com a API e abre a revisão.
+  function review(fileName: string, lines: StatementLine[], skipped: number) {
     if (lines.length === 0) {
       setReading(false)
       setFileError(t('errors.nothingValid'))
@@ -86,11 +112,30 @@ export default function ImportPage() {
       setFileError(t('errors.tooMany', { total: lines.length, max: IMPORT_MAX_LINES }))
       return
     }
-
+    setReading(true)
     check.mutate(lines.map(toImportLine), {
-      onSuccess: ({ statuses }) => setLoaded({ fileName: file.name, skipped, rows: buildReviewRows(lines, statuses, rules.data ?? []) }),
+      onSuccess: ({ statuses }) => {
+        setLoaded({ fileName, skipped, rows: buildReviewRows(lines, statuses, rules.data ?? []) })
+        setChoosingColumns(false)
+      },
       onSettled: () => setReading(false),
     })
+  }
+
+  function confirmColumns(mapping: CsvMapping) {
+    if (!csv) return
+    setFileError(null)
+    check.reset()
+    setCsv({ ...csv, mapping })
+    if (mapping.hasHeader) saveMapping(layoutKey(csv.rows[mapping.headerRow]), mapping)
+    const result = applyMapping(csv.rows, mapping)
+    review(csv.fileName, result.lines, result.skipped)
+  }
+
+  function backToColumns() {
+    save.reset()
+    setLoaded(null)
+    setChoosingColumns(true)
   }
 
   function chooseAnother() {
@@ -121,6 +166,7 @@ export default function ImportPage() {
         onSuccess: (result) => {
           setDone({ ...result, span: dateSpan(chosen.map((row) => row.line)) })
           setLoaded(null)
+          setCsv(null)
         },
       },
     )
@@ -131,13 +177,74 @@ export default function ImportPage() {
     <input
       ref={inputRef}
       type="file"
-      accept=".ofx,.OFX,application/x-ofx"
+      accept=".ofx,.OFX,.csv,.CSV,.txt,application/x-ofx,text/csv"
       className="hidden"
       tabIndex={-1}
       aria-hidden="true"
       onChange={handleFile}
     />
   )
+
+  const fileOrCheckError = fileError ?? (check.error ? errorMessage(check.error) : null)
+
+  function renderStep() {
+    if (done) return <DoneCard done={done} onAnother={chooseAnother} />
+    if (loaded) {
+      return (
+        <Review
+          loaded={loaded}
+          categories={categories.data ?? []}
+          saving={save.isPending}
+          error={save.error ? errorMessage(save.error) : null}
+          onRow={setRow}
+          onSelectAll={selectAll}
+          onSubmit={submit}
+          onAnother={chooseAnother}
+          onColumns={csv ? backToColumns : undefined}
+        />
+      )
+    }
+    if (csv && choosingColumns) {
+      return (
+        <CsvColumnsStep
+          // Arquivo novo começa do zero; voltar da revisão mantém o que foi escolhido.
+          key={csv.fileName + csv.rows.length}
+          fileName={csv.fileName}
+          rows={csv.rows}
+          initial={csv.mapping}
+          busy={reading}
+          error={fileOrCheckError}
+          onConfirm={confirmColumns}
+          onAnother={chooseAnother}
+        />
+      )
+    }
+    return (
+      <section className="rounded-2xl border border-border bg-surface p-5 md:p-6">
+        <div className="max-w-prose space-y-3 text-foreground">
+          <p>{t('choose.intro')}</p>
+          <p className="text-sm text-muted">{t('choose.where')}</p>
+          <p className="flex gap-2 text-sm text-muted">
+            <Icon name="shield" className="mt-0.5 size-4 text-primary" />
+            <span>{t('choose.privacy')}</span>
+          </p>
+        </div>
+        <div className="mt-5 flex flex-wrap items-center gap-3">
+          <Button onClick={chooseAnother} disabled={!ready || reading}>
+            <Icon name="plus" className="size-4" />
+            {t('choose.pick')}
+          </Button>
+          {!ready && <span className="flex items-center gap-2 text-sm text-muted"><Spinner className="size-4" />{t('choose.loading')}</span>}
+          {reading && <span role="status" className="flex items-center gap-2 text-sm text-muted"><Spinner className="size-4" />{t('choose.reading')}</span>}
+        </div>
+        {fileOrCheckError && (
+          <div className="mt-4">
+            <FormAlert>{fileOrCheckError}</FormAlert>
+          </div>
+        )}
+      </section>
+    )
+  }
 
   return (
     <>
@@ -148,46 +255,7 @@ export default function ImportPage() {
       <h1 className="mt-2 text-2xl font-semibold text-foreground">{t('title')}</h1>
       {fileInput}
 
-      <div className="mt-6 space-y-4">
-        {done ? (
-          <DoneCard done={done} onAnother={chooseAnother} />
-        ) : loaded ? (
-          <Review
-            loaded={loaded}
-            categories={categories.data ?? []}
-            saving={save.isPending}
-            error={save.error ? errorMessage(save.error) : null}
-            onRow={setRow}
-            onSelectAll={selectAll}
-            onSubmit={submit}
-            onAnother={chooseAnother}
-          />
-        ) : (
-          <section className="rounded-2xl border border-border bg-surface p-5 md:p-6">
-            <div className="max-w-prose space-y-3 text-foreground">
-              <p>{t('choose.intro')}</p>
-              <p className="text-sm text-muted">{t('choose.where')}</p>
-              <p className="flex gap-2 text-sm text-muted">
-                <Icon name="shield" className="mt-0.5 size-4 text-primary" />
-                <span>{t('choose.privacy')}</span>
-              </p>
-            </div>
-            <div className="mt-5 flex flex-wrap items-center gap-3">
-              <Button onClick={chooseAnother} disabled={!ready || reading}>
-                <Icon name="plus" className="size-4" />
-                {t('choose.pick')}
-              </Button>
-              {!ready && <span className="flex items-center gap-2 text-sm text-muted"><Spinner className="size-4" />{t('choose.loading')}</span>}
-              {reading && <span role="status" className="flex items-center gap-2 text-sm text-muted"><Spinner className="size-4" />{t('choose.reading')}</span>}
-            </div>
-            {(fileError || check.error) && (
-              <div className="mt-4">
-                <FormAlert>{fileError ?? errorMessage(check.error!)}</FormAlert>
-              </div>
-            )}
-          </section>
-        )}
-      </div>
+      <div className="mt-6 space-y-4">{renderStep()}</div>
     </>
   )
 }
@@ -208,160 +276,4 @@ function toImportLine(line: StatementLine): ImportLine {
 function errorMessage(error: Error): string {
   if (error instanceof ApiError) return Object.values(error.fieldErrors)[0] ?? error.detail
   return error.message
-}
-
-interface ReviewProps {
-  loaded: Loaded
-  categories: Category[]
-  saving: boolean
-  error: string | null
-  onRow: (index: number, patch: Partial<ReviewRow>) => void
-  onSelectAll: (selected: boolean) => void
-  onSubmit: () => void
-  onAnother: () => void
-}
-
-function Review({ loaded, categories, saving, error, onRow, onSelectAll, onSubmit, onAnother }: ReviewProps) {
-  const { t } = useTranslation('imports')
-  const { rows } = loaded
-  const span = dateSpan(rows.map((row) => row.line))
-  const selected = rows.filter((row) => row.selected && !row.disabled).length
-  const imported = rows.filter((row) => row.flag === 'imported').length
-  const toCheck = rows.filter((row) => row.flag === 'similar' || row.flag === 'transfer').length
-  const byRules = rows.filter((row) => !row.disabled && row.rulePattern !== null).length
-  const hasTransfer = rows.some((row) => row.flag === 'transfer')
-  const hasSimilar = rows.some((row) => row.flag === 'similar')
-
-  const actions = (
-    <div className="flex flex-wrap gap-2">
-      <Button onClick={onSubmit} isLoading={saving} disabled={selected === 0}>
-        {t('review.submit', { count: selected })}
-      </Button>
-      <Button variant="secondary" onClick={onAnother} disabled={saving}>{t('review.another')}</Button>
-    </div>
-  )
-
-  return (
-    <>
-      <section className="space-y-2 rounded-2xl border border-border bg-surface p-5 text-foreground md:p-6">
-        {span && (
-          <p>
-            <Trans
-              t={t}
-              i18nKey="review.summary"
-              count={rows.length}
-              values={{ from: formatDate(span.from), to: formatDate(span.to) }}
-              // O nome do arquivo entra como elemento pronto, nunca pelo parser de tags.
-              components={{ file: <strong className="break-all">{loaded.fileName}</strong> }}
-            />
-          </p>
-        )}
-        <p className="text-sm text-muted">{t('review.counts', { fresh: rows.length - imported - toCheck, imported, toCheck })}</p>
-        {loaded.skipped > 0 && <p className="text-sm text-muted">{t('review.skipped', { count: loaded.skipped })}</p>}
-        {byRules > 0 && <p className="text-sm text-muted">{t('review.rules', { count: byRules })}</p>}
-      </section>
-
-      {hasTransfer && <FormAlert variant="info">{t('review.transferNotice')}</FormAlert>}
-      {hasSimilar && <FormAlert variant="info">{t('review.similarNotice')}</FormAlert>}
-      {error && <FormAlert>{error}</FormAlert>}
-
-      <div className="flex flex-wrap items-center justify-between gap-3">
-        {actions}
-        <div className="flex gap-2">
-          <Button variant="ghost" onClick={() => onSelectAll(true)} disabled={saving}>{t('review.selectAll')}</Button>
-          <Button variant="ghost" onClick={() => onSelectAll(false)} disabled={saving}>{t('review.selectNone')}</Button>
-        </div>
-      </div>
-
-      <section aria-label={t('review.listLabel')} className="overflow-hidden rounded-2xl border border-border bg-surface">
-        <ul className="divide-y divide-border">
-          {rows.map((row, index) => (
-            <ReviewRowItem key={index} row={row} index={index} categories={categories} disabled={saving} onRow={onRow} />
-          ))}
-        </ul>
-      </section>
-
-      {rows.length > 8 && actions}
-    </>
-  )
-}
-
-interface RowProps {
-  row: ReviewRow
-  index: number
-  categories: Category[]
-  disabled: boolean
-  onRow: (index: number, patch: Partial<ReviewRow>) => void
-}
-
-// memo: marcar uma linha não redesenha as outras (o arquivo pode ter 1.000).
-const ReviewRowItem = memo(function ReviewRowItem({ row, index, categories, disabled, onRow }: RowProps) {
-  const { t } = useTranslation('imports')
-  const checkboxId = useId()
-  const { line } = row
-  const income = line.amount > 0
-
-  return (
-    <li className={`flex flex-col gap-2 px-4 py-3 lg:flex-row lg:items-center lg:gap-4 ${row.disabled ? 'opacity-60' : ''}`}>
-      <div className="flex min-w-0 flex-1 items-start gap-3">
-        <input
-          id={checkboxId}
-          type="checkbox"
-          className="mt-1 size-5 shrink-0 accent-primary"
-          checked={row.selected}
-          disabled={row.disabled || disabled}
-          onChange={(event) => onRow(index, { selected: event.target.checked })}
-        />
-        <label htmlFor={checkboxId} className="min-w-0 flex-1">
-          <span className="block break-words font-medium text-foreground">{line.description}</span>
-          <span className="block text-sm text-muted">
-            {formatDate(line.date)}
-            {row.flag && (
-              <>
-                {' · '}
-                <span className={row.flag === 'imported' ? 'text-muted' : 'font-medium text-vault-text'}>{t(`flag.${row.flag}`)}</span>
-              </>
-            )}
-          </span>
-        </label>
-      </div>
-      <div className="flex items-center justify-between gap-3 pl-8 lg:justify-end lg:pl-0">
-        <select
-          aria-label={t('review.category', { description: line.description })}
-          className="min-h-11 w-full max-w-56 rounded-lg border border-border bg-surface px-2 py-1.5 text-sm text-foreground outline-none focus:border-primary focus:ring-2 focus:ring-primary/20 md:min-h-9"
-          value={row.categoryId}
-          disabled={row.disabled || disabled}
-          onChange={(event) => onRow(index, { categoryId: event.target.value, rulePattern: null })}
-        >
-          <option value="">{t('review.noCategory')}</option>
-          {categories.map((category) => (
-            <option key={category.id} value={String(category.id)}>{category.name}</option>
-          ))}
-        </select>
-        <span className={`w-32 shrink-0 text-right font-semibold tabular-nums whitespace-nowrap ${income ? 'text-income' : 'text-expense'}`}>
-          <span className="sr-only">{t(income ? 'review.income' : 'review.expense')}{' '}</span>
-          {formatSigned(line.amount)}
-        </span>
-      </div>
-    </li>
-  )
-})
-
-function DoneCard({ done, onAnother }: { done: Done; onAnother: () => void }) {
-  const { t } = useTranslation('imports')
-  const params = done.span ? `?de=${done.span.from}&ate=${done.span.to}` : ''
-  return (
-    <section className="space-y-4 rounded-2xl border border-border bg-surface p-5 md:p-6">
-      <FormAlert variant="info">
-        <p className="font-medium">{t('done.title', { count: done.created })}</p>
-        {done.skipped > 0 && <p>{t('done.skipped', { count: done.skipped })}</p>}
-      </FormAlert>
-      <div className="flex flex-wrap gap-2">
-        <Link to={`/movimentacoes${params}`} className={buttonClass()}>
-          {t('done.view')}
-        </Link>
-        <Button variant="secondary" onClick={onAnother}>{t('done.another')}</Button>
-      </div>
-    </section>
-  )
 }
