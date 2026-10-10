@@ -80,8 +80,8 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
     {
         object[] lines =
         [
-            Line("341:0001", "F1", "2022-01-05", -42.90m, "Mercado Bom Preço Imp1", categoryId: fixture.Food),
-            Line("341:0001", "F2", "2022-01-06", 3000m, "Salário Imp1"),
+            Line("341:0001", "F1", "2022-01-05", -42.90m, "Mercado Bom Preço Imp01", categoryId: fixture.Food),
+            Line("341:0001", "F2", "2022-01-06", 3000m, "Salário Imp01"),
         ];
 
         Assert.Equal(["new", "new"], await CheckAsync(lines));
@@ -89,7 +89,7 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         Assert.Equal(["imported", "imported"], await CheckAsync(lines));
         Assert.Equal((0, 2), await ImportAsync(lines));
 
-        var saved = await SearchAsync("Imp1");
+        var saved = await SearchAsync("Imp01");
         Assert.Equal(2, saved.Length);
         Assert.Equal(-42.90m, saved[0].GetProperty("amount").GetDecimal());
         Assert.Equal("2022-01-05", saved[0].GetProperty("date").GetString());
