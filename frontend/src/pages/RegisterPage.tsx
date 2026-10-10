@@ -12,7 +12,7 @@ import { FormAlert } from '../components/ui/FormAlert'
 import { Input } from '../components/ui/Input'
 import { usePageTitle } from '../hooks/usePageTitle'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../lib/forms'
-import { exceedsPasswordBytes } from '../lib/password'
+import { exceedsPasswordBytes, PASSWORD_MAX, PASSWORD_MIN } from '../lib/password'
 
 const FIELDS = ['name', 'email', 'password', 'confirmPassword'] as const
 type Field = (typeof FIELDS)[number]
@@ -20,8 +20,6 @@ type Field = (typeof FIELDS)[number]
 // Mesmas regras do RegisterRequest da API.
 const NAME_MAX = 100
 const EMAIL_MAX = 255
-const PASSWORD_MIN = 8
-const PASSWORD_MAX = 72
 
 function validate(values: Record<Field, string>, t: TFunction<'auth'>): FieldErrors<Field> {
   const errors: FieldErrors<Field> = {}

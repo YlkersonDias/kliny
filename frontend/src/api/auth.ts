@@ -9,6 +9,16 @@ export function login(request: LoginRequest): Promise<AuthResponse> {
   return apiRequest('/auth/login', { method: 'POST', body: request, auth: false })
 }
 
+// "Esqueci minha senha": a API responde igual com ou sem conta, e o link vai por e-mail.
+export function forgotPassword(email: string): Promise<void> {
+  return apiRequest('/auth/forgot-password', { method: 'POST', body: { email }, auth: false })
+}
+
+// Troca a senha pelo token do link; todas as sessões da conta caem.
+export function resetPassword(token: string, password: string): Promise<void> {
+  return apiRequest('/auth/reset-password', { method: 'POST', body: { token, password }, auth: false })
+}
+
 export function me(signal?: AbortSignal): Promise<User> {
   return apiRequest('/auth/me', { signal })
 }

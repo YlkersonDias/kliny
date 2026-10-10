@@ -224,5 +224,5 @@ public class AuthService(
         return new AuthResponse(token, expiresAt, UserResponse.FromUser(user));
     }
 
-    private static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
+    internal static string NormalizeEmail(string email) => email.Trim().ToLowerInvariant();
 }

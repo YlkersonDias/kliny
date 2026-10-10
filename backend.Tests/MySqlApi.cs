@@ -3,6 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using Backend.Data;
 using Backend.Security;
+using Backend.Services.Email;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -31,6 +32,9 @@ public sealed class MySqlApi : IAsyncLifetime
     private string _appUser = "";
 
     public bool IsAvailable => _app is not null;
+
+    // Os e-mails que a API "enviou" (recuperação de senha).
+    public FakeEmailSender Emails { get; } = new();
 
     // Conexão do usuário só de DML, a mesma que a API usa.
     public string AppConnectionString
@@ -85,7 +89,7 @@ public sealed class MySqlApi : IAsyncLifetime
 #pragma warning restore EF1002
         }
 
-        _app = new App(appConnectionString);
+        _app = new App(appConnectionString, Emails);
     }
 
     public async ValueTask DisposeAsync()
@@ -147,7 +151,7 @@ public sealed class MySqlApi : IAsyncLifetime
         }
     }
 
-    private sealed class App(string connectionString) : WebApplicationFactory<Program>
+    private sealed class App(string connectionString, FakeEmailSender emails) : WebApplicationFactory<Program>
     {
         protected override void ConfigureWebHost(IWebHostBuilder builder)
         {
@@ -157,6 +161,9 @@ public sealed class MySqlApi : IAsyncLifetime
             // (10 por minuto), e cada classe de teste faz mais que isso. O limite por IP é conferido
             // no RateLimitingTests, sem MySQL; o bloqueio por e-mail continua o de produção.
             builder.UseSetting("RateLimits:LoginPerIp:PermitLimit", "1000");
+            // Mesmo motivo: a recuperação de senha tem o limite conferido no PasswordResetTests.
+            builder.UseSetting("RateLimits:PasswordResetPerIp:PermitLimit", "1000");
+            builder.UseSetting("Email:AppUrl", "https://kliny.test");
 
             builder.ConfigureServices(services =>
             {
@@ -170,6 +177,8 @@ public sealed class MySqlApi : IAsyncLifetime
 
                 // Os testes não falam com o Google: o comprovante é montado pelo FakeGoogleTokenValidator.
                 services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
+                // Nem com o Resend: os e-mails ficam no FakeEmailSender.
+                services.AddSingleton<IEmailSender>(emails);
             });
         }
     }

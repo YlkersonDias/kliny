@@ -88,6 +88,37 @@ public class RateLimitingTests
         Assert.Equal("Muitas tentativas. Tente novamente em 60 minutos.", await Detail(response));
     }
 
+    // "Esqueci minha senha" e a troca pelo link dividem o limite: 10 por hora por IP.
+    [Fact]
+    public async Task Recuperacao_de_senha_tem_limite_por_ip()
+    {
+        using var app = new TestApp();
+        var client = app.CreateClient();
+        for (var i = 0; i < 10; i++)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Post, i % 2 == 0 ? "/api/auth/forgot-password" : "/api/auth/reset-password")
+            {
+                Content = i % 2 == 0
+                    ? JsonContent.Create(new { email = $"ana{i}@kliny.test" })
+                    : JsonContent.Create(new { token = "abc", password = "senha12345" }),
+            };
+            request.Headers.Add(TestApp.ClientIpHeader, "203.0.113.7");
+            using var accepted = await client.SendAsync(request, Ct);
+            Assert.Equal(HttpStatusCode.NoContent, accepted.StatusCode);
+        }
+
+        using var blocked = new HttpRequestMessage(HttpMethod.Post, "/api/auth/forgot-password") { Content = JsonContent.Create(new { email = "ana@kliny.test" }) };
+        blocked.Headers.Add(TestApp.ClientIpHeader, "203.0.113.7");
+        using var response = await client.SendAsync(blocked, Ct);
+        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+        Assert.Equal(TimeSpan.FromHours(1), response.Headers.RetryAfter?.Delta);
+
+        using var otherIp = new HttpRequestMessage(HttpMethod.Post, "/api/auth/forgot-password") { Content = JsonContent.Create(new { email = "ana@kliny.test" }) };
+        otherIp.Headers.Add(TestApp.ClientIpHeader, "203.0.113.8");
+        using var other = await client.SendAsync(otherIp, Ct);
+        Assert.Equal(HttpStatusCode.NoContent, other.StatusCode);
+    }
+
     [Fact]
     public async Task Ips_diferentes_tem_limites_separados()
     {

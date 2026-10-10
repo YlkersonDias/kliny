@@ -6,6 +6,7 @@ using Backend.Options;
 using Backend.RateLimiting;
 using Backend.Security;
 using Backend.Services;
+using Backend.Services.Email;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.AspNetCore.Localization;
@@ -82,6 +83,22 @@ builder.Services.AddScoped<IRecurrenceService, RecurrenceService>();
 builder.Services.AddScoped<IInstallmentService, InstallmentService>();
 builder.Services.AddScoped<ICategoryRuleService, CategoryRuleService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+
+// Recuperação de senha e envio de e-mail (seção Email; a chave só no deploy/.env). O e-mail sai em
+// segundo plano (EmailWorker), para a resposta não demorar mais quando a conta existe.
+builder.Services.AddOptions<EmailOptions>()
+    .Bind(builder.Configuration.GetSection(EmailOptions.SectionName))
+    .ValidateDataAnnotations()
+    .ValidateOnStart();
+builder.Services.AddSingleton<EmailQueue>();
+builder.Services.AddSingleton<IEmailQueue>(services => services.GetRequiredService<EmailQueue>());
+builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>(client =>
+{
+    client.BaseAddress = new Uri(ResendEmailSender.BaseAddress);
+    client.Timeout = TimeSpan.FromSeconds(15);
+});
+builder.Services.AddHostedService<EmailWorker>();
+builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 
 // Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
 builder.Services.AddProblemDetails();

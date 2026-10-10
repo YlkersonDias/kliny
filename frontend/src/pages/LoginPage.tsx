@@ -19,6 +19,8 @@ export default function LoginPage() {
   usePageTitle(t('login.title'))
   const { signIn, notice } = useAuth()
   const location = useLocation()
+  // Vindo da troca de senha pelo link do e-mail.
+  const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset === true
   const [values, setValues] = useState<Record<Field, string>>({ email: '', password: '' })
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
@@ -62,7 +64,8 @@ export default function LoginPage() {
   return (
     <AuthLayout title={t('login.title')} subtitle={t('login.subtitle')} mascot>
       <form noValidate onSubmit={handleSubmit} className="space-y-4">
-        {notice && !formError && <FormAlert variant="info">{notice}</FormAlert>}
+        {passwordReset && !formError && <FormAlert variant="info">{t('reset.done')}</FormAlert>}
+        {notice && !passwordReset && !formError && <FormAlert variant="info">{notice}</FormAlert>}
         {formError && <FormAlert>{formError}</FormAlert>}
 
         <Input
@@ -87,6 +90,11 @@ export default function LoginPage() {
         <Button type="submit" className="w-full" isLoading={mutation.isPending}>
           {mutation.isPending ? t('login.submitting') : t('login.submit')}
         </Button>
+        <p className="text-center text-sm">
+          <Link to="/esqueci-senha" className="font-semibold text-primary underline-offset-2 hover:underline">
+            {t('login.forgot')}
+          </Link>
+        </p>
       </form>
 
       <GoogleSignIn text="signin_with" showPrivacyNotice />

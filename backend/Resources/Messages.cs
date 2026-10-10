@@ -302,6 +302,25 @@ public static class Messages
         "A mesma linha do extrato aparece duas vezes.",
         "The same statement line appears twice.");
 
+    public static string ResetTokenInvalid => Text(
+        "O link é inválido ou já expirou. Peça um novo em \"Esqueci minha senha\".",
+        "The link is invalid or has expired. Ask for a new one in \"Forgot my password\".");
+
+    public static string PasswordResetSubject => Text(
+        "Crie uma senha nova no Kliny",
+        "Create a new Kliny password");
+
+    // {0}: nome da pessoa; {1}: o link; {2}: minutos de validade.
+    public static string PasswordResetBody => Text(
+        "Olá, {0}.\n\nAlguém (provavelmente você) pediu para criar uma senha nova para a sua conta no Kliny. "
+        + "Para criar, abra este link:\n\n{1}\n\nO link vale por {2} minutos e só pode ser usado uma vez. "
+        + "Depois da troca, o Kliny sai de todos os aparelhos em que a sua conta estiver aberta.\n\n"
+        + "Se você não pediu, pode ignorar este e-mail: a sua senha continua a mesma.\n\nKliny",
+        "Hello, {0}.\n\nSomeone (probably you) asked to create a new password for your Kliny account. "
+        + "To create it, open this link:\n\n{1}\n\nThe link is valid for {2} minutes and can be used only once. "
+        + "After the change, Kliny signs out of every device where your account is open.\n\n"
+        + "If you did not ask for this, you can ignore this email: your password stays the same.\n\nKliny");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

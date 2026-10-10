@@ -22,6 +22,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<Recurrence> Recurrences => Set<Recurrence>();
     public DbSet<InstallmentPlan> InstallmentPlans => Set<InstallmentPlan>();
     public DbSet<CategoryRule> CategoryRules => Set<CategoryRule>();
+    public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
 
     // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
     // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
@@ -114,6 +115,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .WithMany()
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Link de troca de senha: só o hash do token, único. Sem filtro global por usuário (como Users):
+        // quem usa o link não está logado. Apagar o usuário apaga os links.
+        modelBuilder.Entity<PasswordResetToken>(entity =>
+        {
+            entity.Property(t => t.TokenHash).HasMaxLength(64).IsFixedLength().IsRequired();
+            entity.HasIndex(t => t.TokenHash).IsUnique();
+            entity.HasOne(t => t.User)
+                .WithMany()
+                .HasForeignKey(t => t.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         // Regra de categoria (8.4): um texto por usuário (a collation iguala maiúsculas e acentos).

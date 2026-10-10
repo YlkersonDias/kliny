@@ -3,12 +3,14 @@ import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
 import DashboardPage from './pages/DashboardPage'
+import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ImportPage from './pages/ImportPage'
 import LoginPage from './pages/LoginPage'
 import NotFoundPage from './pages/NotFoundPage'
 import PrivacyPage from './pages/PrivacyPage'
 import RegisterPage from './pages/RegisterPage'
 import ReportsPage from './pages/ReportsPage'
+import ResetPasswordPage from './pages/ResetPasswordPage'
 import SettingsPage from './pages/SettingsPage'
 import TransactionsPage from './pages/TransactionsPage'
 import VaultDetailPage from './pages/VaultDetailPage'
@@ -36,8 +38,10 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Pública, com e sem login. */}
+      {/* Públicas, com e sem login. A troca de senha pelo link do e-mail também abre logado. */}
       <Route path="/privacidade" element={<PrivacyPage />} />
+      <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
+      <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>
