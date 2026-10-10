@@ -67,7 +67,8 @@
     "newCategory": "Nova categoria",
     "submitNew": "Adicionar",
     "submitEdit": "Salvar alterações",
-    "descriptionRequired": "Informe a descrição."
+    "descriptionRequired": "Informe a descrição.",
+    "suggestedByRule": "Sugerida pela regra “{{pattern}}”. Você pode trocar."
   },
   "delete": {
     "title": "Apagar movimentação",

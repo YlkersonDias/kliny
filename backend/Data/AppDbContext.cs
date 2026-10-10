@@ -21,6 +21,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Recurrence> Recurrences => Set<Recurrence>();
     public DbSet<InstallmentPlan> InstallmentPlans => Set<InstallmentPlan>();
+    public DbSet<CategoryRule> CategoryRules => Set<CategoryRule>();
 
     // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
     // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
@@ -113,6 +114,23 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .WithMany()
                 .HasForeignKey(p => p.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
+        });
+
+        // Regra de categoria (8.4): um texto por usuário (a collation iguala maiúsculas e acentos).
+        // Apagar o usuário ou a categoria apaga a regra.
+        modelBuilder.Entity<CategoryRule>(entity =>
+        {
+            entity.Property(r => r.Pattern).HasMaxLength(100).IsRequired();
+            entity.HasIndex(r => new { r.UserId, r.Pattern }).IsUnique();
+            entity.HasQueryFilter(r => r.UserId == CurrentUserId);
+            entity.HasOne(r => r.User)
+                .WithMany()
+                .HasForeignKey(r => r.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(r => r.Category)
+                .WithMany()
+                .HasForeignKey(r => r.CategoryId)
+                .OnDelete(DeleteBehavior.Cascade);
         });
 
         modelBuilder.Entity<Vault>(entity =>

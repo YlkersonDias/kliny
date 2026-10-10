@@ -67,7 +67,8 @@
     "newCategory": "New category",
     "submitNew": "Add",
     "submitEdit": "Save changes",
-    "descriptionRequired": "Enter a description."
+    "descriptionRequired": "Enter a description.",
+    "suggestedByRule": "Suggested by the “{{pattern}}” rule. You can change it."
   },
   "delete": {
     "title": "Delete transaction",

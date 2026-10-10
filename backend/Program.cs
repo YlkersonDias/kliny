@@ -80,6 +80,7 @@ builder.Services.AddScoped<IReportService, ReportService>();
 builder.Services.AddScoped<IBudgetService, BudgetService>();
 builder.Services.AddScoped<IRecurrenceService, RecurrenceService>();
 builder.Services.AddScoped<IInstallmentService, InstallmentService>();
+builder.Services.AddScoped<ICategoryRuleService, CategoryRuleService>();
 
 // Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
 builder.Services.AddProblemDetails();

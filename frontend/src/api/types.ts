@@ -69,6 +69,20 @@ export interface TransactionRequest {
 
 export type TransactionType = 'income' | 'expense' | 'vault'
 
+// Regra de categoria (8.4): "descrição contém pattern → categoria". Só sugere no formulário, ou é
+// aplicada às movimentações existentes quando a pessoa pede.
+export interface CategoryRule {
+  id: number
+  pattern: string
+  categoryId: number
+  categoryName: string
+}
+
+export interface CategoryRuleRequest {
+  pattern: string
+  categoryId: number
+}
+
 // Lançamento recorrente (8.5a): todo mês no dia de startDate (31 cai no último dia dos meses curtos).
 // amount com o sinal da movimentação; nextDate é a próxima ocorrência ainda não lançada.
 export interface Recurrence {
