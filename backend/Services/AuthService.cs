@@ -9,7 +9,8 @@ using Microsoft.EntityFrameworkCore;
 namespace Backend.Services;
 
 public class AuthService(
-    AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle, IGoogleTokenValidator googleValidator) : IAuthService
+    AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle, IGoogleTokenValidator googleValidator,
+    ISecurityNotifier notifier) : IAuthService
 {
     // Custo do BCrypt (2^11 rodadas), o mesmo no cadastro e no hash fixo abaixo.
     public const int BcryptWorkFactor = 11;
@@ -116,7 +117,11 @@ public class AuthService(
             if (existing.GoogleSubject is not null)
                 return null;
             existing.GoogleSubject = identity.Subject;
-            return await SaveGoogleUserAsync(existing, identity.Subject);
+            var (response, saved) = await SaveGoogleUserAsync(existing, identity.Subject);
+            // Só quem gravou o vínculo avisa: no empate com outro login simultâneo, um aviso só.
+            if (saved)
+                notifier.GoogleLinked(existing);
+            return response;
         }
 
         var name = string.IsNullOrWhiteSpace(identity.Name) ? email.Split('@')[0] : identity.Name.Trim();
@@ -127,23 +132,24 @@ public class AuthService(
             GoogleSubject = identity.Subject,
         };
         db.Users.Add(user);
-        return await SaveGoogleUserAsync(user, identity.Subject);
+        return (await SaveGoogleUserAsync(user, identity.Subject)).Response;
     }
 
     // Dois logins simultâneos com a mesma conta do Google podem tentar gravar juntos: quem perde
     // esbarra no índice único (do e-mail ou do Google) e entra pela conta que o outro gravou.
-    private async Task<AuthResponse?> SaveGoogleUserAsync(User user, string subject)
+    // Saved: se foi esta requisição que gravou.
+    private async Task<(AuthResponse? Response, bool Saved)> SaveGoogleUserAsync(User user, string subject)
     {
         try
         {
             await db.SaveChangesAsync();
-            return BuildResponse(user);
+            return (BuildResponse(user), true);
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
             db.ChangeTracker.Clear();
             var winner = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.GoogleSubject == subject);
-            return winner is null ? null : BuildResponse(winner);
+            return (winner is null ? null : BuildResponse(winner), false);
         }
     }
 
@@ -171,6 +177,7 @@ public class AuthService(
         {
             throw new ConflictException(Messages.GoogleAlreadyLinked);
         }
+        notifier.GoogleLinked(user);
         return UserResponse.FromUser(user);
     }
 
@@ -180,8 +187,12 @@ public class AuthService(
         // Sem senha, desvincular deixaria a conta sem nenhuma forma de entrar.
         if (user.PasswordHash is null)
             throw new BusinessRuleException(Messages.GoogleUnlinkNeedsPassword);
+        // Sem conta Google vinculada, nada muda e não há o que avisar.
+        if (user.GoogleSubject is null)
+            return UserResponse.FromUser(user);
         user.GoogleSubject = null;
         await db.SaveChangesAsync();
+        notifier.GoogleUnlinked(user);
         return UserResponse.FromUser(user);
     }
 

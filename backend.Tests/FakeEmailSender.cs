@@ -30,4 +30,18 @@ public sealed class FakeEmailSender : IEmailSender
     }
 
     public int CountFor(string to) => Sent.Count(m => m.To == to);
+
+    // Como o WaitForAsync, mas só um e-mail novo que passe no filtro: um aviso de segurança que chegue
+    // atrasado não é confundido com o e-mail do link.
+    public async Task<EmailMessage> WaitForAsync(string to, int alreadySeen, Func<EmailMessage, bool> match, CancellationToken cancellationToken)
+    {
+        for (var i = 0; i < 100; i++)
+        {
+            var found = Sent.Where(m => m.To == to).Skip(alreadySeen).LastOrDefault(match);
+            if (found is not null)
+                return found;
+            await Task.Delay(50, cancellationToken);
+        }
+        throw new TimeoutException($"Nenhum e-mail novo do tipo esperado para {to}.");
+    }
 }

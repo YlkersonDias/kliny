@@ -20,6 +20,10 @@ public class EmailOptions : IValidatableObject
     [Required]
     public string AppUrl { get; set; } = string.Empty;
 
+    // Para onde escrever quando algo der errado, citado nos avisos de segurança.
+    [Required, EmailAddress]
+    public string Support { get; set; } = string.Empty;
+
     public bool Enabled => !string.IsNullOrWhiteSpace(ApiKey);
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

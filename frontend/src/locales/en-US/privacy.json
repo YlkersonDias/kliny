@@ -17,7 +17,7 @@
   },
   "use": {
     "title": "What we use it for",
-    "body": "Only to show your finances to you. We do not sell or share your data, show ads, or use third-party analytics or tracking."
+    "body": "Only to show your finances to you and for your account's email messages: the sign-up confirmation, password changes and security notices. These messages are sent by Resend, an email delivery service, which receives only the address and the text of each one. Other than that, we do not sell or share your data, show ads, or use third-party analytics or tracking."
   },
   "browser": {
     "title": "What stays in your browser",

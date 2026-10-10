@@ -59,7 +59,7 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
     {
         var seen = Api.Emails.CountFor(email);
         Assert.Equal(HttpStatusCode.NoContent, await ForgotAsync(email));
-        var message = await Api.Emails.WaitForAsync(email, seen, Ct);
+        var message = await Api.Emails.WaitForAsync(email, seen, m => LinkPattern().IsMatch(m.Text), Ct);
         return LinkPattern().Match(message.Text).Groups[1].Value;
     }
 

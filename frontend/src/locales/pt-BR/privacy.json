@@ -17,7 +17,7 @@
   },
   "use": {
     "title": "Para que usamos",
-    "body": "Só para mostrar as suas finanças a você. Não vendemos nem compartilhamos os seus dados, não mostramos anúncios e não usamos serviços de análise ou rastreamento de terceiros."
+    "body": "Só para mostrar as suas finanças a você e para as mensagens da sua conta por e-mail: a confirmação do cadastro, a troca de senha e os avisos de segurança. Essas mensagens são enviadas pelo Resend, um serviço de envio de e-mails, que recebe só o endereço e o texto de cada uma. Fora isso, não vendemos nem compartilhamos os seus dados, não mostramos anúncios e não usamos serviços de análise ou rastreamento de terceiros."
   },
   "browser": {
     "title": "O que fica no seu navegador",

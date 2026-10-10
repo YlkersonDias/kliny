@@ -28,7 +28,7 @@ public interface IPasswordResetService
 // logado, e a busca é sempre pelo hash.
 public class PasswordResetService(
     AppDbContext db, IEmailQueue emailQueue, IOptions<EmailOptions> emailOptions, ILoginThrottle loginThrottle,
-    TimeProvider timeProvider, ILogger<PasswordResetService> logger) : IPasswordResetService
+    ISecurityNotifier notifier, TimeProvider timeProvider, ILogger<PasswordResetService> logger) : IPasswordResetService
 {
     public static readonly TimeSpan Lifetime = TimeSpan.FromMinutes(30);
 
@@ -102,7 +102,10 @@ public class PasswordResetService(
         await transaction.CommitAsync();
 
         // Quem errou a senha até travar o login pode entrar com a nova na hora.
-        var email = await db.Users.AsNoTracking().Where(u => u.Id == reset.UserId).Select(u => u.Email).FirstAsync();
-        loginThrottle.Reset(email);
+        var user = await db.Users.AsNoTracking().FirstAsync(u => u.Id == reset.UserId);
+        loginThrottle.Reset(user.Email);
+
+        // A dona da conta fica sabendo da troca, para reagir se não foi ela.
+        notifier.PasswordChanged(user);
     }
 }
