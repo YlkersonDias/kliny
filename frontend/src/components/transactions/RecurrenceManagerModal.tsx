@@ -11,10 +11,11 @@ import { FormAlert } from '../ui/FormAlert'
 import { IconButton } from '../ui/IconButton'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
+import { InstallmentSection } from './InstallmentSection'
 import { TransactionFormModal } from './TransactionFormModal'
 
-// Lista dos lançamentos recorrentes (8.5a): editar, pausar, retomar e apagar. Os já lançados
-// ficam em Movimentações e se editam lá, um a um.
+// Lançamentos recorrentes (8.5a: editar, pausar, retomar e apagar) e compras parceladas (8.5b:
+// apagar todas as parcelas ou só as futuras). Os já lançados ficam em Movimentações e se editam lá, um a um.
 export function RecurrenceManagerModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation(['transactions', 'common'])
   const recurrences = useRecurrences()
@@ -77,10 +78,14 @@ export function RecurrenceManagerModal({ onClose }: { onClose: () => void }) {
 
   return (
     <Modal title={t('recurring.manager.title')} onClose={onClose}>
-      <div className="space-y-4">
+      <div className="space-y-5">
         <p className="text-sm text-muted">{t('recurring.manager.note')}</p>
-        {toggle.isError && <FormAlert>{toggle.error.message}</FormAlert>}
-        {renderList()}
+        <section aria-labelledby="recorrentes-titulo" className="space-y-2">
+          <h3 id="recorrentes-titulo" className="text-sm font-medium text-foreground">{t('recurring.manager.recurringTitle')}</h3>
+          {toggle.isError && <FormAlert>{toggle.error.message}</FormAlert>}
+          {renderList()}
+        </section>
+        <InstallmentSection />
         <div className="flex justify-end">
           <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
         </div>

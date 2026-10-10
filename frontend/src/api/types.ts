@@ -56,6 +56,8 @@ export interface Transaction {
   vaultId: number | null
   // Gerada por um lançamento recorrente (8.5a); nula se não for, ou se a regra foi apagada.
   recurrenceId: number | null
+  // Parcela de uma compra parcelada (8.5b); nula se não for, ou se a compra foi apagada.
+  installmentPlanId: number | null
 }
 
 export interface TransactionRequest {
@@ -87,6 +89,27 @@ export interface RecurrenceCreateRequest {
   amount: number
   startDate: string
   endDate: string | null
+  categoryId: number | null
+}
+
+// Compra parcelada (8.5b): total positivo, sempre gasto. remaining: parcelas depois de hoje.
+export interface InstallmentPlan {
+  id: number
+  description: string
+  total: number
+  count: number
+  categoryId: number | null
+  categoryName: string | null
+  firstDate: string
+  lastDate: string
+  remaining: number
+}
+
+export interface InstallmentCreateRequest {
+  description: string
+  total: number
+  count: number
+  firstDate: string
   categoryId: number | null
 }
 

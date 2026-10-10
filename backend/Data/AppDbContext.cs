@@ -20,6 +20,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<Vault> Vaults => Set<Vault>();
     public DbSet<Transaction> Transactions => Set<Transaction>();
     public DbSet<Recurrence> Recurrences => Set<Recurrence>();
+    public DbSet<InstallmentPlan> InstallmentPlans => Set<InstallmentPlan>();
 
     // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
     // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
@@ -96,6 +97,24 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
+        // Compra parcelada (8.5b). Apagar o usuário apaga as compras; apagar a categoria deixa a
+        // compra sem categoria (as parcelas já ficam sem categoria pela chave delas).
+        modelBuilder.Entity<InstallmentPlan>(entity =>
+        {
+            entity.Property(p => p.Description).HasMaxLength(245).IsRequired();
+            entity.Property(p => p.Total).HasPrecision(18, 2);
+            entity.HasIndex(p => new { p.UserId, p.FirstDate });
+            entity.HasQueryFilter(p => p.UserId == CurrentUserId);
+            entity.HasOne(p => p.User)
+                .WithMany()
+                .HasForeignKey(p => p.UserId)
+                .OnDelete(DeleteBehavior.Cascade);
+            entity.HasOne(p => p.Category)
+                .WithMany()
+                .HasForeignKey(p => p.CategoryId)
+                .OnDelete(DeleteBehavior.SetNull);
+        });
+
         modelBuilder.Entity<Vault>(entity =>
         {
             entity.Property(v => v.Name).HasMaxLength(100).IsRequired();
@@ -140,6 +159,12 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             entity.HasOne(t => t.Recurrence)
                 .WithMany(r => r.Transactions)
                 .HasForeignKey(t => t.RecurrenceId)
+                .OnDelete(DeleteBehavior.SetNull);
+
+            // Apagar a compra parcelada só com as parcelas futuras mantém as outras, sem o vínculo.
+            entity.HasOne(t => t.InstallmentPlan)
+                .WithMany(p => p.Transactions)
+                .HasForeignKey(t => t.InstallmentPlanId)
                 .OnDelete(DeleteBehavior.SetNull);
         });
     }

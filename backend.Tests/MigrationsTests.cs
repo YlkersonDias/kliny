@@ -101,6 +101,10 @@ public class MigrationsTests : IAsyncLifetime
             VALUES (@user, 'Aluguel', -1500, @category, '2021-03-05', 5, '2021-04-05', 0, UTC_TIMESTAMP(6));
             INSERT INTO Transactions (UserId, Description, Amount, Date, CategoryId, VaultId, RecurrenceId)
             VALUES (@user, 'Aluguel', -1500, '2021-03-05', @category, NULL, LAST_INSERT_ID());
+            INSERT INTO InstallmentPlans (UserId, Description, Total, Count, FirstDate, CategoryId, CreatedAt)
+            VALUES (@user, 'Geladeira', 200, 2, '2021-03-10', @category, UTC_TIMESTAMP(6));
+            INSERT INTO Transactions (UserId, Description, Amount, Date, CategoryId, VaultId, InstallmentPlanId)
+            VALUES (@user, 'Geladeira (1/2)', -100, '2021-03-10', @category, NULL, LAST_INSERT_ID());
             """, connection);
         await command.ExecuteNonQueryAsync(Ct);
     }

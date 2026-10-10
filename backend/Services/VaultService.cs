@@ -165,7 +165,7 @@ public class VaultService(AppDbContext db) : IVaultService
     }
 
     private static TransactionResponse ToResponse(Transaction transaction) =>
-        new(transaction.Id, transaction.Description, transaction.Amount, transaction.Date, null, null, transaction.VaultId, null);
+        new(transaction.Id, transaction.Description, transaction.Amount, transaction.Date, null, null, transaction.VaultId, null, null);
 
     // Trava a linha do cofre até o fim da transação de banco. Duas retiradas simultâneas
     // passariam juntas pela checagem de saldo; com a trava, a segunda espera a primeira

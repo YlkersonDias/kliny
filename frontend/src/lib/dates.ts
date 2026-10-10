@@ -54,6 +54,16 @@ export function isValidIsoDate(text: string): boolean {
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month)
 }
 
+// "months" meses depois de uma data YYYY-MM-DD, no mesmo dia; num mês mais curto, o último dia dele
+// (31/01 + 1 mês = 28/02), como o RecurrenceSchedule do backend.
+export function addMonthsClamped(iso: string, months: number): string {
+  const [year, month, day] = iso.split('-').map(Number)
+  const index = year * 12 + (month - 1) + months
+  const newYear = Math.floor(index / 12)
+  const newMonth = (index % 12) + 1
+  return `${pad(newYear, 4)}-${pad(newMonth)}-${pad(Math.min(day, daysInMonth(newYear, newMonth)))}`
+}
+
 const monthYear: Record<Language, Intl.DateTimeFormat> = {
   'pt-BR': new Intl.DateTimeFormat('pt-BR', { month: 'long', year: 'numeric' }),
   'en-US': new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }),

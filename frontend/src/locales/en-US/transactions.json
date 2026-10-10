@@ -76,8 +76,7 @@
     "irreversible": "This action can't be undone."
   },
   "recurring": {
-    "manage": "Recurring",
-    "repeat": "Repeat every month",
+    "manage": "Recurring and installments",
     "repeatHint": "Adds it on day {{day}} from this date on, including past months, through the end of this month; after that, one a month.",
     "shortMonthHint": "In shorter months, on the last day.",
     "firstDate": "First date",
@@ -89,7 +88,7 @@
     "editHint": "Changes apply to the next entries; the ones already added don't change.",
     "badge": "Recurring",
     "manager": {
-      "title": "Recurring entries",
+      "title": "Recurring and installments",
       "note": "The ones already added are in Transactions and are edited there, one by one.",
       "loading": "Loading recurring entries…",
       "empty": "No recurring entries. When adding a transaction, check “Repeat every month”.",
@@ -102,13 +101,55 @@
       "pauseLabel": "Pause {{description}}",
       "resumeLabel": "Resume {{description}}",
       "edit": "Edit {{description}}",
-      "delete": "Delete {{description}}"
+      "delete": "Delete {{description}}",
+      "recurringTitle": "Recurring entries"
     },
     "delete": {
       "title": "Delete recurring entry",
       "confirm": "Delete",
       "question": "Delete <name/>?",
       "note": "Nothing else will be added. The transactions already added stay in Transactions."
+    }
+  },
+  "repeat": {
+    "label": "Repeat",
+    "none": "Doesn't repeat",
+    "monthly": "Every month",
+    "installments": "Installments"
+  },
+  "installments": {
+    "total": "Total amount",
+    "totalHint": "The amount of the whole purchase.",
+    "count": "Number of installments",
+    "countRange": "Enter {{min}} to {{max}} installments.",
+    "totalTooSmall": "The total must be at least R$0.01 per installment.",
+    "firstDate": "First installment",
+    "descriptionHint": "Each installment gets its number at the end, like “(3/10)”.",
+    "preview": "{{count}}x of {{each}}, from {{from}} to {{to}}.",
+    "previewFirst": "The first one is {{first}}, with the leftover cents.",
+    "badge": "Installment",
+    "manager": {
+      "title": "Installment purchases",
+      "loading": "Loading installment purchases…",
+      "empty": "No installment purchases. When adding an expense, choose “Installments”.",
+      "split": "in {{count}}x",
+      "remaining_zero": "{{count}} left · until {{date}}",
+      "remaining_one": "{{count}} left · until {{date}}",
+      "remaining_other": "{{count}} left · until {{date}}",
+      "done": "All already past",
+      "delete": "Delete {{description}}"
+    },
+    "delete": {
+      "title": "Delete installment purchase",
+      "confirm": "Delete",
+      "question": "Delete <name/> ({{total}})?",
+      "which": "Which installments to delete",
+      "future_zero": "Only future ones (none)",
+      "future_one": "Only the future one ({{count}})",
+      "future_other": "Only the {{count}} future ones",
+      "all": "All installments",
+      "futureNote": "For when you paid it off early: installments up to today stay in Transactions, without the link to the purchase.",
+      "allNote": "All installments leave Transactions, including past ones. This can't be undone."
     }
   }
 }

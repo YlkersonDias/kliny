@@ -21,8 +21,12 @@ public class Transaction
     // Gerada por um lançamento recorrente (8.5a). Fica nula se a regra for apagada.
     public int? RecurrenceId { get; set; }
 
+    // Parcela de uma compra parcelada (8.5b). Fica nula se a compra for apagada.
+    public int? InstallmentPlanId { get; set; }
+
     public User User { get; set; } = null!;
     public Category? Category { get; set; }
     public Vault? Vault { get; set; }
     public Recurrence? Recurrence { get; set; }
+    public InstallmentPlan? InstallmentPlan { get; set; }
 }
