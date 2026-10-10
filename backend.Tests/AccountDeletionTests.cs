@@ -14,7 +14,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // Uma categoria com orçamento, uma recorrência já gerada, uma compra parcelada, uma receita com categoria, um cofre com depósito e retirada (histórico).
+    // Uma categoria com orçamento, uma recorrência já gerada, uma compra parcelada, uma regra de categoria, uma receita com categoria, um cofre com depósito e retirada (histórico).
     private async Task<(string Token, int UserId)> SeedAsync(string email)
     {
         var token = await api.RegisterAsync(email);
@@ -31,6 +31,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         (await client.PostAsJsonAsync("/api/recurrences/sync", new { today = today.ToString("yyyy-MM-dd") }, Ct)).EnsureSuccessStatusCode();
         await IdOf(client.PostAsJsonAsync($"/api/installments?today={today:yyyy-MM-dd}",
             new { description = "Geladeira", total = 300m, count = 3, firstDate = today.ToString("yyyy-MM-dd"), categoryId = category }, Ct));
+        await IdOf(client.PostAsJsonAsync("/api/category-rules", new { pattern = "mercado", categoryId = category }, Ct));
         var vault = await IdOf(client.PostAsJsonAsync("/api/vaults", new { name = "Reserva", goal = 300m }, Ct));
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/deposit", new { amount = 200m, date = "2021-05-02" }, Ct)).EnsureSuccessStatusCode();
         (await client.PostAsJsonAsync($"/api/vaults/{vault}/withdraw", new { amount = 50m, date = "2021-05-03" }, Ct)).EnsureSuccessStatusCode();
@@ -63,6 +64,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
             UNION ALL SELECT 'budgets', COUNT(*) FROM Budgets WHERE UserId = @id
             UNION ALL SELECT 'recurrences', COUNT(*) FROM Recurrences WHERE UserId = @id
             UNION ALL SELECT 'installments', COUNT(*) FROM InstallmentPlans WHERE UserId = @id
+            UNION ALL SELECT 'rules', COUNT(*) FROM CategoryRules WHERE UserId = @id
             UNION ALL SELECT 'transactions', COUNT(*) FROM Transactions WHERE UserId = @id
             """, connection);
         command.Parameters.AddWithValue("@id", userId);

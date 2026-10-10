@@ -2,6 +2,7 @@ import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query'
 import { createCategory, deleteCategory, listCategories, updateCategory } from '../api/categories'
 import type { Category, CategoryRequest } from '../api/types'
 import { currentLanguage } from '../i18n'
+import { categoryRuleKeys } from './useCategoryRules'
 import { transactionKeys } from './useTransactions'
 
 export const categoryKeys = {
@@ -43,6 +44,8 @@ export function useUpdateCategory() {
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
       // O orçamento mostra o nome da categoria e some quando ela é apagada.
       queryClient.invalidateQueries({ queryKey: ['budgets'] }),
+      // As regras mostram o nome da categoria e são apagadas com ela (8.4).
+      queryClient.invalidateQueries({ queryKey: categoryRuleKeys.all }),
     ]),
   })
 }
@@ -56,6 +59,8 @@ export function useDeleteCategory() {
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
       // O orçamento mostra o nome da categoria e some quando ela é apagada.
       queryClient.invalidateQueries({ queryKey: ['budgets'] }),
+      // As regras mostram o nome da categoria e são apagadas com ela (8.4).
+      queryClient.invalidateQueries({ queryKey: categoryRuleKeys.all }),
       queryClient.invalidateQueries({ queryKey: ['reports'] }),
     ]),
   })

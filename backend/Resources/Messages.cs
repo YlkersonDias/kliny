@@ -258,6 +258,30 @@ public static class Messages
         "Escolha apagar todas as parcelas ou só as futuras.",
         "Choose to delete all installments or only the future ones.");
 
+    public static string CategoryRulePatternRequired => Text(
+        "Informe o texto que a descrição deve conter.",
+        "Enter the text the description must contain.");
+
+    public static string CategoryRulePatternMaxLength => Text(
+        "O texto deve ter no máximo 100 caracteres.",
+        "The text must be at most 100 characters.");
+
+    public static string CategoryRuleCategoryRequired => Text(
+        "Escolha a categoria.",
+        "Choose the category.");
+
+    public static string CategoryRuleNotFound => Text(
+        "Regra não encontrada.",
+        "Rule not found.");
+
+    public static string CategoryRulePatternInUse => Text(
+        "Já existe uma regra com esse texto.",
+        "There is already a rule with this text.");
+
+    public static string CategoryRuleLimitReached => Text(
+        "Você chegou ao limite de {0} regras.",
+        "You have reached the limit of {0} rules.");
+
     public static string GoalMustBePositive => Text(
         "A meta deve ser maior que zero.",
         "The goal must be greater than zero.");

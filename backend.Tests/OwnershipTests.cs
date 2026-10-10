@@ -278,6 +278,56 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
+    // Regras de categoria (8.4): B não vê, não edita, não apaga nem aplica a regra de A, não usa a
+    // categoria de A numa regra, e aplicar a regra de B nunca muda movimentação de A.
+    [Fact]
+    public async Task B_nao_mexe_nas_regras_de_categoria_de_A()
+    {
+        int ruleA;
+        using (var a = AsA())
+        using (var created = await a.PostAsJsonAsync("/api/category-rules", new { pattern = "Salário A", categoryId = fixture.CategoryA }, Ct))
+        {
+            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            ruleA = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
+        }
+
+        using (var b = AsB())
+        {
+            using var update = await b.PutAsJsonAsync($"/api/category-rules/{ruleA}", new { pattern = "invadida", categoryId = fixture.CategoryA }, Ct);
+            Assert.Equal(HttpStatusCode.NotFound, update.StatusCode);
+            using var delete = await b.DeleteAsync($"/api/category-rules/{ruleA}", Ct);
+            Assert.Equal(HttpStatusCode.NotFound, delete.StatusCode);
+            using var apply = await b.PostAsync($"/api/category-rules/{ruleA}/apply?includeCategorized=true", null, Ct);
+            Assert.Equal(HttpStatusCode.NotFound, apply.StatusCode);
+            using var withCategoryOfA = await b.PostAsJsonAsync("/api/category-rules", new { pattern = "qualquer", categoryId = fixture.CategoryA }, Ct);
+            Assert.Equal(HttpStatusCode.BadRequest, withCategoryOfA.StatusCode);
+            Assert.Empty((await Json(b.GetAsync("/api/category-rules", Ct))).EnumerateArray());
+
+            // Regra de B com um texto que também está na movimentação de A: só as de B mudam.
+            int categoryB;
+            using (var created = await b.PostAsJsonAsync("/api/categories", new { name = "Renda B" }, Ct))
+                categoryB = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
+            int ruleB;
+            using (var created = await b.PostAsJsonAsync("/api/category-rules", new { pattern = "Salário", categoryId = categoryB }, Ct))
+                ruleB = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
+            using var applyB = await b.PostAsync($"/api/category-rules/{ruleB}/apply?includeCategorized=true", null, Ct);
+            Assert.Equal(1, (await applyB.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("count").GetInt32());
+            using (var cleanup = await b.DeleteAsync($"/api/categories/{categoryB}", Ct))
+                Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+
+        using (var a = AsA())
+        {
+            var rule = Assert.Single((await Json(a.GetAsync("/api/category-rules", Ct))).EnumerateArray());
+            Assert.Equal("Salário A", rule.GetProperty("pattern").GetString());
+            var transaction = await Json(a.GetAsync($"/api/transactions/{fixture.TransactionA}", Ct));
+            Assert.Equal(fixture.CategoryA, transaction.GetProperty("categoryId").GetInt32());
+            using var cleanup = await a.DeleteAsync($"/api/category-rules/{ruleA}", Ct);
+            Assert.Equal(HttpStatusCode.NoContent, cleanup.StatusCode);
+        }
+        await AssertDataOfAUnchanged();
+    }
+
     // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()

@@ -4,9 +4,11 @@ import { useTranslation } from 'react-i18next'
 import { ApiError } from '../../api/client'
 import type { Category, Recurrence, Transaction } from '../../api/types'
 import { useCategories } from '../../hooks/useCategories'
+import { useCategoryRules } from '../../hooks/useCategoryRules'
 import { useCreateInstallment } from '../../hooks/useInstallments'
 import { useCreateRecurrence, useUpdateRecurrence } from '../../hooks/useRecurrences'
 import { useCreateTransaction, useUpdateTransaction } from '../../hooks/useTransactions'
+import { matchRule } from '../../lib/categoryRules'
 import { formatDate, isValidIsoDate, today } from '../../lib/dates'
 import { firstInvalidField, splitApiError, type FieldErrors } from '../../lib/forms'
 import {
@@ -138,6 +140,8 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreatingCategory, setIsCreatingCategory] = useState(false)
+  // Escolhida pela pessoa: daí em diante, as regras de categoria (8.4) não mexem mais no campo.
+  const [categoryChosen, setCategoryChosen] = useState(false)
   const descriptionRef = useRef<HTMLInputElement>(null)
   const amountRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
@@ -146,6 +150,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const categoryRef = useRef<HTMLSelectElement>(null)
 
   const categories = useCategories()
+  const rules = useCategoryRules()
   const create = useCreateTransaction()
   const update = useUpdateTransaction()
   const createRecurrence = useCreateRecurrence()
@@ -166,8 +171,12 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const saved = transaction ?? recurrence
   const categoryOptions: Category[] = categories.data
     ?? (saved?.categoryId != null ? [{ id: saved.categoryId, name: saved.categoryName ?? '' }] : [])
+  // Regra de categoria (8.4): só em nova movimentação e enquanto a pessoa não escolheu a categoria.
+  // A sugestão é derivada da descrição (não um efeito): some se a descrição deixar de bater.
+  const suggestion = isNew && !categoryChosen ? matchRule(values.description, rules.data ?? []) : null
+  const chosenCategoryId = isNew && !categoryChosen ? (suggestion ? String(suggestion.categoryId) : '') : values.categoryId
   // Categoria apagada enquanto o formulário estava aberto vira "Sem categoria".
-  const categoryValue = categoryOptions.some((category) => String(category.id) === values.categoryId) ? values.categoryId : ''
+  const categoryValue = categoryOptions.some((category) => String(category.id) === chosenCategoryId) ? chosenCategoryId : ''
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
     setErrors(fieldErrors)
@@ -181,8 +190,13 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
     if (field !== 'kind' && field !== 'repeat') setErrors((current) => ({ ...current, [field]: undefined }))
   }
 
+  function chooseCategory(categoryId: string) {
+    setCategoryChosen(true)
+    change('categoryId', categoryId)
+  }
+
   function handleCategoryCreated(category: Category) {
-    change('categoryId', String(category.id))
+    chooseCategory(String(category.id))
     setIsCreatingCategory(false)
   }
 
@@ -394,7 +408,8 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
             ref={categoryRef}
             label={t('form.category')}
             value={categoryValue}
-            onChange={(event) => change('categoryId', event.target.value)}
+            hint={suggestion && categoryValue !== '' ? t('form.suggestedByRule', { pattern: suggestion.pattern }) : undefined}
+            onChange={(event) => chooseCategory(event.target.value)}
             error={errors.categoryId ?? (categories.isError ? t('form.categoriesError') : undefined)}
           >
             <option value="">{t('common:uncategorized')}</option>

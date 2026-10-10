@@ -10,6 +10,7 @@ import { IconButton } from '../ui/IconButton'
 import { Input } from '../ui/Input'
 import { Modal } from '../ui/Modal'
 import { Spinner } from '../ui/Spinner'
+import { CategoryRulesSection } from './CategoryRulesSection'
 
 interface CategoryManagerModalProps {
   onClose: () => void
@@ -63,6 +64,8 @@ export function CategoryManagerModal({ onClose, onDeleted }: CategoryManagerModa
             </ul>
           )}
         </section>
+
+        <CategoryRulesSection />
 
         <div className="flex justify-end">
           <Button variant="secondary" onClick={onClose}>{t('common:actions.close')}</Button>
