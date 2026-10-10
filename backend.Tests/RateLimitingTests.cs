@@ -24,7 +24,7 @@ public class RateLimitingTests
 
     private static HttpRequestMessage RegisterRequest(int n) => new(HttpMethod.Post, "/api/auth/register")
     {
-        Content = JsonContent.Create(new { name = "Ana", email = $"ana{n}@kliny.test", password = "senha12345" }),
+        Content = JsonContent.Create(new { name = "Ana", email = $"ana{n}@kliny.test" }),
     };
 
     private static async Task LoginTimes(HttpClient client, int times, string? ip = null)
@@ -78,7 +78,7 @@ public class RateLimitingTests
         for (var i = 0; i < 5; i++)
         {
             using var created = await client.SendAsync(RegisterRequest(i), Ct);
-            Assert.Equal(HttpStatusCode.Created, created.StatusCode);
+            Assert.Equal(HttpStatusCode.Accepted, created.StatusCode);
         }
 
         using var response = await client.SendAsync(RegisterRequest(5), Ct);
@@ -154,7 +154,7 @@ public class RateLimitingTests
 
         using var response = await client.SendAsync(RegisterRequest(0), Ct);
 
-        Assert.Equal(HttpStatusCode.Created, response.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, response.StatusCode);
     }
 
     [Fact]

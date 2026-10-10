@@ -3,7 +3,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import * as authApi from '../api/auth'
 import i18n from '../i18n'
 import { setUnauthorizedHandler } from '../api/client'
-import type { AuthResponse, LoginRequest, RegisterRequest, User } from '../api/types'
+import type { AuthResponse, LoginRequest, User } from '../api/types'
 import { disableGoogleAutoSelect } from '../lib/googleIdentity'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
@@ -73,8 +73,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     startSession(await authApi.login(request))
   }, [startSession])
 
-  const signUp = useCallback(async (request: RegisterRequest) => {
-    startSession(await authApi.register(request))
+  const completeSignUp = useCallback(async (token: string, password: string) => {
+    startSession(await authApi.completeRegistration(token, password))
   }, [startSession])
 
   const signInWithGoogle = useCallback(async (credential: string) => {
@@ -109,13 +109,13 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     isValidating,
     notice,
     signIn,
-    signUp,
+    completeSignUp,
     signInWithGoogle,
     updateUser,
     signOut,
     signOutEverywhere,
     deleteAccount,
-  }), [session, isValidating, notice, signIn, signUp, signInWithGoogle, updateUser, signOut, signOutEverywhere, deleteAccount])
+  }), [session, isValidating, notice, signIn, completeSignUp, signInWithGoogle, updateUser, signOut, signOutEverywhere, deleteAccount])
 
   return <AuthContext value={value}>{children}</AuthContext>
 }

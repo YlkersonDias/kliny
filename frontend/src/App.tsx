@@ -2,6 +2,7 @@ import { Route, Routes } from 'react-router'
 import { ProtectedRoute, PublicOnlyRoute } from './auth/ProtectedRoute'
 import { AppLayout } from './components/layout/AppLayout'
 import { useFocusOnRouteChange } from './hooks/useFocusOnRouteChange'
+import CreateAccountPage from './pages/CreateAccountPage'
 import DashboardPage from './pages/DashboardPage'
 import ForgotPasswordPage from './pages/ForgotPasswordPage'
 import ImportPage from './pages/ImportPage'
@@ -42,6 +43,7 @@ export default function App() {
       <Route path="/privacidade" element={<PrivacyPage />} />
       <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
       <Route path="/redefinir-senha" element={<ResetPasswordPage />} />
+      <Route path="/criar-conta" element={<CreateAccountPage />} />
 
       <Route path="*" element={<NotFoundPage />} />
     </Routes>

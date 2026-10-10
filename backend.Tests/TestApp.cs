@@ -30,6 +30,7 @@ public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null
         {
             services.AddSingleton<IAuthService, FakeAuthService>();
             services.AddSingleton<IPasswordResetService, FakePasswordResetService>();
+            services.AddSingleton<IRegistrationService, FakeRegistrationService>();
             services.AddSingleton<IStartupFilter, ClientIpStartupFilter>();
         });
     }
@@ -54,10 +55,6 @@ public sealed class FakeAuthService : IAuthService
 {
     public const string LockedEmail = "bloqueado@kliny.test";
     public const string FailingEmail = "falha@kliny.test";
-
-    public Task<AuthResponse> RegisterAsync(RegisterRequest request) =>
-        Task.FromResult(new AuthResponse("token", DateTime.UtcNow.AddHours(1),
-            new UserResponse(1, request.Name, request.Email, DateTime.UtcNow)));
 
     public Task<AuthResponse?> LoginAsync(LoginRequest request) => request.Email switch
     {
@@ -87,4 +84,14 @@ public sealed class FakePasswordResetService : IPasswordResetService
     public Task RequestAsync(string email) => Task.CompletedTask;
 
     public Task ResetAsync(string token, string newPassword) => Task.CompletedTask;
+}
+
+// Cadastro sem banco nem e-mail: só para os testes de limite, rota e validação.
+public sealed class FakeRegistrationService : IRegistrationService
+{
+    public Task RequestAsync(string name, string email) => Task.CompletedTask;
+
+    public Task<AuthResponse> CompleteAsync(string token, string password) =>
+        Task.FromResult(new AuthResponse("token", DateTime.UtcNow.AddHours(1),
+            new UserResponse(1, "Teste", "teste@kliny.test", DateTime.UtcNow)));
 }

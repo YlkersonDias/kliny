@@ -21,7 +21,7 @@ namespace Backend.Tests;
 // O servidor vem de KLINY_TEST_MYSQL (sem Database, com um usuário que cria bancos e usuários),
 // definida só no CI, onde o MySQL é um container de serviço. Sem ela os testes são pulados,
 // salvo no CI, onde a falta é erro. Nunca usa o banco kliny nem os usuários kliny_app e kliny_migrator.
-public sealed class MySqlApi : IAsyncLifetime
+public sealed partial class MySqlApi : IAsyncLifetime
 {
     public const string ServerVariable = "KLINY_TEST_MYSQL";
 
@@ -127,16 +127,24 @@ public sealed class MySqlApi : IAsyncLifetime
         return client;
     }
 
-    // Cadastra e devolve o token. O cadastro tem limite de 5 por hora por IP: usar com moderação.
-    public async Task<string> RegisterAsync(string email)
+    // Cadastra pelo fluxo de verdade (pedido, e-mail com o link, senha pelo link) e devolve o token.
+    // O limite de cadastros por IP fica alto nos testes (ver App, abaixo).
+    public async Task<string> RegisterAsync(string email, string password = "senha12345")
     {
         using var client = Client();
-        using var response = await client.PostAsJsonAsync("/api/auth/register",
-            new { name = "Teste", email, password = "senha12345" }, Ct);
+        var seen = Emails.CountFor(email);
+        using (var requested = await client.PostAsJsonAsync("/api/auth/register", new { name = "Teste", email }, Ct))
+            requested.EnsureSuccessStatusCode();
+        var message = await Emails.WaitForAsync(email, seen, Ct);
+        var token = RegistrationLink().Match(message.Text).Groups[1].Value;
+        using var response = await client.PostAsJsonAsync("/api/auth/register/complete", new { token, password }, Ct);
         response.EnsureSuccessStatusCode();
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(Ct);
         return body.GetProperty("token").GetString()!;
     }
+
+    [System.Text.RegularExpressions.GeneratedRegex("/criar-conta#([A-Za-z0-9_-]{43})")]
+    public static partial System.Text.RegularExpressions.Regex RegistrationLink();
 
     private sealed class IdempotencyKeyHandler : DelegatingHandler
     {
@@ -163,6 +171,8 @@ public sealed class MySqlApi : IAsyncLifetime
             builder.UseSetting("RateLimits:LoginPerIp:PermitLimit", "1000");
             // Mesmo motivo: a recuperação de senha tem o limite conferido no PasswordResetTests.
             builder.UseSetting("RateLimits:PasswordResetPerIp:PermitLimit", "1000");
+            // E o pedido de cadastro: cada conta de teste agora passa por ele (5 por hora em produção).
+            builder.UseSetting("RateLimits:RegisterPerIp:PermitLimit", "1000");
             builder.UseSetting("Email:AppUrl", "https://kliny.test");
 
             builder.ConfigureServices(services =>

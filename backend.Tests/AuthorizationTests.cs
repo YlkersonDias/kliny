@@ -15,6 +15,7 @@ public partial class AuthorizationTests
     private static readonly HashSet<string> PublicEndpoints =
     [
         "POST api/auth/register",
+        "POST api/auth/register/complete",
         "POST api/auth/login",
         "POST api/auth/google",
         "POST api/auth/forgot-password",
@@ -105,10 +106,10 @@ public partial class AuthorizationTests
         using var app = new TestApp();
         var client = app.CreateClient();
 
-        using var register = await client.PostAsync("/api/auth/register", Json("""{"name":"Ana","email":"ana@kliny.test","password":"senha12345"}"""), Ct);
+        using var register = await client.PostAsync("/api/auth/register", Json("""{"name":"Ana","email":"ana@kliny.test"}"""), Ct);
         using var login = await client.PostAsync("/api/auth/login", Json("""{"email":"ana@kliny.test","password":"senha-errada"}"""), Ct);
 
-        Assert.Equal(HttpStatusCode.Created, register.StatusCode);
+        Assert.Equal(HttpStatusCode.Accepted, register.StatusCode);
         // 401 do próprio login (senha errada, pelo IAuthService falso), não da autorização.
         Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
         Assert.Equal("application/problem+json", login.Content.Headers.ContentType?.MediaType);

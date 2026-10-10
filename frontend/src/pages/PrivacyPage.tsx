@@ -41,6 +41,7 @@ export default function PrivacyPage() {
           <h2 id="privacidade-dados" className="text-lg font-semibold text-foreground">{t('data.title')}</h2>
           <ul className="mt-2 list-disc space-y-1 pl-5 text-muted">
             <li>{t('data.account')}</li>
+            <li>{t('data.pending')}</li>
             <li>{t('data.finances')}</li>
             {isGoogleEnabled && <li>{t('data.google')}</li>}
             <li>{t('data.import')}</li>

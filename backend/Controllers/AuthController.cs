@@ -14,19 +14,35 @@ namespace Backend.Controllers;
 [ApiController]
 [Route("api/auth")]
 public class AuthController(
-    IAuthService authService, IPasswordResetService passwordResetService, IOptions<GoogleOptions> googleOptions) : ControllerBase
+    IAuthService authService, IPasswordResetService passwordResetService, IRegistrationService registrationService,
+    IOptions<GoogleOptions> googleOptions) : ControllerBase
 {
     // Público: as únicas rotas sem login (o Program.cs exige login em todo o resto).
+    // Cadastro: responde sempre 202, tenha o e-mail conta ou não (regra 4). A conta só é criada
+    // pelo link do e-mail (register/complete), com a senha escolhida por quem o recebeu.
     [AllowAnonymous]
     [HttpPost("register")]
     [EnableRateLimiting(RateLimitingSetup.RegisterPolicy)]
-    [ProducesResponseType<AuthResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status202Accepted)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
-    [ProducesResponseType(StatusCodes.Status409Conflict)]
     [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
     public async Task<IActionResult> Register(RegisterRequest request)
     {
-        var response = await authService.RegisterAsync(request);
+        await registrationService.RequestAsync(request.Name, request.Email);
+        return Accepted();
+    }
+
+    // Fim do cadastro pelo link: cria a conta e já entra nela. Mesmo limite por IP da recuperação de
+    // senha (quem tenta adivinhar tokens).
+    [AllowAnonymous]
+    [HttpPost("register/complete")]
+    [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
+    [ProducesResponseType<AuthResponse>(StatusCodes.Status201Created)]
+    [ProducesResponseType(StatusCodes.Status400BadRequest)]
+    [ProducesResponseType(StatusCodes.Status429TooManyRequests)]
+    public async Task<IActionResult> CompleteRegistration(CompleteRegistrationRequest request)
+    {
+        var response = await registrationService.CompleteAsync(request.Token, request.Password);
         return CreatedAtAction(nameof(Me), response);
     }
 

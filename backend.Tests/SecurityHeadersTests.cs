@@ -58,9 +58,9 @@ public partial class SecurityHeadersTests
         using var app = new TestApp();
         var client = app.CreateClient();
 
-        using var created = await client.PostAsJsonAsync("/api/auth/register",
-            new { name = "Ana", email = "ana@kliny.test", password = "senha12345" }, Ct);
-        using var invalid = await client.PostAsJsonAsync("/api/auth/register", new { name = "", email = "x", password = "1" }, Ct);
+        using var created = await client.PostAsJsonAsync("/api/auth/register/complete",
+            new { token = "abc", password = "senha12345" }, Ct);
+        using var invalid = await client.PostAsJsonAsync("/api/auth/register", new { name = "", email = "x" }, Ct);
         using var notFound = await client.GetAsync("/nao-existe", Ct);
         using var failure = await client.PostAsJsonAsync("/api/auth/login",
             new { email = FakeAuthService.FailingEmail, password = "senha12345" }, Ct);

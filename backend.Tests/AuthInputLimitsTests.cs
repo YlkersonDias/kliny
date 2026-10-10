@@ -51,8 +51,8 @@ public class AuthInputLimitsTests
     [Fact]
     public async Task Cadastro_recusa_senha_acima_de_72_bytes()
     {
-        var (status, messages) = await PostAsync("/api/auth/register",
-            new { name = "Ana", email = "ana@kliny.test", password = AccentedPassword });
+        var (status, messages) = await PostAsync("/api/auth/register/complete",
+            new { token = "abc", password = AccentedPassword });
 
         Assert.Equal(HttpStatusCode.BadRequest, status);
         Assert.Contains(TooLong, messages);
@@ -62,8 +62,8 @@ public class AuthInputLimitsTests
     public async Task Cadastro_aceita_senha_de_exatos_72_bytes()
     {
         // 36 "é" = 72 bytes.
-        var (status, _) = await PostAsync("/api/auth/register",
-            new { name = "Ana", email = "ana@kliny.test", password = new string('é', 36) });
+        var (status, _) = await PostAsync("/api/auth/register/complete",
+            new { token = "abc", password = new string('é', 36) });
 
         Assert.Equal(HttpStatusCode.Created, status);
     }

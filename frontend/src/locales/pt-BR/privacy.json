@@ -9,6 +9,7 @@
   "data": {
     "title": "O que guardamos",
     "account": "Da sua conta: nome, e-mail, a data de criação e a senha, guardada só como hash (uma forma que não pode ser revertida para a senha original).",
+    "pending": "Ao pedir o cadastro: o nome e o e-mail, só até a confirmação pelo link do e-mail (no máximo 2 dias); sem a confirmação, nenhuma conta é criada e o pedido é apagado.",
     "finances": "Do que você lança: receitas, gastos, categorias, cofres, metas, depósitos e retiradas, com valor, data e descrição.",
     "google": "Se você entrar com o Google: o identificador da sua conta Google, para reconhecer você nas próximas vezes. Do Google recebemos só o nome e o e-mail; não temos acesso a mais nada da sua conta Google, e a conta criada pelo Google não tem senha.",
     "import": "Se você importar um extrato do banco: o arquivo é lido só no seu aparelho e não é enviado. Guardamos só as movimentações que você confirmar e, em cada uma, uma marca (um hash) feita do código do banco, dos 4 últimos dígitos da conta e do identificador da movimentação no extrato, para a mesma não ser importada de novo. O número completo da conta não é guardado.",

@@ -20,34 +20,6 @@ public class AuthService(
     internal static readonly string TimingHash =
         BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"), BcryptWorkFactor);
 
-    public async Task<AuthResponse> RegisterAsync(RegisterRequest request)
-    {
-        var email = NormalizeEmail(request.Email);
-
-        if (await db.Users.AnyAsync(u => u.Email == email))
-            throw new ConflictException(Messages.EmailInUse);
-
-        var user = new User
-        {
-            Name = request.Name.Trim(),
-            Email = email,
-            PasswordHash = BCrypt.Net.BCrypt.HashPassword(request.Password, BcryptWorkFactor),
-        };
-
-        db.Users.Add(user);
-
-        try
-        {
-            await db.SaveChangesAsync();
-        }
-        catch (DbUpdateException ex) when (ex.IsUniqueViolation())
-        {
-            throw new ConflictException(Messages.EmailInUse);
-        }
-
-        return BuildResponse(user);
-    }
-
     public async Task<AuthResponse?> LoginAsync(LoginRequest request)
     {
         var email = NormalizeEmail(request.Email);

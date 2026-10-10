@@ -14,10 +14,6 @@ public static class Messages
 
     // Mensagens com {0} e {1}: usar com string.Format.
 
-    public static string EmailInUse => Text(
-        "Este e-mail já está cadastrado.",
-        "This email is already registered.");
-
     public static string InvalidCredentials => Text(
         "E-mail ou senha inválidos.",
         "Invalid email or password.");
@@ -301,6 +297,40 @@ public static class Messages
     public static string ImportDuplicateLine => Text(
         "A mesma linha do extrato aparece duas vezes.",
         "The same statement line appears twice.");
+
+    public static string RegistrationTokenInvalid => Text(
+        "O link é inválido ou já expirou. Faça o cadastro de novo para receber outro.",
+        "The link is invalid or has expired. Sign up again to get a new one.");
+
+    public static string RegistrationAlreadyDone => Text(
+        "Já existe uma conta com este e-mail. Entre ou use \"Esqueci minha senha\".",
+        "There is already an account with this email. Sign in or use \"Forgot my password\".");
+
+    public static string RegistrationSubject => Text(
+        "Termine o seu cadastro no Kliny",
+        "Finish signing up for Kliny");
+
+    // {0}: nome; {1}: o link; {2}: horas de validade.
+    public static string RegistrationBody => Text(
+        "Olá, {0}.\n\nPara terminar o seu cadastro no Kliny, abra este link e crie a sua senha:\n\n{1}\n\n"
+        + "O link vale por {2} horas e só pode ser usado uma vez.\n\n"
+        + "Se você não pediu para criar uma conta, pode ignorar este e-mail: nenhuma conta é criada sem ele.\n\nKliny",
+        "Hello, {0}.\n\nTo finish signing up for Kliny, open this link and create your password:\n\n{1}\n\n"
+        + "The link is valid for {2} hours and can be used only once.\n\n"
+        + "If you did not ask to create an account, you can ignore this email: no account is created without it.\n\nKliny");
+
+    public static string AccountExistsSubject => Text(
+        "Você já tem uma conta no Kliny",
+        "You already have a Kliny account");
+
+    // {0}: nome; {1}: link para entrar; {2}: link de "Esqueci minha senha".
+    public static string AccountExistsBody => Text(
+        "Olá, {0}.\n\nAlguém (provavelmente você) tentou criar uma conta no Kliny com este e-mail, mas você já tem uma. "
+        + "Nada mudou nela.\n\nPara entrar: {1}\nSe esqueceu a senha: {2}\n\n"
+        + "Se não foi você, pode ignorar este e-mail.\n\nKliny",
+        "Hello, {0}.\n\nSomeone (probably you) tried to create a Kliny account with this email, but you already have one. "
+        + "Nothing changed in it.\n\nTo sign in: {1}\nIf you forgot your password: {2}\n\n"
+        + "If it was not you, you can ignore this email.\n\nKliny");
 
     public static string ResetTokenInvalid => Text(
         "O link é inválido ou já expirou. Peça um novo em \"Esqueci minha senha\".",

@@ -67,8 +67,10 @@ export async function apiRequest<T>(
     throw toApiError(response.status, problem)
   }
 
-  if (response.status === 204) return undefined as T
-  return (await response.json()) as T
+  // 204, ou 202 do pedido de cadastro: sucesso sem corpo.
+  const text = await response.text()
+  if (!text) return undefined as T
+  return JSON.parse(text) as T
 }
 
 async function readProblem(response: Response): Promise<ProblemDetails | null> {
