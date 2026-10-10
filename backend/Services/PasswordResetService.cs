@@ -1,10 +1,9 @@
-using System.Security.Cryptography;
-using System.Text;
 using Backend.Data;
 using Backend.Exceptions;
 using Backend.Models;
 using Backend.Options;
 using Backend.Resources;
+using Backend.Security;
 using Backend.Services.Email;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
@@ -37,8 +36,7 @@ public class PasswordResetService(
     // caixa de e-mail de outra pessoa trocando de IP.
     public const int MaxPerHour = 3;
 
-    public static string Hash(string token) =>
-        Convert.ToHexStringLower(SHA256.HashData(Encoding.UTF8.GetBytes(token)));
+    public static string Hash(string token) => OneTimeToken.Hash(token);
 
     public async Task RequestAsync(string email)
     {
@@ -58,11 +56,11 @@ public class PasswordResetService(
         await db.PasswordResetTokens.Where(t => t.UserId == user.Id && t.ExpiresAt > now)
             .ExecuteUpdateAsync(s => s.SetProperty(t => t.ExpiresAt, now));
 
-        var token = Base64UrlEncode(RandomNumberGenerator.GetBytes(32));
+        var (token, hash) = OneTimeToken.Create();
         db.PasswordResetTokens.Add(new PasswordResetToken
         {
             UserId = user.Id,
-            TokenHash = Hash(token),
+            TokenHash = hash,
             CreatedAt = now,
             ExpiresAt = now + Lifetime,
         });
@@ -107,7 +105,4 @@ public class PasswordResetService(
         var email = await db.Users.AsNoTracking().Where(u => u.Id == reset.UserId).Select(u => u.Email).FirstAsync();
         loginThrottle.Reset(email);
     }
-
-    private static string Base64UrlEncode(byte[] bytes) =>
-        Convert.ToBase64String(bytes).TrimEnd('=').Replace('+', '-').Replace('/', '_');
 }

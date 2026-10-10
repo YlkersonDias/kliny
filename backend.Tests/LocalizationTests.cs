@@ -118,16 +118,6 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
             "E-mail ou senha inválidos.", "Invalid email or password.");
 
     [Theory]
-    [InlineData(null, false)]
-    [InlineData("en-US", true)]
-    public async Task Email_repetido(string? language, bool english) =>
-        // Só dois idiomas: cada tentativa conta no limite de 5 cadastros por hora.
-        AssertMessage(await Send(HttpMethod.Post, "/api/auth/register", language,
-                new { name = "Outra", email = LocalizationFixture.Email, password = "senha12345" }, authenticated: false),
-            HttpStatusCode.Conflict, english,
-            "Este e-mail já está cadastrado.", "This email is already registered.");
-
-    [Theory]
     [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]
     public async Task Categoria_nao_encontrada(string? language, bool english) =>
         AssertMessage(await Send(HttpMethod.Get, "/api/categories/999999", language),
@@ -260,12 +250,11 @@ public class RegisterLocalizationTests
         using var app = new TestApp();
         using var client = app.CreateClient();
         using var response = await client.SendAsync(Localization.Request(HttpMethod.Post, "/api/auth/register", language,
-            new { name = "", email = "sem-arroba", password = "123" }), Ct);
+            new { name = "", email = "sem-arroba" }), Ct);
 
         Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         var messages = await Localization.MessagesOf(response);
         Assert.Contains(english ? "Enter your name." : "Informe o nome.", messages);
         Assert.Contains(english ? "Invalid email." : "E-mail inválido.", messages);
-        Assert.Contains(english ? "The password must be between 8 and 72 characters." : "A senha deve ter entre 8 e 72 caracteres.", messages);
     }
 }

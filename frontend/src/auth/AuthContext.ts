@@ -1,6 +1,6 @@
 import { createContext } from 'react'
 import type { DeleteAccountConfirmation } from '../api/auth'
-import type { LoginRequest, RegisterRequest, User } from '../api/types'
+import type { LoginRequest, User } from '../api/types'
 
 export interface AuthContextValue {
   user: User | null
@@ -9,7 +9,8 @@ export interface AuthContextValue {
   // Aviso para a tela de login, como "Sua sessão expirou".
   notice: string | null
   signIn: (request: LoginRequest) => Promise<void>
-  signUp: (request: RegisterRequest) => Promise<void>
+  // Fim do cadastro pelo link do e-mail: cria a conta e entra nela.
+  completeSignUp: (token: string, password: string) => Promise<void>
   // Entra (ou cria a conta) com o comprovante do botão do Google.
   signInWithGoogle: (credential: string) => Promise<void>
   // Atualiza os dados do usuário na sessão (depois de vincular ou desvincular o Google).

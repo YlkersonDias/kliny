@@ -23,6 +23,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<InstallmentPlan> InstallmentPlans => Set<InstallmentPlan>();
     public DbSet<CategoryRule> CategoryRules => Set<CategoryRule>();
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
+    public DbSet<PendingRegistration> PendingRegistrations => Set<PendingRegistration>();
 
     // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
     // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
@@ -127,6 +128,18 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .WithMany()
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
+        });
+
+        // Cadastro esperando a confirmação do e-mail: só o hash do token, único. Sem filtro global por
+        // usuário (ainda não existe usuário) e sem chave para Users. Índice no e-mail para encerrar os
+        // pedidos anteriores do mesmo endereço.
+        modelBuilder.Entity<PendingRegistration>(entity =>
+        {
+            entity.Property(p => p.Email).HasMaxLength(255).IsRequired();
+            entity.Property(p => p.Name).HasMaxLength(100).IsRequired();
+            entity.Property(p => p.TokenHash).HasMaxLength(64).IsFixedLength().IsRequired();
+            entity.HasIndex(p => p.TokenHash).IsUnique();
+            entity.HasIndex(p => p.Email);
         });
 
         // Regra de categoria (8.4): um texto por usuário (a collation iguala maiúsculas e acentos).

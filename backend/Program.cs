@@ -99,6 +99,8 @@ builder.Services.AddHttpClient<IEmailSender, ResendEmailSender>(client =>
 });
 builder.Services.AddHostedService<EmailWorker>();
 builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
+builder.Services.AddSingleton<RegistrationEmailThrottle>();
+builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
 // Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
 builder.Services.AddProblemDetails();

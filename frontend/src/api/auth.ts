@@ -1,8 +1,14 @@
 import { apiRequest } from './client'
 import type { AuthResponse, LoginRequest, RegisterRequest, User } from './types'
 
-export function register(request: RegisterRequest): Promise<AuthResponse> {
+// Pede o cadastro: a API responde igual com ou sem conta, e o link vai por e-mail.
+export function register(request: RegisterRequest): Promise<void> {
   return apiRequest('/auth/register', { method: 'POST', body: request, auth: false })
+}
+
+// Fim do cadastro pelo link: cria a conta com a senha escolhida e já entra.
+export function completeRegistration(token: string, password: string): Promise<AuthResponse> {
+  return apiRequest('/auth/register/complete', { method: 'POST', body: { token, password }, auth: false })
 }
 
 export function login(request: LoginRequest): Promise<AuthResponse> {

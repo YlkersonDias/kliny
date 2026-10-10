@@ -22,10 +22,10 @@ export interface LoginRequest {
   password: string
 }
 
+// Só nome e e-mail: a senha é escolhida no link do e-mail (completeRegistration).
 export interface RegisterRequest {
   name: string
   email: string
-  password: string
 }
 
 export interface PagedResponse<T> {

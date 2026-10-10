@@ -1,23 +1,22 @@
 @baseUrl = http://localhost:5228
-@token = cole_aqui_o_token_devolvido_no_cadastro_ou_login
+@token = cole_aqui_o_token_devolvido_no_fim_do_cadastro_ou_no_login
 
-### Cadastro (201)
+### Pedido de cadastro (202, sempre): manda por e-mail o link para criar a senha, ou o aviso de conta
+### existente. Sem Email:ApiKey, o e-mail não sai: o link só aparece no banco (PendingRegistrations, como hash).
 POST {{baseUrl}}/api/auth/register
 Content-Type: application/json
 
 {
   "name": "Usuário Teste",
-  "email": "teste@kliny.local",
-  "password": "senha12345"
+  "email": "teste@kliny.local"
 }
 
-### Cadastro com e-mail repetido (409)
-POST {{baseUrl}}/api/auth/register
+### Fim do cadastro pelo link (201, com o token): troque o token pelo do link do e-mail
+POST {{baseUrl}}/api/auth/register/complete
 Content-Type: application/json
 
 {
-  "name": "Outro Usuário",
-  "email": "  TESTE@kliny.local ",
+  "token": "cole_aqui_o_token_do_link",
   "password": "senha12345"
 }
 
@@ -27,8 +26,7 @@ Content-Type: application/json
 
 {
   "name": "",
-  "email": "nao-e-email",
-  "password": "curta"
+  "email": "nao-e-email"
 }
 
 ### Login correto (200)

@@ -9,6 +9,7 @@
   "data": {
     "title": "What we keep",
     "account": "For your account: name, email, the date it was created and the password, kept only as a hash (a form that cannot be turned back into the original password).",
+    "pending": "When you ask to sign up: your name and email, only until you confirm through the link in the email (at most 2 days); without the confirmation, no account is created and the request is deleted.",
     "finances": "What you record: income, expenses, categories, vaults, goals, deposits and withdrawals, with amount, date and description.",
     "google": "If you sign in with Google: your Google account identifier, to recognize you next time. From Google we receive only your name and email; we have no access to anything else in your Google account, and an account created through Google has no password.",
     "import": "If you import a bank statement: the file is read only on your device and is not uploaded. We keep only the transactions you confirm and, in each one, a mark (a hash) made from the bank code, the last 4 digits of the account and the transaction's identifier in the statement, so the same one is not imported again. The full account number is not stored.",
