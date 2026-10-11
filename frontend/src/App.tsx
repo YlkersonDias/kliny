@@ -13,6 +13,7 @@ import RegisterPage from './pages/RegisterPage'
 import ReportsPage from './pages/ReportsPage'
 import ResetPasswordPage from './pages/ResetPasswordPage'
 import SettingsPage from './pages/SettingsPage'
+import SimulatorPage from './pages/SimulatorPage'
 import TransactionsPage from './pages/TransactionsPage'
 import VaultDetailPage from './pages/VaultDetailPage'
 import VaultsPage from './pages/VaultsPage'
@@ -35,6 +36,7 @@ export default function App() {
           <Route path="/cofres" element={<VaultsPage />} />
           <Route path="/cofres/:id" element={<VaultDetailPage />} />
           <Route path="/relatorios" element={<ReportsPage />} />
+          <Route path="/simulador" element={<SimulatorPage />} />
           <Route path="/configuracoes" element={<SettingsPage />} />
         </Route>
       </Route>

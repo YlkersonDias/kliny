@@ -1,0 +1,59 @@
+{
+  "title": "Contribution simulator",
+  "subtitle": "See what an amount saved every month could turn into, with the rate you enter.",
+  "notice": "This is only a simulation, made with the values you entered. {{appName}} does not promise or suggest any return, and this is not investment advice. The values are gross: they do not deduct taxes, fees or inflation. Real returns vary.",
+  "form": {
+    "title": "Simulation values",
+    "initial": "Starting amount (optional)",
+    "monthly": "Monthly contribution",
+    "rate": "Rate of return",
+    "rateUnit": "Rate period",
+    "rateMonth": "per month",
+    "rateYear": "per year",
+    "rateHint": "You choose the rate. Per year, it is converted to the equivalent monthly rate.",
+    "term": "Term",
+    "termUnit": "Term unit",
+    "termMonths": "months",
+    "termYears": "years"
+  },
+  "errors": {
+    "invalidMoney": "Invalid amount.",
+    "invalidRate": "Invalid rate. Use numbers, with up to 4 decimal places (for example, 0.8).",
+    "rateTooHighMonth": "The rate goes up to {{max}}% per month.",
+    "rateTooHighYear": "The rate goes up to {{max}}% per year.",
+    "invalidTerm": "Enter the term as a whole number, from 1.",
+    "termTooLong": "The term goes up to 50 years (600 months)."
+  },
+  "incomplete": "Fill in the rate, the term and the starting amount or the monthly contribution to see the simulation.",
+  "fixErrors": "Fix the marked fields to see the simulation.",
+  "tooLarge": "The result goes beyond the largest amount {{appName}} shows. Lower the amounts, the rate or the term.",
+  "result": {
+    "title": "Simulation result",
+    "total": "Simulated total after {{period}}",
+    "contributed": "Total contributed",
+    "growth": "Simulated return"
+  },
+  "period": {
+    "months_one": "{{count}} month",
+    "months_other": "{{count}} months",
+    "months_zero": "{{count}} months",
+    "years_one": "{{count}} year",
+    "years_other": "{{count}} years",
+    "years_zero": "{{count}} years",
+    "yearsAndMonths": "{{years}} and {{months}}"
+  },
+  "chart": {
+    "title": "Simulated growth",
+    "legendTotal": "Simulated total",
+    "legendContributed": "Total contributed",
+    "caption": "After {{period}}, with {{contributed}} contributed, the simulation reaches {{total}}, with {{growth}} of simulated return.",
+    "tableLabel": "See the simulation as a table",
+    "tableCaption": "Simulation by period",
+    "period": "Period",
+    "contributed": "Contributed",
+    "growth": "Simulated return",
+    "total": "Simulated total",
+    "pointMonth": "Month {{n}}",
+    "pointYear": "Year {{n}}"
+  }
+}

@@ -1,0 +1,59 @@
+{
+  "title": "Simulador de aportes",
+  "subtitle": "Veja quanto um valor guardado todo mês pode virar, com a taxa que você informar.",
+  "notice": "Isto é só uma simulação, feita com os valores que você informou. O {{appName}} não promete nem indica rendimento, e isto não é recomendação de investimento. Os valores são brutos: não descontam imposto, taxas nem inflação. Rendimentos reais variam.",
+  "form": {
+    "title": "Valores da simulação",
+    "initial": "Capital inicial (opcional)",
+    "monthly": "Aporte mensal",
+    "rate": "Taxa de rendimento",
+    "rateUnit": "Período da taxa",
+    "rateMonth": "ao mês",
+    "rateYear": "ao ano",
+    "rateHint": "Você escolhe a taxa. Ao ano, ela é convertida para a taxa mensal equivalente.",
+    "term": "Prazo",
+    "termUnit": "Unidade do prazo",
+    "termMonths": "meses",
+    "termYears": "anos"
+  },
+  "errors": {
+    "invalidMoney": "Valor inválido.",
+    "invalidRate": "Taxa inválida. Use números, com até 4 casas decimais (por exemplo, 0,8).",
+    "rateTooHighMonth": "A taxa vai até {{max}}% ao mês.",
+    "rateTooHighYear": "A taxa vai até {{max}}% ao ano.",
+    "invalidTerm": "Informe um prazo em número inteiro, a partir de 1.",
+    "termTooLong": "O prazo vai até 50 anos (600 meses)."
+  },
+  "incomplete": "Preencha a taxa, o prazo e o capital inicial ou o aporte mensal para ver a simulação.",
+  "fixErrors": "Corrija os campos marcados para ver a simulação.",
+  "tooLarge": "O resultado passa do maior valor que o {{appName}} mostra. Diminua os valores, a taxa ou o prazo.",
+  "result": {
+    "title": "Resultado da simulação",
+    "total": "Total simulado ao fim de {{period}}",
+    "contributed": "Total aportado",
+    "growth": "Rendimento simulado"
+  },
+  "period": {
+    "months_one": "{{count}} mês",
+    "months_other": "{{count}} meses",
+    "months_zero": "{{count}} meses",
+    "years_one": "{{count}} ano",
+    "years_other": "{{count}} anos",
+    "years_zero": "{{count}} anos",
+    "yearsAndMonths": "{{years}} e {{months}}"
+  },
+  "chart": {
+    "title": "Evolução simulada",
+    "legendTotal": "Total simulado",
+    "legendContributed": "Total aportado",
+    "caption": "Ao fim de {{period}}, com {{contributed}} aportados, a simulação chega a {{total}}, com {{growth}} de rendimento simulado.",
+    "tableLabel": "Ver a simulação em tabela",
+    "tableCaption": "Simulação por período",
+    "period": "Período",
+    "contributed": "Aportado",
+    "growth": "Rendimento simulado",
+    "total": "Total simulado",
+    "pointMonth": "Mês {{n}}",
+    "pointYear": "Ano {{n}}"
+  }
+}

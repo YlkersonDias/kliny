@@ -9,6 +9,7 @@ import ptLayout from '../locales/pt-BR/layout.json'
 import ptPrivacy from '../locales/pt-BR/privacy.json'
 import ptReports from '../locales/pt-BR/reports.json'
 import ptSettings from '../locales/pt-BR/settings.json'
+import ptSimulator from '../locales/pt-BR/simulator.json'
 import ptTransactions from '../locales/pt-BR/transactions.json'
 import ptVaults from '../locales/pt-BR/vaults.json'
 import enAuth from '../locales/en-US/auth.json'
@@ -22,6 +23,7 @@ import enLayout from '../locales/en-US/layout.json'
 import enPrivacy from '../locales/en-US/privacy.json'
 import enReports from '../locales/en-US/reports.json'
 import enSettings from '../locales/en-US/settings.json'
+import enSimulator from '../locales/en-US/simulator.json'
 import enTransactions from '../locales/en-US/transactions.json'
 import enVaults from '../locales/en-US/vaults.json'
 
@@ -33,7 +35,7 @@ export const defaultNS = 'common'
 const ptBR = {
   common: ptCommon, errors: ptErrors, auth: ptAuth, layout: ptLayout, settings: ptSettings,
   dashboard: ptDashboard, transactions: ptTransactions, categories: ptCategories, vaults: ptVaults, reports: ptReports,
-  privacy: ptPrivacy, landing: ptLanding, imports: ptImports,
+  privacy: ptPrivacy, landing: ptLanding, imports: ptImports, simulator: ptSimulator,
 }
 
 // satisfies: chave do português que falta no inglês não compila. A chave a mais e as variáveis
@@ -41,7 +43,7 @@ const ptBR = {
 const enUS = {
   common: enCommon, errors: enErrors, auth: enAuth, layout: enLayout, settings: enSettings,
   dashboard: enDashboard, transactions: enTransactions, categories: enCategories, vaults: enVaults, reports: enReports,
-  privacy: enPrivacy, landing: enLanding, imports: enImports,
+  privacy: enPrivacy, landing: enLanding, imports: enImports, simulator: enSimulator,
 } satisfies typeof ptBR
 
 export const resources = {

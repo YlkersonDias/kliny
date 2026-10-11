@@ -2,6 +2,7 @@ import type { ReactNode, RefObject } from 'react'
 import { useTranslation } from 'react-i18next'
 import { LANGUAGE_SHORT_NAMES } from '../../lib/language'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
+import { simulate } from '../../lib/simulator'
 import { Icon } from '../ui/Icon'
 
 // Todos os cartões com a mesma largura e a mesma altura (a do mais alto, pela trilha): a descrição
@@ -86,6 +87,18 @@ const SLICES = [
   { key: 'reportsTransport', value: 20, start: 62, color: 'var(--color-category-5)' },
   { key: 'reportsOther', value: 18, start: 82, color: 'var(--color-category-7)' },
 ] as const
+
+// Exemplo do simulador, calculado com a mesma conta do app: R$ 500 por mês, 0,8% ao mês, 10 anos.
+// A taxa é só de exemplo: no app, quem informa é a pessoa.
+const SIMULATION = simulate({ initial: 0, monthly: 500, rate: 0.8, rateUnit: 'month', months: 120 })
+const SIMULATION_TOTAL = SIMULATION.ok ? SIMULATION.total : 0
+const SIMULATION_CONTRIBUTED = SIMULATION.ok ? SIMULATION.contributed : 0
+// Pontos do gráfico (um por ano) numa caixa de 100 x 40, com o total mais alto no topo.
+const SIMULATION_LINES = SIMULATION.ok
+  ? (['total', 'contributed'] as const).map((key) => SIMULATION.points
+    .map((point, index) => `${(index / (SIMULATION.points.length - 1)) * 100},${40 - (point[key] / SIMULATION_TOTAL) * 36}`)
+    .join(' '))
+  : ['', '']
 
 // Recursos: a seção fica presa na tela e a trilha anda de lado com a rolagem (useLandingMotion).
 // No celular ou com movimento reduzido (data-static), vira uma lista com rolagem lateral comum.
@@ -172,6 +185,23 @@ export function FeatureTour({ tourRef, trackRef }: { tourRef: RefObject<HTMLElem
               <div><dt className="text-muted">{t('features.reportsIn')}</dt><dd className="font-semibold text-income tabular-nums">{formatSigned(5200)}</dd></div>
               <div><dt className="text-muted">{t('features.reportsOut')}</dt><dd className="font-semibold text-expense tabular-nums">{formatOutflow(3480)}</dd></div>
               <div><dt className="text-muted">{t('features.reportsLeft')}</dt><dd className="font-semibold tabular-nums">{formatSigned(1720)}</dd></div>
+            </dl>
+          </Panel>
+
+          <Panel title={t('features.simulator')} text={t('features.simulatorText')}>
+            <dl className="grid grid-cols-3 gap-2 text-xs">
+              <div><dt className="text-muted">{t('features.simulatorMonthly')}</dt><dd className="font-semibold tabular-nums">{formatMoney(500)}</dd></div>
+              <div><dt className="text-muted">{t('features.simulatorRate')}</dt><dd className="font-semibold tabular-nums">{t('features.simulatorRateValue')}</dd></div>
+              <div><dt className="text-muted">{t('features.simulatorTerm')}</dt><dd className="font-semibold">{t('features.simulatorTermValue')}</dd></div>
+            </dl>
+            <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="mt-3 h-20 w-full">
+              <polygon points={`0,40 ${SIMULATION_LINES[0]} 100,40`} fill="var(--color-primary)" fillOpacity="0.18" />
+              <polyline points={SIMULATION_LINES[0]} fill="none" stroke="var(--color-primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
+              <polyline points={SIMULATION_LINES[1]} fill="none" stroke="var(--color-muted)" strokeWidth="1.5" strokeDasharray="4 3" vectorEffect="non-scaling-stroke" />
+            </svg>
+            <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs">
+              <div><dt className="text-muted">{t('features.simulatorContributed')}</dt><dd className="font-semibold tabular-nums">{formatMoney(SIMULATION_CONTRIBUTED)}</dd></div>
+              <div><dt className="text-muted">{t('features.simulatorTotal')}</dt><dd className="font-semibold text-primary tabular-nums">{formatMoney(SIMULATION_TOTAL)}</dd></div>
             </dl>
           </Panel>
 
