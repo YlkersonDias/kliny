@@ -1,3 +1,4 @@
+import { startTransition } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Link, NavLink, Outlet, useNavigate } from 'react-router'
 import { useAuth } from '../../auth/useAuth'
@@ -18,9 +19,16 @@ export function AppLayout() {
   useRecurrenceSync()
 
   function handleSignOut() {
-    signOut()
-    // Sem guardar a página atual: o próximo login pode ser de outra pessoa.
-    navigate('/entrar', { replace: true })
+    // Volta para a landing (em "/", sem sessão), sem guardar a página atual: o próximo login pode
+    // ser de outra pessoa. Sessão expirada, "Sair de todos os dispositivos" e conta excluída
+    // continuam indo para o login, que mostra o aviso de cada caso.
+    // As duas na mesma transição: o React Router navega dentro de uma transição, e a sessão apagada
+    // fora dela chegava antes à tela, quando a página protegida ainda estava aberta e mandava para
+    // o login.
+    startTransition(() => {
+      navigate('/', { replace: true })
+      signOut()
+    })
   }
 
   // Marca clicável, levando ao início (no menu lateral e no cabeçalho do celular). O nome
