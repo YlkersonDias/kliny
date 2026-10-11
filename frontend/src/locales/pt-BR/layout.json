@@ -9,7 +9,8 @@
     "home": "Início",
     "transactions": "Movimentações",
     "vaults": "Cofres",
-    "reports": "Relatórios"
+    "reports": "Relatórios",
+    "simulator": "Simulador"
   },
   "theme": {
     "label": "Modo escuro",

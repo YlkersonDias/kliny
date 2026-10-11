@@ -94,7 +94,16 @@
     "yoursTheme": "Theme",
     "yoursLanguage": "Language",
     "yoursInstall": "Install on your phone",
-    "yoursInstallHint": "Opens like an app, no store needed."
+    "yoursInstallHint": "Opens like an app, no store needed.",
+    "simulator": "Contribution simulator",
+    "simulatorText": "See what an amount saved every month could turn into, with the rate you choose. It is only a simulation.",
+    "simulatorMonthly": "Monthly",
+    "simulatorRate": "Rate",
+    "simulatorRateValue": "0.8% per month",
+    "simulatorTerm": "Term",
+    "simulatorTermValue": "10 years",
+    "simulatorContributed": "Total contributed",
+    "simulatorTotal": "Simulated total"
   },
   "steps": {
     "title": "Getting started takes two minutes.",

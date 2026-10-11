@@ -9,7 +9,8 @@
     "home": "Home",
     "transactions": "Transactions",
     "vaults": "Vaults",
-    "reports": "Reports"
+    "reports": "Reports",
+    "simulator": "Simulator"
   },
   "theme": {
     "label": "Dark mode",

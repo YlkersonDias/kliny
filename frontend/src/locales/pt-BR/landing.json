@@ -94,7 +94,16 @@
     "yoursTheme": "Tema",
     "yoursLanguage": "Idioma",
     "yoursInstall": "Instalar no celular",
-    "yoursInstallHint": "Abre como app, sem loja."
+    "yoursInstallHint": "Abre como app, sem loja.",
+    "simulator": "Simulador de aportes",
+    "simulatorText": "Veja quanto um valor guardado todo mês pode virar, com a taxa que você escolher. É só uma simulação.",
+    "simulatorMonthly": "Aporte mensal",
+    "simulatorRate": "Taxa",
+    "simulatorRateValue": "0,8% ao mês",
+    "simulatorTerm": "Prazo",
+    "simulatorTermValue": "10 anos",
+    "simulatorContributed": "Total aportado",
+    "simulatorTotal": "Total simulado"
   },
   "steps": {
     "title": "Começar leva dois minutos.",
