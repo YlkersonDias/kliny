@@ -195,13 +195,14 @@ export function FeatureTour({ tourRef, trackRef }: { tourRef: RefObject<HTMLElem
               <div><dt className="text-muted">{t('features.simulatorTerm')}</dt><dd className="font-semibold">{t('features.simulatorTermValue')}</dd></div>
             </dl>
             <svg viewBox="0 0 100 40" preserveAspectRatio="none" className="mt-3 h-20 w-full">
-              <polygon points={`0,40 ${SIMULATION_LINES[0]} 100,40`} fill="var(--color-primary)" fillOpacity="0.18" />
+              <polygon points={`0,40 ${SIMULATION_LINES[0]} 100,40`} fill="var(--color-primary)" fillOpacity="0.3" />
               <polyline points={SIMULATION_LINES[0]} fill="none" stroke="var(--color-primary)" strokeWidth="1.5" vectorEffect="non-scaling-stroke" />
-              <polyline points={SIMULATION_LINES[1]} fill="none" stroke="var(--color-muted)" strokeWidth="1.5" strokeDasharray="4 3" vectorEffect="non-scaling-stroke" />
+              <polygon points={`0,40 ${SIMULATION_LINES[1]} 100,40`} fill="var(--color-vault)" fillOpacity="0.5" />
+              <polyline points={SIMULATION_LINES[1]} fill="none" stroke="var(--color-vault)" strokeWidth="1.5" strokeDasharray="4 3" vectorEffect="non-scaling-stroke" />
             </svg>
             <dl className="mt-3 grid grid-cols-2 gap-2 border-t border-border pt-3 text-xs">
-              <div><dt className="text-muted">{t('features.simulatorContributed')}</dt><dd className="font-semibold tabular-nums">{formatMoney(SIMULATION_CONTRIBUTED)}</dd></div>
-              <div><dt className="text-muted">{t('features.simulatorTotal')}</dt><dd className="font-semibold text-primary tabular-nums">{formatMoney(SIMULATION_TOTAL)}</dd></div>
+              <div><dt className="flex items-center gap-1.5 text-muted"><span className="size-2.5 rounded-sm bg-vault" />{t('features.simulatorContributed')}</dt><dd className="font-semibold tabular-nums">{formatMoney(SIMULATION_CONTRIBUTED)}</dd></div>
+              <div><dt className="flex items-center gap-1.5 text-muted"><span className="size-2.5 rounded-sm bg-primary" />{t('features.simulatorTotal')}</dt><dd className="font-semibold text-primary tabular-nums">{formatMoney(SIMULATION_TOTAL)}</dd></div>
             </dl>
           </Panel>
 

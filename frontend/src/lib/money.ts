@@ -45,6 +45,48 @@ export function toInputText(value: number, language: Language = currentLanguage(
   return plain[language].format(Math.abs(normalize(value)))
 }
 
+const SEPARATORS: Record<Language, { decimal: string; group: string }> = {
+  'pt-BR': { decimal: ',', group: '.' },
+  'en-US': { decimal: '.', group: ',' },
+}
+// Dígitos da parte inteira: o MONEY_MAX tem 12.
+const MAX_INTEGER_DIGITS = 12
+
+// Formata o valor enquanto ele é digitado: os pontos de milhar entram sozinhos ("50000000" vira
+// "50.000.000"), e a vírgula dos centavos é a pessoa quem digita, com até 2 casas. O separador de
+// milhar digitado é ignorado (ele é automático); o que vem depois da primeira vírgula conta como
+// centavos. Colar "R$ 1.234,56" dá "1.234,56". Não valida: quem confere é o parseMoneyInput.
+export function formatMoneyTyping(text: string, language: Language = currentLanguage()): string {
+  const { decimal, group } = SEPARATORS[language]
+  const cleaned = text.replace(/^\s*R\$\s*/, '')
+  const decimalAt = cleaned.indexOf(decimal)
+  const integerDigits = (decimalAt === -1 ? cleaned : cleaned.slice(0, decimalAt)).replace(/\D/g, '')
+  if (decimalAt === -1 && integerDigits === '') return ''
+
+  const integer = (integerDigits.replace(/^0+(?=\d)/, '') || '0').slice(0, MAX_INTEGER_DIGITS)
+  const grouped = integer.replace(/\B(?=(\d{3})+(?!\d))/g, group)
+  if (decimalAt === -1) return grouped
+  return `${grouped}${decimal}${cleaned.slice(decimalAt + 1).replace(/\D/g, '').slice(0, 2)}`
+}
+
+// Onde o cursor fica depois da formatação: com o mesmo número de dígitos (e vírgula) à direita dele
+// que havia antes. A formatação só mexe à esquerda (zeros e pontos), então contar pela direita não
+// se perde quando um ponto entra ou sai.
+export function caretAfterTyping(raw: string, caret: number, formatted: string, language: Language = currentLanguage()): number {
+  const { decimal, group } = SEPARATORS[language]
+  const isSignificant = (char: string) => /\d/.test(char) || char === decimal
+  let after = [...raw.slice(caret)].filter(isSignificant).length
+  // Casas além da segunda foram cortadas: o cursor não passa do fim.
+  let position = formatted.length
+  while (position > 0 && after > 0) {
+    position--
+    if (isSignificant(formatted[position])) after--
+  }
+  // Logo depois do último dígito digitado, e não depois de um ponto de milhar.
+  while (position > 0 && formatted[position - 1] === group) position--
+  return position
+}
+
 // Só dígitos, com ou sem separador de milhar em grupos de 3, e até 2 casas decimais.
 // Português: 1.234,56. Inglês: 1,234.56 (a vírgula como decimal não é aceita).
 const MONEY_PATTERN: Record<Language, { pattern: RegExp; group: string }> = {
