@@ -1,6 +1,7 @@
-import { lazy, useId, useState } from 'react'
+import { lazy, useEffect, useId, useState } from 'react'
 import type { TFunction } from 'i18next'
 import { useTranslation } from 'react-i18next'
+import { useAuth } from '../auth/useAuth'
 import { ChartFigure } from '../components/charts/ChartFigure'
 import { ChoiceChip } from '../components/ui/ChoiceChip'
 import { Input } from '../components/ui/Input'
@@ -11,6 +12,7 @@ import { formatMoney, MONEY_MAX } from '../lib/money'
 import {
   parseSimulatorForm, simulate, SIMULATOR_MAX_RATE, type SimulatorError, type SimulatorField, type SimulatorForm,
 } from '../lib/simulator'
+import { readSimulatorForm, saveSimulatorForm } from '../lib/simulatorStore'
 
 const SimulatorChart = lazy(() => import('../components/simulator/SimulatorChart'))
 
@@ -38,14 +40,24 @@ function errorText(error: SimulatorError | undefined, form: SimulatorForm, t: Si
 }
 
 // Simulador de aportes: só uma conta, no navegador, com os valores que a pessoa digita. Nada vai para
-// a API nem fica guardado (fechou a página, sumiu). Os campos começam vazios, sem taxa sugerida.
+// a API. Os campos começam vazios, sem taxa sugerida, e o que foi digitado fica guardado no navegador
+// até sair da conta (lib/simulatorStore.ts), para a simulação continuar ali ao trocar de página.
 export default function SimulatorPage() {
   const { t } = useTranslation('simulator')
   usePageTitle(t('title'))
   const id = useId()
-  const [form, setForm] = useState<SimulatorForm>(EMPTY)
+  const { user } = useAuth()
+  const userId = user?.id
+  const [form, setForm] = useState<SimulatorForm>(() => (userId !== undefined && readSimulatorForm(userId)) || EMPTY)
   // O erro de um campo só aparece depois de sair dele: digitando "0," a taxa ainda está pela metade.
-  const [touched, setTouched] = useState<Partial<Record<SimulatorField, boolean>>>({})
+  // Os campos que voltaram preenchidos já contam como vistos.
+  const [touched, setTouched] = useState<Partial<Record<SimulatorField, boolean>>>(() => ({
+    initial: form.initial !== '', monthly: form.monthly !== '', rate: form.rate !== '', term: form.term !== '',
+  }))
+
+  useEffect(() => {
+    if (userId !== undefined) saveSimulatorForm(userId, form)
+  }, [userId, form])
 
   const parsed = parseSimulatorForm(form)
   const errors = parsed.status === 'ready' ? {} : parsed.errors

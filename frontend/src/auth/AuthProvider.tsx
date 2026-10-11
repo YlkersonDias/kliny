@@ -5,6 +5,7 @@ import i18n from '../i18n'
 import { setUnauthorizedHandler } from '../api/client'
 import type { AuthResponse, LoginRequest, User } from '../api/types'
 import { disableGoogleAutoSelect } from '../lib/googleIdentity'
+import { clearSimulatorForm } from '../lib/simulatorStore'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
 
@@ -24,6 +25,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     disableGoogleAutoSelect()
     // O próximo usuário do navegador não pode ver os dados do anterior.
     queryClient.clear()
+    // Nem a simulação dele (sair, sair de todos os dispositivos, sessão expirada, conta excluída).
+    clearSimulatorForm()
   }, [queryClient])
 
   const expire = useCallback(() => endSession(i18n.t('errors:sessionExpired')), [endSession])
