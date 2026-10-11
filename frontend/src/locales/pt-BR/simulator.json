@@ -26,7 +26,7 @@
   },
   "incomplete": "Preencha a taxa, o prazo e o capital inicial ou o aporte mensal para ver a simulação.",
   "fixErrors": "Corrija os campos marcados para ver a simulação.",
-  "tooLarge": "O resultado passa do maior valor que o {{appName}} mostra. Diminua os valores, a taxa ou o prazo.",
+  "tooLarge": "O resultado passa de {{max}}, o maior valor que o {{appName}} mostra. Diminua os valores, a taxa ou o prazo.",
   "result": {
     "title": "Resultado da simulação",
     "total": "Total simulado ao fim de {{period}}",

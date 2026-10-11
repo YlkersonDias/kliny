@@ -1,10 +1,11 @@
 import { useTranslation } from 'react-i18next'
-import { Area, CartesianGrid, ComposedChart, Line, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
+import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } from 'recharts'
 import { formatMoney } from '../../lib/money'
 import type { SimulationPoint } from '../../lib/simulator'
 
 // Carregado sob demanda (React.lazy). Só visual: o ChartFigure o esconde do leitor de tela.
-// O total simulado é a área cheia; o aportado, a linha tracejada (não depende só da cor).
+// O total simulado na cor principal; o aportado em âmbar (a cor do dinheiro guardado, como nos
+// cofres), com a borda tracejada: as duas séries não dependem só da cor.
 
 export default function SimulatorChart({ points, label }: { points: SimulationPoint[]; label: (month: number) => string }) {
   const { t } = useTranslation('simulator')
@@ -13,7 +14,7 @@ export default function SimulatorChart({ points, label }: { points: SimulationPo
   return (
     <div className="h-64">
       <ResponsiveContainer width="100%" height="100%">
-        <ComposedChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }} accessibilityLayer={false}>
+        <AreaChart data={data} margin={{ top: 8, right: 8, bottom: 0, left: 8 }} accessibilityLayer={false}>
           <CartesianGrid vertical={false} stroke="var(--color-border)" />
           <XAxis
             dataKey="axis"
@@ -36,19 +37,21 @@ export default function SimulatorChart({ points, label }: { points: SimulationPo
             stroke="var(--color-primary)"
             strokeWidth={2}
             fill="var(--color-primary)"
-            fillOpacity={0.18}
+            fillOpacity={0.3}
             isAnimationActive={false}
           />
-          <Line
+          {/* Depois do total, para a faixa do aportado ficar por cima, embaixo da do total. */}
+          <Area
             type="monotone"
             dataKey="contributed"
-            stroke="var(--color-muted)"
+            stroke="var(--color-vault)"
             strokeWidth={2}
             strokeDasharray="5 4"
-            dot={false}
+            fill="var(--color-vault)"
+            fillOpacity={0.5}
             isAnimationActive={false}
           />
-        </ComposedChart>
+        </AreaChart>
       </ResponsiveContainer>
     </div>
   )

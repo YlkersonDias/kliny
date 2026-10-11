@@ -26,7 +26,7 @@
   },
   "incomplete": "Fill in the rate, the term and the starting amount or the monthly contribution to see the simulation.",
   "fixErrors": "Fix the marked fields to see the simulation.",
-  "tooLarge": "The result goes beyond the largest amount {{appName}} shows. Lower the amounts, the rate or the term.",
+  "tooLarge": "The result goes beyond {{max}}, the largest amount {{appName}} shows. Lower the amounts, the rate or the term.",
   "result": {
     "title": "Simulation result",
     "total": "Simulated total after {{period}}",

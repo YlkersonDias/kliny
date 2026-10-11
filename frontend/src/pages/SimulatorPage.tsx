@@ -7,7 +7,7 @@ import { Input } from '../components/ui/Input'
 import { MoneyInput } from '../components/ui/MoneyInput'
 import { StatItem } from '../components/ui/StatItem'
 import { usePageTitle } from '../hooks/usePageTitle'
-import { formatMoney } from '../lib/money'
+import { formatMoney, MONEY_MAX } from '../lib/money'
 import {
   parseSimulatorForm, simulate, SIMULATOR_MAX_RATE, type SimulatorError, type SimulatorField, type SimulatorForm,
 } from '../lib/simulator'
@@ -66,13 +66,16 @@ export default function SimulatorPage() {
       return <p className="text-sm text-muted">{t('fixErrors')}</p>
     }
     if (!result) return <p className="text-sm text-muted">{t('incomplete')}</p>
-    if (!result.ok) return <p role="alert" className="text-sm text-danger">{t('tooLarge')}</p>
+    if (!result.ok) return <p role="alert" className="text-sm text-danger">{t('tooLarge', { max: formatMoney(MONEY_MAX) })}</p>
 
     const period = formatTerm(parsed.status === 'ready' ? parsed.input.months : 0, t)
     return (
       <>
-        <dl className="grid gap-4 sm:grid-cols-3">
-          <StatItem label={t('result.total', { period })} value={formatMoney(result.total)} />
+        {/* O total numa linha só dele e os outros dois lado a lado só com o cartão largo (512 px ou
+            mais, pela largura do próprio cartão, e não da tela): em colunas estreitas, valores grandes
+            quebravam no meio do número. R$ 999.999.999.999,99 ocupa cerca de 205 px. */}
+        <dl className="grid gap-4 @lg:grid-cols-2">
+          <StatItem className="@lg:col-span-2" label={t('result.total', { period })} value={formatMoney(result.total)} />
           <StatItem label={t('result.contributed')} value={formatMoney(result.contributed)} />
           <StatItem label={t('result.growth')} value={formatMoney(result.growth)} />
         </dl>
@@ -82,14 +85,15 @@ export default function SimulatorPage() {
           labelledBy={`${id}-grafico`}
           heightClass="h-64"
           before={(
-            // Legenda em HTML: área cheia e linha tracejada, não só a cor.
+            // Legenda em HTML, com a cor e o traço de cada série (contínuo no total, tracejado no
+            // aportado): não depende só da cor.
             <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
               <li className="flex items-center gap-1.5">
-                <span className="h-3 w-4 rounded-[3px] border-2 border-primary bg-primary/20" />
+                <span className="h-3 w-4 rounded-[3px] border-t-2 border-primary bg-primary/30" />
                 {t('chart.legendTotal')}
               </li>
               <li className="flex items-center gap-1.5">
-                <span className="w-4 border-t-2 border-dashed border-muted" />
+                <span className="h-3 w-4 rounded-[3px] border-t-2 border-dashed border-vault bg-vault/50" />
                 {t('chart.legendContributed')}
               </li>
             </ul>
@@ -195,7 +199,7 @@ export default function SimulatorPage() {
           </form>
         </section>
 
-        <section aria-labelledby={`${id}-resultado`} className="rounded-2xl border border-border bg-surface p-5 sm:p-6">
+        <section aria-labelledby={`${id}-resultado`} className="@container rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h2 id={`${id}-resultado`} className="text-lg font-semibold text-foreground">{t('result.title')}</h2>
           {/* O aviso fica sempre junto ao resultado: o Kliny não promete nem indica rendimento. */}
           <p className="mt-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-muted">{t('notice')}</p>
