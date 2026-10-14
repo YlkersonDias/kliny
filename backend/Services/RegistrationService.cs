@@ -100,7 +100,8 @@ public class RegistrationService(
         if (await db.Users.AnyAsync(u => u.Email == pending.Email))
             throw await AlreadyRegisteredAsync(transaction, pending.Email);
 
-        var user = new User { Name = pending.Name, Email = pending.Email, PasswordHash = passwordHash };
+        // A conta nasce com as categorias padrão, gravadas no mesmo SaveChanges (tudo ou nada).
+        var user = new User { Name = pending.Name, Email = pending.Email, PasswordHash = passwordHash, Categories = DefaultCategories.Create() };
         db.Users.Add(user);
         try
         {

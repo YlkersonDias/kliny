@@ -130,6 +130,8 @@ public class AuthService(
             Name = name.Length > 100 ? name[..100] : name,
             Email = email,
             GoogleSubject = identity.Subject,
+            // Conta nova pelo Google também nasce com as categorias padrão.
+            Categories = DefaultCategories.Create(),
         };
         db.Users.Add(user);
         return (await SaveGoogleUserAsync(user, identity.Subject)).Response;

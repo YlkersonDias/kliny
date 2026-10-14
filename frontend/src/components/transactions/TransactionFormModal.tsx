@@ -170,7 +170,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   // Enquanto a lista carrega, a categoria gravada já aparece no campo.
   const saved = transaction ?? recurrence
   const categoryOptions: Category[] = categories.data
-    ?? (saved?.categoryId != null ? [{ id: saved.categoryId, name: saved.categoryName ?? '' }] : [])
+    ?? (saved?.categoryId != null ? [{ id: saved.categoryId, name: saved.categoryName ?? '', color: null, icon: null }] : [])
   // Regra de categoria (8.4): só em nova movimentação e enquanto a pessoa não escolheu a categoria.
   // A sugestão é derivada da descrição (não um efeito): some se a descrição deixar de bater.
   const suggestion = isNew && !categoryChosen ? matchRule(values.description, rules.data ?? []) : null

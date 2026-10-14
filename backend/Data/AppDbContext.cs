@@ -1,3 +1,4 @@
+using Backend.DTOs.Categories;
 using Backend.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,6 +57,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
         modelBuilder.Entity<Category>(entity =>
         {
             entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
+            entity.Property(c => c.Color).HasMaxLength(CategoryAppearance.MaxLength);
+            entity.Property(c => c.Icon).HasMaxLength(CategoryAppearance.MaxLength);
             // A collation do banco ignora maiúsculas e acentos: "Mercado" e "mercado" contam como iguais.
             entity.HasIndex(c => new { c.UserId, c.Name }).IsUnique();
             entity.HasQueryFilter(c => c.UserId == CurrentUserId);

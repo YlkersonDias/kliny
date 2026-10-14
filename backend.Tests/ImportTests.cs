@@ -24,7 +24,7 @@ public sealed class ImportFixture : IAsyncLifetime
 
         Token = await Api.RegisterAsync("importacao@kliny.test");
         using var client = Api.Client(Token);
-        using var created = await client.PostAsJsonAsync("/api/categories", new { name = "Alimentação" }, Ct);
+        using var created = await client.PostAsJsonAsync("/api/categories", new { name = "Feira" }, Ct);
         created.EnsureSuccessStatusCode();
         Food = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
     }

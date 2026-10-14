@@ -14,9 +14,10 @@
     "yours": "Suas categorias",
     "loading": "Carregando categorias…",
     "empty": "Nenhuma categoria ainda. Crie a primeira acima.",
-    "rename": "Renomear {{name}}",
+    "rename": "Editar {{name}}",
     "delete": "Apagar {{name}}",
-    "newName": "Novo nome para {{name}}"
+    "newName": "Nome de {{name}}",
+    "editTitle": "Editar categoria"
   },
   "delete": {
     "title": "Apagar categoria",
@@ -54,5 +55,48 @@
     "applied_zero": "Nenhuma movimentação mudou.",
     "applied_one": "{{count}} movimentação atualizada.",
     "applied_other": "{{count}} movimentações atualizadas."
+  },
+  "appearance": {
+    "color": "Cor",
+    "icon": "Ícone",
+    "preview": "Como fica",
+    "colors": {
+      "blue": "Azul",
+      "indigo": "Índigo",
+      "purple": "Roxo",
+      "pink": "Rosa",
+      "orange": "Laranja",
+      "amber": "Âmbar",
+      "teal": "Verde-água",
+      "green": "Verde",
+      "brown": "Marrom",
+      "gray": "Cinza"
+    },
+    "icons": {
+      "cart": "Mercado",
+      "home": "Casa",
+      "car": "Carro",
+      "bus": "Ônibus",
+      "food": "Restaurante",
+      "coffee": "Café",
+      "health": "Saúde",
+      "education": "Educação",
+      "leisure": "Lazer",
+      "gift": "Presente",
+      "pets": "Pets",
+      "clothes": "Roupas",
+      "salary": "Salário",
+      "invest": "Investimento",
+      "travel": "Viagem",
+      "bills": "Contas",
+      "phone": "Celular",
+      "streaming": "Streaming",
+      "gym": "Academia",
+      "beauty": "Beleza",
+      "baby": "Bebê",
+      "tools": "Manutenção",
+      "savings": "Poupança",
+      "tag": "Outros"
+    }
   }
 }

@@ -1,10 +1,12 @@
 import { useState } from 'react'
 import { useTranslation } from 'react-i18next'
 import { useBudgets } from '../../hooks/useBudgets'
+import { useCategories } from '../../hooks/useCategories'
 import { budgetProgress, type BudgetStatus } from '../../lib/budgets'
 import { formatMoney } from '../../lib/money'
 import { BudgetsModal } from '../budgets/BudgetsModal'
 import { Button } from '../ui/Button'
+import { CategoryIcon } from '../ui/CategoryIcon'
 import { FormAlert } from '../ui/FormAlert'
 
 // Cor da barra e do texto de cada situação. O texto sempre diz a situação: nunca só a cor.
@@ -15,6 +17,8 @@ const TEXT: Record<BudgetStatus, string> = { ok: 'text-muted', near: 'text-vault
 export function BudgetsOverview({ month }: { month: string }) {
   const { t } = useTranslation(['dashboard', 'common'])
   const budgets = useBudgets(month)
+  // Só para a cor e o ícone de cada categoria.
+  const categories = useCategories()
   const [managing, setManaging] = useState(false)
 
   function statusText(status: BudgetStatus, difference: number): string {
@@ -54,8 +58,11 @@ export function BudgetsOverview({ month }: { month: string }) {
             const progress = budgetProgress(budget.limit, budget.spent)
             return (
               <li key={budget.categoryId}>
-                <div className="flex items-baseline justify-between gap-3">
-                  <span className="min-w-0 truncate font-medium text-foreground" title={budget.categoryName}>{budget.categoryName}</span>
+                <div className="flex items-center justify-between gap-3">
+                  <span className="flex min-w-0 items-center gap-2">
+                    <CategoryIcon category={categories.data?.find((category) => category.id === budget.categoryId)} size="size-7" />
+                    <span className="min-w-0 truncate font-medium text-foreground" title={budget.categoryName}>{budget.categoryName}</span>
+                  </span>
                   <span className="shrink-0 text-sm tabular-nums text-foreground">
                     {t('budgets.spentOf', { spent: formatMoney(budget.spent), limit: formatMoney(budget.limit) })}
                   </span>

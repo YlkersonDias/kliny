@@ -24,11 +24,11 @@ public sealed class BudgetFixture : IAsyncLifetime
 
         Token = await Api.RegisterAsync("orcamento@kliny.test");
         using var client = Api.Client(Token);
-        Food = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Alimentação" }, Ct));
-        Rent = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Moradia" }, Ct));
-        Free = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Lazer" }, Ct));
+        Food = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Feira" }, Ct));
+        Rent = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Casa e contas" }, Ct));
+        Free = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Passeios" }, Ct));
 
-        // Outubro de 2021 em Alimentação: 120 + 30,50 de gastos; uma receita e um gasto de outro mês
+        // Outubro de 2021 em Feira: 120 + 30,50 de gastos; uma receita e um gasto de outro mês
         // na mesma categoria não contam.
         foreach (var (description, amount, date, category) in new (string, decimal, string, int?)[]
         {
@@ -92,7 +92,7 @@ public class BudgetTests(BudgetFixture fixture) : IClassFixture<BudgetFixture>
         }
 
         var food = Assert.Single(await ListAsync("2021-10"), b => b.GetProperty("categoryId").GetInt32() == fixture.Food);
-        Assert.Equal("Alimentação", food.GetProperty("categoryName").GetString());
+        Assert.Equal("Feira", food.GetProperty("categoryName").GetString());
         Assert.Equal(800m, food.GetProperty("limit").GetDecimal());
         // Só os gastos de outubro: sem a receita, sem os outros meses e sem o depósito no cofre.
         Assert.Equal(150.50m, food.GetProperty("spent").GetDecimal());

@@ -14,7 +14,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
             .AsNoTracking()
             .Where(c => c.UserId == userId)
             .OrderBy(c => c.Name)
-            .Select(c => new CategoryResponse(c.Id, c.Name))
+            .Select(c => new CategoryResponse(c.Id, c.Name, c.Color, c.Icon))
             .ToListAsync();
 
     public async Task<CategoryResponse> GetAsync(int userId, int id) =>
@@ -22,7 +22,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
 
     public async Task<CategoryResponse> CreateAsync(int userId, CategoryRequest request)
     {
-        var category = new Category { UserId = userId, Name = request.Name.Trim() };
+        var category = new Category { UserId = userId, Name = request.Name.Trim(), Color = request.Color, Icon = request.Icon };
         db.Categories.Add(category);
         await SaveAsync(userId, category);
         return CategoryResponse.FromCategory(category);
@@ -32,6 +32,8 @@ public class CategoryService(AppDbContext db) : ICategoryService
     {
         var category = await FindOwnedAsync(userId, id);
         category.Name = request.Name.Trim();
+        category.Color = request.Color;
+        category.Icon = request.Icon;
         await SaveAsync(userId, category);
         return CategoryResponse.FromCategory(category);
     }

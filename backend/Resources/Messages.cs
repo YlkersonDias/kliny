@@ -98,6 +98,25 @@ public static class Messages
         "Já existe uma categoria com esse nome.",
         "A category with this name already exists.");
 
+    public static string CategoryColorInvalid => Text(
+        "Cor inválida.",
+        "Invalid color.");
+
+    public static string CategoryIconInvalid => Text(
+        "Ícone inválido.",
+        "Invalid icon.");
+
+    // Categorias com que toda conta nova nasce (DefaultCategories), no idioma da requisição.
+    public static string DefaultCategoryFood => Text("Alimentação", "Food");
+    public static string DefaultCategoryHousing => Text("Moradia", "Housing");
+    public static string DefaultCategoryTransport => Text("Transporte", "Transportation");
+    public static string DefaultCategoryHealth => Text("Saúde", "Health");
+    public static string DefaultCategoryEducation => Text("Educação", "Education");
+    public static string DefaultCategoryLeisure => Text("Lazer", "Leisure");
+    public static string DefaultCategoryBills => Text("Contas", "Bills");
+    public static string DefaultCategorySalary => Text("Salário", "Salary");
+    public static string DefaultCategoryOther => Text("Outros", "Other");
+
     public static string CategoryNameRequired => Text(
         "Informe o nome da categoria.",
         "Enter the category name.");
