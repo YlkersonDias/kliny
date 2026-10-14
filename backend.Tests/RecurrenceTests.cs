@@ -25,7 +25,7 @@ public sealed class RecurrenceFixture : IAsyncLifetime
         Token = await Api.RegisterAsync("recorrente@kliny.test");
         LimitToken = await Api.RegisterAsync("recorrente-limite@kliny.test");
         using var client = Api.Client(Token);
-        using var response = await client.PostAsJsonAsync("/api/categories", new { name = "Moradia" }, Ct);
+        using var response = await client.PostAsJsonAsync("/api/categories", new { name = "Casa e contas" }, Ct);
         response.EnsureSuccessStatusCode();
         Category = (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
     }
@@ -172,7 +172,7 @@ public class RecurrenceTests(RecurrenceFixture fixture) : IClassFixture<Recurren
 
         Assert.Equal("Plano de celular novo", updated.GetProperty("description").GetString());
         Assert.Equal(-65m, updated.GetProperty("amount").GetDecimal());
-        Assert.Equal("Moradia", updated.GetProperty("categoryName").GetString());
+        Assert.Equal("Casa e contas", updated.GetProperty("categoryName").GetString());
         Assert.Equal(1, updated.GetProperty("dayOfMonth").GetInt32());
         Assert.All(await TransactionsAsync("Plano de celular"), t => Assert.Equal(-50m, t.GetProperty("amount").GetDecimal()));
         Assert.Equal(0, await SyncAsync());

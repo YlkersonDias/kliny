@@ -24,8 +24,8 @@ public sealed class CategoryRuleFixture : IAsyncLifetime
         Token = await Api.RegisterAsync("regras@kliny.test");
         LimitToken = await Api.RegisterAsync("regras-limite@kliny.test");
         using var client = Api.Client(Token);
-        Food = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Alimentação" }, Ct));
-        Home = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Moradia" }, Ct));
+        Food = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Feira" }, Ct));
+        Home = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Casa e contas" }, Ct));
         using var income = await client.PostAsJsonAsync("/api/transactions", new { description = "Salário", amount = 5000m, date = "2021-01-01" }, Ct);
         income.EnsureSuccessStatusCode();
     }
@@ -83,14 +83,14 @@ public class CategoryRuleTests(CategoryRuleFixture fixture) : IClassFixture<Cate
         var rule = (await client.GetFromJsonAsync<JsonElement>("/api/category-rules", Ct)).EnumerateArray()
             .Single(r => r.GetProperty("id").GetInt32() == id);
         Assert.Equal("padaria", rule.GetProperty("pattern").GetString());
-        Assert.Equal("Alimentação", rule.GetProperty("categoryName").GetString());
+        Assert.Equal("Feira", rule.GetProperty("categoryName").GetString());
 
         using (var update = await client.PutAsJsonAsync($"/api/category-rules/{id}", new { pattern = "padoca", categoryId = fixture.Home }, Ct))
         {
             Assert.Equal(HttpStatusCode.OK, update.StatusCode);
             var updated = await update.Content.ReadFromJsonAsync<JsonElement>(Ct);
             Assert.Equal("padoca", updated.GetProperty("pattern").GetString());
-            Assert.Equal("Moradia", updated.GetProperty("categoryName").GetString());
+            Assert.Equal("Casa e contas", updated.GetProperty("categoryName").GetString());
         }
 
         using (var delete = await client.DeleteAsync($"/api/category-rules/{id}", Ct))

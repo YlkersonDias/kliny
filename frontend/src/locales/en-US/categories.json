@@ -14,9 +14,10 @@
     "yours": "Your categories",
     "loading": "Loading categories…",
     "empty": "No categories yet. Create the first one above.",
-    "rename": "Rename {{name}}",
+    "rename": "Edit {{name}}",
     "delete": "Delete {{name}}",
-    "newName": "New name for {{name}}"
+    "newName": "Name of {{name}}",
+    "editTitle": "Edit category"
   },
   "delete": {
     "title": "Delete category",
@@ -54,5 +55,48 @@
     "applied_zero": "No transactions changed.",
     "applied_one": "{{count}} transaction updated.",
     "applied_other": "{{count}} transactions updated."
+  },
+  "appearance": {
+    "color": "Color",
+    "icon": "Icon",
+    "preview": "Preview",
+    "colors": {
+      "blue": "Blue",
+      "indigo": "Indigo",
+      "purple": "Purple",
+      "pink": "Pink",
+      "orange": "Orange",
+      "amber": "Amber",
+      "teal": "Teal",
+      "green": "Green",
+      "brown": "Brown",
+      "gray": "Gray"
+    },
+    "icons": {
+      "cart": "Groceries",
+      "home": "Home",
+      "car": "Car",
+      "bus": "Bus",
+      "food": "Restaurant",
+      "coffee": "Coffee",
+      "health": "Health",
+      "education": "Education",
+      "leisure": "Leisure",
+      "gift": "Gift",
+      "pets": "Pets",
+      "clothes": "Clothes",
+      "salary": "Salary",
+      "invest": "Investment",
+      "travel": "Travel",
+      "bills": "Bills",
+      "phone": "Phone",
+      "streaming": "Streaming",
+      "gym": "Gym",
+      "beauty": "Beauty",
+      "baby": "Baby",
+      "tools": "Repairs",
+      "savings": "Savings",
+      "tag": "Other"
+    }
   }
 }

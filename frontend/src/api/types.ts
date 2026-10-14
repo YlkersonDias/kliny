@@ -35,13 +35,19 @@ export interface PagedResponse<T> {
   totalCount: number
 }
 
+// color e icon: chaves de lib/categoryAppearance.ts; nulas, cor neutra e etiqueta.
 export interface Category {
   id: number
   name: string
+  color: string | null
+  icon: string | null
 }
 
 export interface CategoryRequest {
   name: string
+  // O PUT grava o que vier: quem edita manda os três campos.
+  color?: string | null
+  icon?: string | null
 }
 
 // amount com o sinal do banco: positivo = receita, negativo = gasto.

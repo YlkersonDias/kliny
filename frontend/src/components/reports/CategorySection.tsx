@@ -1,9 +1,12 @@
 import { lazy } from 'react'
 import { useTranslation } from 'react-i18next'
 import type { CategoryReportType, CategoryTotal } from '../../api/types'
+import { useCategories } from '../../hooks/useCategories'
+import { categoryLook } from '../../lib/categoryAppearance'
 import { categoryName, formatPercent, toSlices, totalOf } from '../../lib/categoryChart'
 import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { ChartFigure } from '../charts/ChartFigure'
+import { CategoryIcon } from '../ui/CategoryIcon'
 import { ChoiceChip } from '../ui/ChoiceChip'
 
 const CategoryDonut = lazy(() => import('./CategoryDonut'))
@@ -24,7 +27,9 @@ function signed(type: CategoryReportType, value: number): string {
 export function CategorySection({ type, rows, onTypeChange, isRefreshing = false }: CategorySectionProps) {
   const { t } = useTranslation('reports')
   const isExpense = type === 'expense'
-  const slices = toSlices(rows)
+  const categories = useCategories()
+  // Cada fatia na cor da categoria (sem categoria, cinza); categoria que não está na lista também.
+  const slices = toSlices(rows, (id) => categoryLook(categories.data?.find((category) => category.id === id)))
   const total = totalOf(rows)
   const top = slices[0]
 
@@ -52,16 +57,18 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
                 {/* Legenda visual (a tabela abaixo traz as mesmas informações para todos). */}
                 <ol className="min-w-0 divide-y divide-border">
                   {slices.map((slice) => (
-                    <li key={slice.key} className="grid grid-cols-[1.5rem_0.875rem_minmax(0,1fr)_auto_auto] items-center gap-2.5 py-2 text-sm tabular-nums">
+                    <li key={slice.key} className="grid grid-cols-[1.5rem_1.5rem_minmax(0,1fr)_auto_auto] items-center gap-2.5 py-2 text-sm tabular-nums">
                       <span className="flex size-[1.375rem] items-center justify-center rounded-full border-[1.5px] border-foreground bg-surface text-xs font-bold text-foreground">
                         {slice.rank}
                       </span>
-                      <span
-                        className="size-3.5 rounded-[3px]"
-                        style={slice.isOther
-                          ? { background: 'repeating-linear-gradient(45deg, var(--color-border) 0 3px, var(--color-muted) 3px 4px)' }
-                          : { background: slice.color }}
-                      />
+                      {slice.look ? (
+                        <CategoryIcon look={slice.look} size="size-6" />
+                      ) : (
+                        <span
+                          className="size-3.5 justify-self-center rounded-[3px]"
+                          style={{ background: 'repeating-linear-gradient(45deg, var(--color-border) 0 3px, var(--color-muted) 3px 4px)' }}
+                        />
+                      )}
                       <span className={`truncate ${slice.isUncategorized ? 'italic text-muted' : 'text-foreground'}`} title={slice.name}>
                         {slice.name}
                       </span>

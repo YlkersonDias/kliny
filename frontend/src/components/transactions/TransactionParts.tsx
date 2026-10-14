@@ -1,6 +1,8 @@
 import { useTranslation } from 'react-i18next'
 import type { Transaction } from '../../api/types'
+import { useCategories } from '../../hooks/useCategories'
 import { formatSigned } from '../../lib/money'
+import { CategoryIcon } from '../ui/CategoryIcon'
 import { Icon } from '../ui/Icon'
 
 // Peças de uma linha de movimentação, do ponto de vista da conta (sinal do banco).
@@ -65,9 +67,19 @@ export function InstallmentMark({ transaction }: { transaction: Transaction }) {
   )
 }
 
+// O nome da categoria com o ícone colorido dela ao lado (a cor e o ícone vêm da lista de categorias,
+// já em cache). A seta de receita ou gasto continua à esquerda da linha: a cor da categoria nunca
+// substitui o sinal e o ícone do valor.
 export function TransactionCategory({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation(['transactions', 'common'])
+  const categories = useCategories()
   if (transaction.vaultId !== null) return <span className="text-vault-text">{t('kind.vault')}</span>
   if (transaction.categoryName === null) return <span className="text-muted">{t('common:uncategorized')}</span>
-  return <span className="text-foreground">{transaction.categoryName}</span>
+  const category = categories.data?.find((item) => item.id === transaction.categoryId)
+  return (
+    <span className="inline-flex max-w-full items-center gap-1.5 align-middle text-foreground">
+      <CategoryIcon category={category} size="size-5" />
+      <span className="min-w-0 truncate">{transaction.categoryName}</span>
+    </span>
+  )
 }
