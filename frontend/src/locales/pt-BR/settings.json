@@ -28,6 +28,10 @@
   "account": {
     "title": "Privacidade e conta",
     "privacyLink": "Ler a política de privacidade",
+    "exportDescription": "Baixe uma cópia de tudo o que está na sua conta: um arquivo .zip com os dados completos (JSON) e as movimentações numa planilha (CSV, abre no Excel).",
+    "exportButton": "Baixar meus dados",
+    "exportDone": "Arquivo baixado. Ele tem os seus dados financeiros: guarde em lugar seguro.",
+    "exportError": "Não foi possível baixar os dados.",
     "deleteDescription": "Excluir a conta apaga para sempre todas as suas movimentações, categorias e cofres. Não dá para desfazer.",
     "deleteButton": "Excluir minha conta",
     "confirmTitle": "Excluir a conta?",

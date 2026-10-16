@@ -173,6 +173,8 @@ public sealed partial class MySqlApi : IAsyncLifetime
             builder.UseSetting("RateLimits:PasswordResetPerIp:PermitLimit", "1000");
             // E o pedido de cadastro: cada conta de teste agora passa por ele (5 por hora em produção).
             builder.UseSetting("RateLimits:RegisterPerIp:PermitLimit", "1000");
+            // E a exportação (5 por hora em produção), conferida no RateLimitingTests.
+            builder.UseSetting("RateLimits:ExportPerIp:PermitLimit", "1000");
             builder.UseSetting("Email:AppUrl", "https://kliny.test");
 
             builder.ConfigureServices(services =>

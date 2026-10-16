@@ -34,10 +34,24 @@ interface RequestOptions {
   headers?: Record<string, string>
 }
 
-export async function apiRequest<T>(
+export async function apiRequest<T>(path: string, options: RequestOptions = {}): Promise<T> {
+  const response = await send(path, options)
+  // 204, ou 202 do pedido de cadastro: sucesso sem corpo.
+  const text = await response.text()
+  if (!text) return undefined as T
+  return JSON.parse(text) as T
+}
+
+// Resposta que é um arquivo (a exportação dos dados), com os mesmos erros e o mesmo 401 do apiRequest.
+export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
+  const response = await send(path, options)
+  return response.blob()
+}
+
+async function send(
   path: string,
-  { method = 'GET', body, auth = true, signal, headers: extraHeaders }: RequestOptions = {},
-): Promise<T> {
+  { method = 'GET', body, auth = true, signal, headers: extraHeaders }: RequestOptions,
+): Promise<Response> {
   const token = auth ? getSessionToken() : null
   // Accept-Language: a API responde as mensagens de erro no idioma da tela.
   const headers = new Headers({ Accept: 'application/json', 'Accept-Language': currentLanguage() })
@@ -66,11 +80,7 @@ export async function apiRequest<T>(
     }
     throw toApiError(response.status, problem)
   }
-
-  // 204, ou 202 do pedido de cadastro: sucesso sem corpo.
-  const text = await response.text()
-  if (!text) return undefined as T
-  return JSON.parse(text) as T
+  return response
 }
 
 async function readProblem(response: Response): Promise<ProblemDetails | null> {

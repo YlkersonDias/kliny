@@ -83,6 +83,7 @@ builder.Services.AddScoped<IRecurrenceService, RecurrenceService>();
 builder.Services.AddScoped<IInstallmentService, InstallmentService>();
 builder.Services.AddScoped<ICategoryRuleService, CategoryRuleService>();
 builder.Services.AddScoped<IImportService, ImportService>();
+builder.Services.AddScoped<IExportService, ExportService>();
 
 // Recuperação de senha e envio de e-mail (seção Email; a chave só no deploy/.env). O e-mail sai em
 // segundo plano (EmailWorker), para a resposta não demorar mais quando a conta existe.

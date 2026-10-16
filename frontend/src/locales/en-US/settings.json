@@ -28,6 +28,10 @@
   "account": {
     "title": "Privacy and account",
     "privacyLink": "Read the privacy policy",
+    "exportDescription": "Download a copy of everything in your account: a .zip file with the full data (JSON) and your transactions as a spreadsheet (CSV, opens in Excel).",
+    "exportButton": "Download my data",
+    "exportDone": "File downloaded. It contains your financial data: keep it somewhere safe.",
+    "exportError": "Could not download your data.",
     "deleteDescription": "Deleting your account permanently erases all your transactions, categories and vaults. It cannot be undone.",
     "deleteButton": "Delete my account",
     "confirmTitle": "Delete your account?",

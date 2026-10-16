@@ -7,13 +7,14 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.RateLimiting;
 
-// Limite por IP no login e no cadastro (AddRateLimiter nativo). O limite por e-mail do login
+// Limite por IP no login, no cadastro, na recuperação de senha e na exportação (AddRateLimiter nativo). O limite por e-mail do login
 // fica no LoginThrottle, porque o rate limiter decide antes de ler o corpo da requisição.
 public static class RateLimitingSetup
 {
     public const string LoginPolicy = "login";
     public const string RegisterPolicy = "register";
     public const string PasswordResetPolicy = "password-reset";
+    public const string ExportPolicy = "export";
 
     // A janela deslizante anda em 6 pedaços: na de 1 minuto, a cada 10 segundos.
     private const int SegmentsPerWindow = 6;
@@ -34,6 +35,7 @@ public static class RateLimitingSetup
             options.AddPolicy(LoginPolicy, context => PerIp(context, limits => limits.LoginPerIp));
             options.AddPolicy(RegisterPolicy, context => PerIp(context, limits => limits.RegisterPerIp));
             options.AddPolicy(PasswordResetPolicy, context => PerIp(context, limits => limits.PasswordResetPerIp));
+            options.AddPolicy(ExportPolicy, context => PerIp(context, limits => limits.ExportPerIp));
             options.OnRejected = OnRejectedAsync;
         });
 
@@ -69,6 +71,7 @@ public static class RateLimitingSetup
         {
             RegisterPolicy => Limit(context, limits => limits.RegisterPerIp).Window,
             PasswordResetPolicy => Limit(context, limits => limits.PasswordResetPerIp).Window,
+            ExportPolicy => Limit(context, limits => limits.ExportPerIp).Window,
             _ => Limit(context, limits => limits.LoginPerIp).Window,
         };
 
