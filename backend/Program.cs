@@ -61,11 +61,14 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
         options.Events = new JwtBearerEvents { OnTokenValidated = TokenVersionValidation.ValidateAsync };
     });
 
-// Todo endpoint exige login, salvo os marcados com [AllowAnonymous] (só cadastro e login).
-// Um controller novo sem [Authorize] continua protegido. O OpenAPI também exige login.
+// Todo endpoint exige login, salvo os marcados com [AllowAnonymous]: login (com senha e com o Google),
+// cadastro (register e register/complete) e recuperação de senha (forgot-password e reset-password),
+// conferidos na lista PublicEndpoints do AuthorizationTests. Um controller novo sem [Authorize]
+// continua protegido. O OpenAPI também exige login.
 builder.Services.AddAuthorization(options => options.FallbackPolicy = options.DefaultPolicy);
 
-// Limite de tentativas no login e no cadastro (seção RateLimits do appsettings.json).
+// Limites por IP no login, no cadastro, na recuperação de senha e na exportação dos dados (seção
+// RateLimits do appsettings.json).
 builder.Services.AddAppRateLimiting(builder.Configuration);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
