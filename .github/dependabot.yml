@@ -1,6 +1,6 @@
 # Dependabot: um PR por semana e por ecossistema quando sai versão nova (as atualizações de segurança
 # chegam assim que são publicadas, se estiverem ligadas em Settings → Advanced Security). Cada PR
-# passa pelo CI e só entra com a revisão do mantenedor. As travas abaixo vêm do CLAUDE.md.
+# passa pelo CI e só entra com a revisão do mantenedor.
 version: 2
 updates:
   - package-ecosystem: nuget

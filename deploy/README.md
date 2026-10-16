@@ -121,7 +121,7 @@ docker compose --profile tunnel up -d
 
 **Os quatro, nesta ordem.** O `build` remonta as imagens da API, do site **e das migrations**: sem ele, o `migrate` usa a imagem antiga e não aplica a migration nova (aconteceu na publicação da v1.2.0, corrigido na hora).
 
-Para publicar uma versão marcada em vez do `main` atualizado, troque o `git pull` por `git fetch --tags` e `git checkout vX.Y.Z`. Para voltar a uma versão anterior, o mesmo, com a versão anterior (ver "Versões e como voltar" no `CLAUDE.md`).
+Para publicar uma versão marcada em vez do `main` atualizado, troque o `git pull` por `git fetch --tags` e `git checkout vX.Y.Z`. Para voltar a uma versão anterior, o mesmo, com a versão anterior. A release de cada versão diz se ela tem migration: uma migration que só acrescenta (tabela ou coluna opcional) não atrapalha o código anterior; uma que remove ou muda algo precisa do `Down` aplicado com o `kliny_migrator`, com backup antes.
 
 O `migrate` não faz nada se não houver migration nova. O site fica fora do ar por alguns segundos, enquanto os containers são trocados; quem estiver com o app aberto vê o aviso de nova versão.
 
