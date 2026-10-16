@@ -1,6 +1,6 @@
 {
   "title": "Privacy policy",
-  "updated": "Updated on October 10, 2026.",
+  "updated": "Updated on October 16, 2026.",
   "intro": "{{appName}} is a personal finance app. This page explains what data it keeps, why, and what you can do about it.",
   "who": {
     "title": "Who looks after your data",
@@ -33,7 +33,7 @@
   },
   "rights": {
     "title": "Your rights",
-    "body": "Under the Brazilian General Data Protection Law (LGPD), you can confirm what data we have, ask for a copy, correct it and ask for it to be deleted. You can delete your account and all its data yourself in Settings. For other requests, use the contact above."
+    "body": "Under the Brazilian General Data Protection Law (LGPD), you can confirm what data we have, ask for a copy, correct it and ask for it to be deleted. You can download a copy of all your data and delete your account yourself in Settings. For other requests, use the contact above."
   },
   "changes": {
     "title": "Changes to this policy",

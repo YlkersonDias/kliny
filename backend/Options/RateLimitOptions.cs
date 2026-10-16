@@ -3,7 +3,7 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.Options;
 
-// Limites de tentativas do login, do cadastro e da recuperação de senha (seção "RateLimits" do appsettings.json).
+// Limites de tentativas do login, do cadastro, da recuperação de senha e da exportação (seção "RateLimits" do appsettings.json).
 public class RateLimitOptions
 {
     public const string SectionName = "RateLimits";
@@ -19,6 +19,10 @@ public class RateLimitOptions
     // usa o Kliny para mandar e-mail a muitos endereços.
     [Required, ValidateObjectMembers]
     public SlidingWindowLimit PasswordResetPerIp { get; set; } = new() { PermitLimit = 10, WindowSeconds = 3600 };
+
+    // Exportação dos dados: monta o arquivo com tudo da conta, então é mais cara que uma consulta.
+    [Required, ValidateObjectMembers]
+    public SlidingWindowLimit ExportPerIp { get; set; } = new() { PermitLimit = 5, WindowSeconds = 3600 };
 
     // Por e-mail, só no login: trava quem troca de IP para atacar a mesma conta.
     [Required, ValidateObjectMembers]

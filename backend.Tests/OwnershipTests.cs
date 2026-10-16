@@ -414,6 +414,21 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
+    [Fact]
+    public async Task Exportacao_de_B_nao_traz_nada_de_A()
+    {
+        using var b = AsB();
+        using var response = await b.GetAsync("/api/account/export", Ct);
+        Assert.Equal(HttpStatusCode.OK, response.StatusCode);
+        var (json, csv) = await ExportTests.ReadZipAsync(response);
+
+        var text = json.GetRawText() + csv;
+        foreach (var ofA in new[] { "a@kliny.test", "Mercado A", "Salário A", "Viagem A" })
+            Assert.DoesNotContain(ofA, text);
+        Assert.Equal("b@kliny.test", json.GetProperty("account").GetProperty("email").GetString());
+        Assert.Contains("Salário B", csv);
+    }
+
     // A, vista por ela mesma, continua como o fixture criou.
     private async Task AssertDataOfAUnchanged()
     {

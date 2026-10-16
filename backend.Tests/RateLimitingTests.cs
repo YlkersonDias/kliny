@@ -120,6 +120,27 @@ public class RateLimitingTests
     }
 
     [Fact]
+    public async Task Exportacao_tem_limite_por_ip()
+    {
+        // O limite vem antes do login: sem token, as 5 primeiras respondem 401 e a 6ª, 429.
+        using var app = new TestApp();
+        var client = app.CreateClient();
+        for (var i = 0; i < 5; i++)
+        {
+            using var request = new HttpRequestMessage(HttpMethod.Get, "/api/account/export");
+            request.Headers.Add(TestApp.ClientIpHeader, "203.0.113.9");
+            using var refused = await client.SendAsync(request, Ct);
+            Assert.Equal(HttpStatusCode.Unauthorized, refused.StatusCode);
+        }
+
+        using var blocked = new HttpRequestMessage(HttpMethod.Get, "/api/account/export");
+        blocked.Headers.Add(TestApp.ClientIpHeader, "203.0.113.9");
+        using var response = await client.SendAsync(blocked, Ct);
+        Assert.Equal(HttpStatusCode.TooManyRequests, response.StatusCode);
+        Assert.Equal(TimeSpan.FromHours(1), response.Headers.RetryAfter?.Delta);
+    }
+
+    [Fact]
     public async Task Ips_diferentes_tem_limites_separados()
     {
         using var app = new TestApp();

@@ -465,4 +465,17 @@ public static class Messages
     public static string TimelineDayMaxDays => Text(
         "Com agrupamento por dia, o período deve ter no máximo {0} dias.",
         "When grouping by day, the period must be at most {0} days.");
+
+    // Exportação dos dados: cabeçalho e tipos do CSV das movimentações.
+
+    public static string ExportCsvDate => Text("Data", "Date");
+    public static string ExportCsvDescription => Text("Descrição", "Description");
+    public static string ExportCsvAmount => Text("Valor", "Amount");
+    public static string ExportCsvType => Text("Tipo", "Type");
+    public static string ExportCsvCategory => Text("Categoria", "Category");
+    public static string ExportCsvVault => Text("Cofre", "Vault");
+    public static string ExportKindIncome => Text("Receita", "Income");
+    public static string ExportKindExpense => Text("Gasto", "Expense");
+    public static string ExportKindVaultDeposit => Text("Depósito no cofre", "Vault deposit");
+    public static string ExportKindVaultWithdrawal => Text("Retirada do cofre", "Vault withdrawal");
 }

@@ -6,8 +6,9 @@ import { Button } from '../ui/Button'
 import { ConfirmDialog } from '../ui/ConfirmDialog'
 import { GoogleButton } from '../ui/GoogleButton'
 import { Input } from '../ui/Input'
+import { ExportData } from './ExportData'
 
-// "Privacidade e conta" em /configuracoes: link para a política e a exclusão da conta.
+// "Privacidade e conta" em /configuracoes: link para a política, a cópia dos dados e a exclusão da conta.
 // Excluir exige a senha (ou, em conta criada pelo Google, entrar de novo com o Google) e marcar a
 // caixa de que nada pode ser desfeito; a sessão só termina depois que a API confirmou (como no
 // "Sair de todos os dispositivos").
@@ -59,7 +60,8 @@ export function AccountSection() {
           {t('account.privacyLink')}
         </Link>
       </p>
-      <p className="mt-4 text-sm text-muted">{t('account.deleteDescription')}</p>
+      <ExportData />
+      <p className="mt-6 text-sm text-muted">{t('account.deleteDescription')}</p>
       <Button variant="danger" className="mt-4" onClick={openDialog}>
         {t('account.deleteButton')}
       </Button>
