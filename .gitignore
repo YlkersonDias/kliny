@@ -417,3 +417,6 @@ FodyWeavers.xsd
 # Claude Code
 .claude/skills/
 .claude/settings.local.json
+# Claude Code: configurações locais e notas pessoais (CLAUDE.local.md), nunca no Git.
+.claude/
+CLAUDE.local.md

@@ -1,6 +1,6 @@
 # Dependabot: um PR por semana e por ecossistema quando sai versão nova (as atualizações de segurança
 # chegam assim que são publicadas, se estiverem ligadas em Settings → Advanced Security). Cada PR
-# passa pelo CI e só entra com a revisão do Ylkerson. As travas abaixo vêm do CLAUDE.md.
+# passa pelo CI e só entra com a revisão do mantenedor. As travas abaixo vêm do CLAUDE.md.
 version: 2
 updates:
   - package-ecosystem: nuget
@@ -50,6 +50,10 @@ updates:
     groups:
       imagens:
         patterns: ["*"]
+    ignore:
+      # O Node fica na linha LTS (24): as versões ímpares não são LTS, e trocar de LTS é decisão à parte.
+      - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
 
   # Imagens do docker-compose.yml (MySQL e cloudflared).
   - package-ecosystem: docker-compose
