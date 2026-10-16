@@ -23,6 +23,8 @@ public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null
         // Development só para o que só existe lá (o OpenAPI).
         builder.UseEnvironment(environment);
         builder.UseSetting("Jwt:Key", new string('k', 64));
+        // O appsettings.json só aceita o Host localhost; alguns testes usam https://kliny.test.
+        builder.UseSetting("AllowedHosts", "localhost;kliny.test");
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
             builder.UseSetting(key, value);
 

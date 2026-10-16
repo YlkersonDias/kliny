@@ -1,4 +1,6 @@
 # Build e testes a cada push na main e em cada pull request.
+# As actions ficam fixadas pelo SHA do commit (a tag pode ser movida pelo dono); o Dependabot
+# (.github/dependabot.yml) abre um PR quando sai versão nova, com o número no comentário.
 # Localmente o Smart App Control bloqueia o Backend.dll recompilado; aqui ele não existe.
 name: CI
 
@@ -15,6 +17,25 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
+  secrets:
+    name: Segredos (gitleaks)
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      # Histórico inteiro: um segredo apagado num commit depois continua no Git.
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+
+      # Binário oficial do gitleaks, fixado pelo digest da imagem. A exceção dos falsos positivos
+      # (valores de exemplo e de teste) fica no .gitleaks.toml; qualquer outro achado quebra o CI.
+      # --redact: o valor achado nunca aparece no log.
+      - name: Procurar segredos no histórico
+        run: >-
+          docker run --rm --user "$(id -u):$(id -g)" -v "$GITHUB_WORKSPACE:/repo:ro"
+          ghcr.io/gitleaks/gitleaks:v8.30.1@sha256:c00b6bd0aeb3071cbcb79009cb16a60dd9e0a7c60e2be9ab65d25e6bc8abbb7f
+          git /repo --config /repo/.gitleaks.toml --redact --no-banner --verbose
+
   backend:
     name: Backend (build e testes)
     runs-on: ubuntu-latest
@@ -34,9 +55,9 @@ jobs:
           --health-timeout=5s
           --health-retries=30
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-dotnet@v6
+      - uses: actions/setup-dotnet@a98b56852c35b8e3190ac28c8c2271da59106c68 # v6.0.0
         with:
           dotnet-version: 10.0.x
 
@@ -62,9 +83,9 @@ jobs:
       run:
         working-directory: frontend
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      - uses: actions/setup-node@v7
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 24
           cache: npm
@@ -91,7 +112,7 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
-      - uses: actions/checkout@v7
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # S.7: as imagens do deploy no PC (deploy/) continuam montando. Nada é publicado: só o build.
       - name: Conferir o docker-compose.yml

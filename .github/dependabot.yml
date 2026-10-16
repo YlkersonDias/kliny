@@ -1,0 +1,66 @@
+# Dependabot: um PR por semana e por ecossistema quando sai versão nova (as atualizações de segurança
+# chegam assim que são publicadas, se estiverem ligadas em Settings → Advanced Security). Cada PR
+# passa pelo CI e só entra com a revisão do Ylkerson. As travas abaixo vêm do CLAUDE.md.
+version: 2
+updates:
+  - package-ecosystem: nuget
+    directories: ["/backend", "/backend.Tests"]
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      nuget:
+        patterns: ["*"]
+    ignore:
+      # O Pomelo 9 só suporta o EF Core 9.0.x: o EF fica nessa linha até sair um Pomelo compatível.
+      - dependency-name: "Microsoft.EntityFrameworkCore*"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "Pomelo.EntityFrameworkCore.MySql"
+        update-types: ["version-update:semver-major"]
+
+  - package-ecosystem: npm
+    directory: "/frontend"
+    schedule:
+      interval: weekly
+      day: monday
+    open-pull-requests-limit: 5
+    groups:
+      npm-desenvolvimento:
+        dependency-type: development
+      npm-producao:
+        dependency-type: production
+
+  # As actions do CI, fixadas pelo SHA do commit: o Dependabot troca o SHA e o comentário da versão.
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      actions:
+        patterns: ["*"]
+
+  # Imagens dos Dockerfiles do deploy (SDK e runtime do .NET, Node, nginx).
+  - package-ecosystem: docker
+    directory: "/deploy"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      imagens:
+        patterns: ["*"]
+
+  # Imagens do docker-compose.yml (MySQL e cloudflared).
+  - package-ecosystem: docker-compose
+    directory: "/deploy"
+    schedule:
+      interval: weekly
+      day: monday
+    groups:
+      compose:
+        patterns: ["*"]
+    ignore:
+      # O MySQL fica na linha 8.4 LTS: trocar de linha é decisão à parte, com backup e teste.
+      - dependency-name: "mysql"
+        update-types: ["version-update:semver-major", "version-update:semver-minor"]

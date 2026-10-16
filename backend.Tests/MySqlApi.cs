@@ -165,6 +165,8 @@ public sealed partial class MySqlApi : IAsyncLifetime
         {
             builder.UseEnvironment("Testing");
             builder.UseSetting("Jwt:Key", new string('k', 64));
+            // O appsettings.json só aceita o Host localhost; alguns testes usam https://kliny.test.
+            builder.UseSetting("AllowedHosts", "localhost;kliny.test");
             // O login com o Google, o vínculo e a exclusão de conta dividem o limite por IP do login
             // (10 por minuto), e cada classe de teste faz mais que isso. O limite por IP é conferido
             // no RateLimitingTests, sem MySQL; o bloqueio por e-mail continua o de produção.
