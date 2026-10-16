@@ -223,7 +223,7 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         var lines = Enumerable.Range(1, 30)
             .Select(i => Line("341:0010", $"S{i}", "2022-10-01", -i, $"Simultânea {i} Imp10")).ToArray();
 
-        var results = await Task.WhenAll(Enumerable.Range(0, 5).Select(_ => ImportAsync(lines)));
+        var results = await Task.WhenAll(Enumerable.Range(0, 10).Select(_ => ImportAsync(lines)));
 
         Assert.Equal(30, results.Sum(r => r.Created));
         Assert.All(results, r => Assert.Equal(30, r.Created + r.Skipped));

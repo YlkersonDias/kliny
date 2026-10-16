@@ -75,8 +75,9 @@ public class ImportService(AppDbContext db) : IImportService
             && await db.Categories.CountAsync(c => c.UserId == userId && categoryIds.Contains(c.Id)) != categoryIds.Count)
             throw new BusinessRuleException(Messages.CategoryNotFound);
 
-        // Duas importações do mesmo arquivo ao mesmo tempo (duas abas): a que chegar depois esbarra
-        // no índice único, desfaz tudo e tenta de novo, já pulando o que a outra gravou.
+        // Duas importações do mesmo arquivo ao mesmo tempo (duas abas) passam uma de cada vez pela
+        // trava do usuário (InsertAsync). O índice único continua garantindo que cada linha entra
+        // uma vez só; se mesmo assim houver colisão ou deadlock, desfaz tudo e tenta de novo.
         for (var attempt = 1; ; attempt++)
         {
             try
@@ -93,6 +94,11 @@ public class ImportService(AppDbContext db) : IImportService
     private async Task<ImportResponse> InsertAsync(int userId, IReadOnlyList<ImportLine> lines, string[] keys)
     {
         await using var dbTransaction = await db.Database.BeginTransactionAsync();
+        // Trava a linha do usuário, como o depósito do VaultService: a segunda importação simultânea
+        // espera a primeira terminar. Sem a trava, as duas leem as chaves antes de qualquer uma
+        // gravar, colidem no índice único e, repetindo na hora, podem esgotar as tentativas. A leitura
+        // das chaves vem depois da trava, então enxerga o que a anterior gravou e só pula.
+        await db.Database.ExecuteSqlAsync($"SELECT Id FROM Users WHERE Id = {userId} FOR UPDATE");
         var imported = await ExistingKeysAsync(userId, keys);
 
         var created = 0;
