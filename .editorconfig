@@ -1,0 +1,25 @@
+root = true
+
+[*]
+charset = utf-8
+indent_style = space
+indent_size = 2
+insert_final_newline = true
+trim_trailing_whitespace = true
+
+[*.cs]
+indent_size = 4
+
+[*.ps1]
+indent_size = 4
+# O PowerShell 5.1 só lê acentos em UTF-8 com BOM.
+charset = utf-8-bom
+
+[*.sh]
+end_of_line = lf
+
+[*.conf]
+indent_size = 4
+
+[*.md]
+trim_trailing_whitespace = false
