@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Convenção de sinal: nos relatórios, gastos e depósitos em cofre vêm positivos.
+// Nos relatórios, gastos e depósitos em cofre vêm positivos.
 [ApiController]
 [Authorize]
 [Route("api/reports")]

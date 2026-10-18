@@ -2,11 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { useTheme } from '../../theme/useTheme'
 import { Icon } from './Icon'
 
-// Botão liga/desliga do modo escuro: nome fixo e aria-pressed ("Modo escuro, ativado").
-// Troca para o oposto do tema na tela e guarda como Claro ou Escuro (sai do "Sistema", se estava
-// nele). O ícone mostra o tema atual: lua no escuro, sol no claro.
-// 44 px no celular e 40 px a partir do md, alinhado ao link de configurações do menu lateral.
-// onSoft: sobre o fundo lilás (login e cadastro), onde muted não tem contraste no tema claro.
+// Troca para o oposto do tema na tela e guarda como Claro ou Escuro (sai do "Sistema").
+// onSoft: sobre o fundo lilás, onde muted não tem contraste no tema claro.
 export function ThemeToggle({ onSoft = false, className = '' }: { onSoft?: boolean; className?: string }) {
   const { t } = useTranslation('layout')
   const { theme, setPreference } = useTheme()

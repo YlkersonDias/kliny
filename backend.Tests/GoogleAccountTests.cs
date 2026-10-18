@@ -5,9 +5,6 @@ using static Backend.Tests.FakeGoogleTokenValidator;
 
 namespace Backend.Tests;
 
-// Vincular, desvincular e excluir conta com o Google, contra o MySQL, com o validador falso.
-// O teste de que outra pessoa não mexe no vínculo fica no OwnershipTests (regra 19).
-// 3 cadastros nesta classe.
 public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -42,7 +39,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
         var token = await api.RegisterAsync("senha-google@kliny.test");
         var id = (await MeAsync(token)).GetProperty("id").GetInt32();
 
-        // Comprovante inválido: nada muda.
         using (var invalid = await PostAsync(token, "/api/auth/google/link", new { credential = "lixo" }))
         {
             Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
@@ -56,7 +52,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.True((await link.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("googleLinked").GetBoolean());
         }
 
-        // Vincular de novo a mesma conta não muda nada.
         using (var again = await PostAsync(token, "/api/auth/google/link", new { credential = Credential("g-link", "pessoa@outlook.com") }))
             Assert.Equal(HttpStatusCode.OK, again.StatusCode);
 
@@ -66,7 +61,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.Equal(id, (await signIn.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("user").GetProperty("id").GetInt32());
         }
 
-        // Outra conta do Google com a primeira ainda vinculada: 409.
         using (var second = await PostAsync(token, "/api/auth/google/link", new { credential = Credential("g-link-2", "x@gmail.com") }))
         {
             Assert.Equal(HttpStatusCode.Conflict, second.StatusCode);
@@ -79,7 +73,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.False((await unlink.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("googleLinked").GetBoolean());
         }
 
-        // Desvinculada, a conta Google (de e-mail sem autoridade) não entra mais nem cria conta.
         using var after = await PostAsync(null, "/api/auth/google", new { credential = Credential("g-link", "pessoa@outlook.com") });
         Assert.Equal(HttpStatusCode.Unauthorized, after.StatusCode);
     }
@@ -107,7 +100,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.Equal(reauthFailed, await DetailOf(nothing));
         }
 
-        // Senha não serve: a conta não tem senha.
         using (var password = await PostAsync(token, "/api/auth/delete-account", new { password = "senha12345" }))
             Assert.Equal(reauthFailed, await DetailOf(password));
 
@@ -124,7 +116,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
         using var me = await client.GetAsync("/api/auth/me", Ct);
         Assert.Equal(HttpStatusCode.Unauthorized, me.StatusCode);
 
-        // Entrar de novo com o Google cria uma conta nova, vazia.
         var (_, newId) = await GoogleOnlyAsync("g-excluir", "excluir-google@gmail.com");
         Assert.NotEqual(id, newId);
     }
@@ -136,7 +127,6 @@ public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
         using (var link = await PostAsync(token, "/api/auth/google/link", new { credential = Credential("g-senha", "senha-e-google@gmail.com") }))
             Assert.Equal(HttpStatusCode.OK, link.StatusCode);
 
-        // Com senha, o Google não substitui a senha na confirmação.
         using (var onlyGoogle = await PostAsync(token, "/api/auth/delete-account",
                    new { googleCredential = Credential("g-senha", "senha-e-google@gmail.com") }))
         {

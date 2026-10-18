@@ -41,7 +41,7 @@ export default function App() {
         </Route>
       </Route>
 
-      {/* Públicas, com e sem login. A troca de senha pelo link do e-mail também abre logado. */}
+      {/* Públicas, com e sem login. */}
       <Route path="/privacidade" element={<PrivacyPage />} />
       <Route path="/esqueci-senha" element={<ForgotPasswordPage />} />
       <Route path="/redefinir-senha" element={<ResetPasswordPage />} />

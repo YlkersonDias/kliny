@@ -8,8 +8,7 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.Tests;
 
-// Vigia as rotas: só cadastro e login aceitam chamada sem login. Um endpoint novo sem proteção
-// quebra estes testes (e o CI).
+// Um endpoint novo sem proteção quebra estes testes.
 public partial class AuthorizationTests
 {
     private static readonly HashSet<string> PublicEndpoints =
@@ -24,7 +23,6 @@ public partial class AuthorizationTests
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // "POST api/vaults/{id:int}/deposit" para cada método de cada rota.
     private static List<(string Method, string Pattern)> Routes(TestApp app)
     {
         app.CreateClient().Dispose();
@@ -63,7 +61,7 @@ public partial class AuthorizationTests
         Assert.Equal(PublicEndpoints, anonymous);
     }
 
-    // Development: inclui o /openapi/v1.json, que também precisa exigir login.
+    // Development inclui o /openapi/v1.json.
     [Theory]
     [InlineData("Testing")]
     [InlineData("Development")]
@@ -76,7 +74,7 @@ public partial class AuthorizationTests
 
         foreach (var (method, pattern) in routes.Where(r => !PublicEndpoints.Contains($"{r.Method} {r.Pattern}")))
         {
-            // {id:int} e {documentName} viram "1": a autorização decide antes de ler o Id ou o corpo.
+            // A autorização decide antes de ler o Id ou o corpo.
             var path = "/" + RouteParameter().Replace(pattern, "1");
             using var request = new HttpRequestMessage(new HttpMethod(method), path);
             if (method is "POST" or "PUT")
@@ -110,7 +108,6 @@ public partial class AuthorizationTests
         using var login = await client.PostAsync("/api/auth/login", Json("""{"email":"ana@kliny.test","password":"senha-errada"}"""), Ct);
 
         Assert.Equal(HttpStatusCode.Accepted, register.StatusCode);
-        // 401 do próprio login (senha errada, pelo IAuthService falso), não da autorização.
         Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
         Assert.Equal("application/problem+json", login.Content.Headers.ContentType?.MediaType);
     }

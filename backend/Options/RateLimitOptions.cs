@@ -3,24 +3,22 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.Options;
 
-// Limites de tentativas do login, do cadastro, da recuperação de senha e da exportação (seção "RateLimits" do appsettings.json).
+// Seção "RateLimits" do appsettings.json.
 public class RateLimitOptions
 {
     public const string SectionName = "RateLimits";
 
-    // Por IP, com janela deslizante: barra o volume antes de chegar ao BCrypt.
+    // Por IP: barra o volume antes de chegar ao BCrypt.
     [Required, ValidateObjectMembers]
     public SlidingWindowLimit LoginPerIp { get; set; } = new() { PermitLimit = 10, WindowSeconds = 60 };
 
     [Required, ValidateObjectMembers]
     public SlidingWindowLimit RegisterPerIp { get; set; } = new() { PermitLimit = 5, WindowSeconds = 3600 };
 
-    // "Esqueci minha senha" e a troca pelo link, juntos: barra quem tenta adivinhar tokens e quem
-    // usa o Kliny para mandar e-mail a muitos endereços.
+    // "Esqueci minha senha" e a troca pelo link, juntos: contra adivinhar tokens e mandar e-mail em massa.
     [Required, ValidateObjectMembers]
     public SlidingWindowLimit PasswordResetPerIp { get; set; } = new() { PermitLimit = 10, WindowSeconds = 3600 };
 
-    // Exportação dos dados: monta o arquivo com tudo da conta, então é mais cara que uma consulta.
     [Required, ValidateObjectMembers]
     public SlidingWindowLimit ExportPerIp { get; set; } = new() { PermitLimit = 5, WindowSeconds = 3600 };
 
@@ -42,7 +40,6 @@ public class SlidingWindowLimit
 
 public class LoginLockout
 {
-    // Falhas dentro da janela que bloqueiam o e-mail.
     [Range(1, 100)]
     public int MaxFailures { get; set; } = 5;
 

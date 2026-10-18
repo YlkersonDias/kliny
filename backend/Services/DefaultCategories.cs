@@ -3,10 +3,7 @@ using Backend.Resources;
 
 namespace Backend.Services;
 
-// Categorias com que toda conta nova nasce, cada uma com cor e ícone, para a pessoa já poder lançar
-// sem montar a lista do zero. Os nomes saem no idioma da requisição que cria a conta (o link do
-// cadastro ou o primeiro login com o Google) e ficam gravados assim; dá para renomear e apagar.
-// As contas que já existiam não ganham nada.
+// Os nomes saem no idioma da requisição que cria a conta e ficam gravados assim.
 public static class DefaultCategories
 {
     public static List<Category> Create() =>

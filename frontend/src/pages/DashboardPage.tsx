@@ -20,7 +20,6 @@ import { currentMonthRange, formatLongDate, today as getToday } from '../lib/dat
 
 const RECENT_COUNT = 5
 
-// Bloco cinza do tamanho do conteúdo, enquanto carrega (sem pular a tela).
 function Placeholder({ className }: { className: string }) {
   return <div className={`rounded-2xl border border-border bg-surface motion-safe:animate-pulse ${className}`} />
 }
@@ -28,7 +27,7 @@ function Placeholder({ className }: { className: string }) {
 export default function DashboardPage() {
   const { t } = useTranslation(['dashboard', 'transactions', 'common'])
   usePageTitle(t('title'))
-  // Período calculado no navegador (data local); a API não escolhe período.
+  // Data local do navegador: a API não escolhe período.
   const month = currentMonthRange()
   const today = getToday()
 
@@ -129,7 +128,6 @@ export default function DashboardPage() {
   return (
     <>
       <div className="flex flex-wrap items-center justify-between gap-3">
-        {/* A data de hoje (o cartão é sobre hoje; o mês aparece em "Este mês"). */}
         <h1 className="text-2xl font-semibold text-foreground">{formatLongDate(today)}</h1>
         {recent.data && recent.data.totalCount > 0 && (
           <Button onClick={() => setForm({})}>

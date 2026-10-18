@@ -20,7 +20,6 @@ export function useBudgets(month: string) {
   })
 }
 
-// Uma alteração por categoria: limite novo (PUT) ou sem orçamento (DELETE).
 export interface BudgetChange {
   categoryId: number
   amount: number | null
@@ -35,7 +34,7 @@ export function useSaveBudgets() {
         else await setBudget(change.categoryId, change.amount)
       }
     },
-    // Mesmo se uma falhar no meio, as anteriores já foram gravadas: a lista precisa ser recarregada.
+    // Se uma falhar no meio, as anteriores já foram gravadas.
     onSettled: () => queryClient.invalidateQueries({ queryKey: budgetKeys.all }),
   })
 }

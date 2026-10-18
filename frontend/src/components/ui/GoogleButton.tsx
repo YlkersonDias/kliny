@@ -6,18 +6,14 @@ import { useTheme } from '../../theme/useTheme'
 
 interface GoogleButtonProps {
   text: GoogleButtonOptions['text']
-  // Recebe o comprovante (ID token) do Google depois que a pessoa escolhe a conta.
   onCredential: (credential: string) => void
-  // Durante o envio: o botão fica visível, mas não recebe cliques.
   disabled?: boolean
 }
 
-// Largura do botão do Google: entre 200 e 400 px (limite do Google), acompanhando o espaço.
+// Limites do Google.
 const MIN_WIDTH = 200
 const MAX_WIDTH = 400
 
-// O botão oficial "Fazer login com o Google", desenhado pelo próprio Google num iframe, no tema e
-// no idioma da tela. Sem conexão ou com o script bloqueado, mostra um aviso no lugar.
 export function GoogleButton({ text, onCredential, disabled = false }: GoogleButtonProps) {
   const { t } = useTranslation('common')
   const { theme } = useTheme()
@@ -62,12 +58,8 @@ export function GoogleButton({ text, onCredential, disabled = false }: GoogleBut
 
   if (failed) return <p className="text-center text-sm text-muted">{t('google.unavailable')}</p>
 
-  // scheme-light: o documento do Google dentro do iframe é claro. Com o app no tema escuro, a
-  // diferença de color-scheme faz o navegador pintar um fundo branco atrás do iframe (uma borda
-  // branca em volta do botão); com o mesmo esquema, o fundo fica transparente.
-  // Enquanto o iframe carrega, o Google mostra um botão provisório em HTML que depende de um
-  // <style> inline, bloqueado pela CSP (sem 'unsafe-inline'): sem estilo, o logo aparece enorme.
-  // O provisório fica escondido; o que contém o iframe nunca é escondido.
+  // scheme-light: com o app escuro, a diferença de color-scheme pintaria um fundo branco atrás do
+  // iframe. O botão provisório do Google depende de <style> inline, que a CSP bloqueia: fica escondido.
   return (
     <div
       ref={containerRef}

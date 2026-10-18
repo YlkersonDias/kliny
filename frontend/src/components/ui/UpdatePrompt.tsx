@@ -2,11 +2,8 @@ import { useTranslation } from 'react-i18next'
 import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from './Button'
 
-// Aviso de nova versão do app (PWA, 7.4). Nunca recarrega sozinho: a pessoa pode estar no meio de
-// um formulário. "Atualizar" ativa o service worker novo e recarrega; "Agora não" esconde o aviso,
-// e a versão nova entra na próxima vez que o app abrir.
-// Fica fora do LanguageProvider (que remonta a tela ao trocar o idioma), para registrar o service
-// worker uma vez só; o texto acompanha o idioma pelo useTranslation.
+// Nunca recarrega sozinho: a pessoa pode estar no meio de um formulário. Fica fora do
+// LanguageProvider, que remonta a tela, para registrar o service worker uma vez só.
 export function UpdatePrompt() {
   const { t } = useTranslation()
   const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW()

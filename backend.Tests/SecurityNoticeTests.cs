@@ -6,9 +6,6 @@ using static Backend.Tests.FakeGoogleTokenValidator;
 
 namespace Backend.Tests;
 
-// Avisos de segurança por e-mail (senha trocada, conta Google vinculada ou desvinculada), contra o
-// MySQL, com o FakeEmailSender. Cada ação manda um aviso só, só para o e-mail da própria conta, e as
-// ações recusadas ou que não mudam nada não mandam (regra 19: a ação de uma pessoa não avisa outra).
 public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -32,7 +29,6 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.Contains("suporte@kliny.app.br", message.Text);
         foreach (var text in contains)
             Assert.Contains(text, message.Text);
-        // Nenhum link de uso único num aviso.
         Assert.DoesNotContain("#", message.Text);
     }
 
@@ -45,14 +41,12 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
         return await client.SendAsync(request, Ct);
     }
 
-    // Troca a senha pelo link do e-mail e devolve o aviso que chegou depois.
     private async Task<EmailMessage> ResetPasswordAsync(string email, string? language = null)
     {
         var seen = api.Emails.CountFor(email);
         using (var forgot = await PostAsync(null, "/api/auth/forgot-password", new { email }))
             Assert.Equal(HttpStatusCode.NoContent, forgot.StatusCode);
         var link = await api.Emails.WaitForAsync(email, seen, Ct);
-        // Pedir o link não é a troca: só o e-mail do link chegou.
         await AssertNoNewEmailAsync(email, seen + 1);
 
         var token = ResetLink().Match(link.Text).Groups[1].Value;
@@ -101,10 +95,8 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
         var otherSeen = api.Emails.CountFor(other);
         var seen = api.Emails.CountFor(email);
 
-        // Recusado (comprovante inválido): nenhum aviso.
         using (var invalid = await PostAsync(token, "/api/auth/google/link", new { credential = "lixo" }))
             Assert.Equal(HttpStatusCode.BadRequest, invalid.StatusCode);
-        // Sem vínculo, desvincular não muda nada: nenhum aviso.
         using (var nothing = await PostAsync(token, "/api/auth/google/unlink", new { }))
             Assert.Equal(HttpStatusCode.OK, nothing.StatusCode);
         await AssertNoNewEmailAsync(email, seen);
@@ -115,7 +107,6 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
         AssertNotice(await api.Emails.WaitForAsync(email, seen, Ct),
             "Uma conta Google foi vinculada à sua conta no Kliny", "https://kliny.test/configuracoes", "https://kliny.test/esqueci-senha");
 
-        // A mesma conta Google de novo não muda nada: nenhum aviso.
         using (var again = await PostAsync(token, "/api/auth/google/link", new { credential = Credential(subject, "pessoa@outlook.com") }))
             Assert.Equal(HttpStatusCode.OK, again.StatusCode);
         await AssertNoNewEmailAsync(email, seen + 1);
@@ -132,7 +123,6 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
     [Fact]
     public async Task Vinculo_automatico_no_login_com_o_Google_avisa()
     {
-        // Gmail: o Google é a autoridade sobre o e-mail, e o primeiro login vincula a conta que já existe.
         var email = NewEmail("auto", "gmail.com");
         await api.RegisterAsync(email);
         var seen = api.Emails.CountFor(email);
@@ -142,7 +132,6 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.Equal(HttpStatusCode.OK, first.StatusCode);
         AssertNotice(await api.Emails.WaitForAsync(email, seen, Ct), "Uma conta Google foi vinculada à sua conta no Kliny");
 
-        // Já vinculada: os próximos logins com o Google não avisam.
         using (var second = await PostAsync(null, "/api/auth/google", new { credential }))
             Assert.Equal(HttpStatusCode.OK, second.StatusCode);
         await AssertNoNewEmailAsync(email, seen + 1);
@@ -151,7 +140,6 @@ public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
     [Fact]
     public async Task Conta_nova_pelo_Google_nao_recebe_aviso()
     {
-        // Criar a conta pelo Google não é vincular a uma conta que já existia: nada a avisar.
         var email = NewEmail("nova", "gmail.com");
         using (var created = await PostAsync(null, "/api/auth/google", new { credential = Credential($"g-{Guid.NewGuid():N}", email) }))
             Assert.Equal(HttpStatusCode.OK, created.StatusCode);

@@ -13,7 +13,7 @@ public enum TransactionType
     Vault,
 }
 
-// Ordens aceitas no "sort" (regra 6: lista fechada; nunca um nome de coluna vindo de fora).
+// Lista fechada: nunca um nome de coluna vindo de fora.
 public static class TransactionSort
 {
     public const string DateDesc = "date-desc";
@@ -47,7 +47,7 @@ public class TransactionQuery : IValidatableObject
     /// <summary>Uma das ordens de <see cref="TransactionSort"/>; vazio = mais recentes primeiro.</summary>
     public string? Sort { get; set; }
 
-    // Limite alto o bastante na prática e que impede o estouro do cálculo de Skip.
+    // Impede o estouro do cálculo de Skip.
     [Range(1, 1_000_000, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PageRange))]
     public int Page { get; set; } = 1;
 

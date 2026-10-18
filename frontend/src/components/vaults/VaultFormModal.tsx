@@ -16,7 +16,6 @@ import { MoneyInput } from '../ui/MoneyInput'
 const FIELDS = ['name', 'goal'] as const
 type Field = (typeof FIELDS)[number]
 
-// Mesma regra do VaultRequest da API.
 const NAME_MAX = 100
 
 interface Values {
@@ -30,21 +29,19 @@ function validate(values: Values, t: TFunction<['vaults', 'common']>): FieldErro
   if (!name) errors.name = t('form.nameRequired')
   else if (name.length > NAME_MAX) errors.name = t('form.nameMax', { max: NAME_MAX })
 
-  // Zero ou negativo não é erro: vira "sem meta", como o campo vazio (parseGoalInput).
+  // Zero ou negativo não é erro: vira "sem meta", como o campo vazio.
   if (parseGoalInput(values.goal) === 'invalid') {
     errors.goal = t('common:validation.amountInvalid')
   }
   return errors
 }
 
-// Meta como número, ou null (sem meta ou valor inválido).
 function goalNumber(text: string): number | null {
   const goal = parseGoalInput(text)
   return typeof goal === 'number' ? goal : null
 }
 
 interface VaultFormModalProps {
-  // Sem vault: novo cofre.
   vault?: Vault
   onClose: () => void
 }
@@ -84,12 +81,11 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
-    // Meta vazia, zero ou negativa: sem meta (goal: null).
     const request = { name: values.name.trim(), goal: goalNumber(values.goal) }
     const options = {
       onSuccess: onClose,
       onError: (error: unknown) => {
-        // Nome repetido (409) vem só em detail, mas pertence ao campo.
+        // O 409 vem só em detail, mas pertence ao campo.
         if (error instanceof ApiError && error.status === 409) {
           showErrors({ name: error.detail })
           return
@@ -126,7 +122,7 @@ export function VaultFormModal({ vault, onClose }: VaultFormModalProps) {
           ref={goalRef}
           label={t('form.goal')}
           placeholder={t('common:amountPlaceholder')}
-          // Meta que o saldo já atinge é aceita; só avisa (na dica, ligada ao campo por aria-describedby).
+          // Meta que o saldo já atinge é aceita; só avisa.
           hint={isEdit
             ? [goalReachedNotice(goalNumber(values.goal), vault.balance), t('form.goalHintRemove')].filter(Boolean).join(' ')
             : t('form.goalHintNew')}

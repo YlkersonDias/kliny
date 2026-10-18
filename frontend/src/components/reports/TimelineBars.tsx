@@ -4,7 +4,6 @@ import type { TimelineGrouping, TimelinePoint } from '../../api/types'
 import { formatMoney } from '../../lib/money'
 import { axisLabel, periodLabel } from '../../lib/timelineChart'
 
-// Carregado sob demanda (React.lazy). Só visual: o ChartFigure o esconde do leitor de tela.
 // Receita sempre à esquerda e gasto à direita; a legenda em HTML traz ícone e sinal.
 
 export default function TimelineBars({ points, grouping }: { points: TimelinePoint[]; grouping: TimelineGrouping }) {

@@ -20,7 +20,6 @@ type SimulatorT = TFunction<'simulator'>
 
 const EMPTY: SimulatorForm = { initial: '', monthly: '', rate: '', rateUnit: 'month', term: '', termUnit: 'year' }
 
-// "2 anos", "8 meses" ou "2 anos e 6 meses".
 function formatTerm(months: number, t: SimulatorT): string {
   const years = Math.floor(months / 12)
   const rest = months % 12
@@ -39,9 +38,7 @@ function errorText(error: SimulatorError | undefined, form: SimulatorForm, t: Si
   return t(`errors.${error}`)
 }
 
-// Simulador de aportes: só uma conta, no navegador, com os valores que a pessoa digita. Nada vai para
-// a API. Os campos começam vazios, sem taxa sugerida, e o que foi digitado fica guardado no navegador
-// até sair da conta (lib/simulatorStore.ts), para a simulação continuar ali ao trocar de página.
+// Só uma conta no navegador, com os valores digitados: nada vai para a API e nenhuma taxa é sugerida.
 export default function SimulatorPage() {
   const { t } = useTranslation('simulator')
   usePageTitle(t('title'))
@@ -50,7 +47,6 @@ export default function SimulatorPage() {
   const userId = user?.id
   const [form, setForm] = useState<SimulatorForm>(() => (userId !== undefined && readSimulatorForm(userId)) || EMPTY)
   // O erro de um campo só aparece depois de sair dele: digitando "0," a taxa ainda está pela metade.
-  // Os campos que voltaram preenchidos já contam como vistos.
   const [touched, setTouched] = useState<Partial<Record<SimulatorField, boolean>>>(() => ({
     initial: form.initial !== '', monthly: form.monthly !== '', rate: form.rate !== '', term: form.term !== '',
   }))
@@ -83,9 +79,7 @@ export default function SimulatorPage() {
     const period = formatTerm(parsed.status === 'ready' ? parsed.input.months : 0, t)
     return (
       <>
-        {/* O total numa linha só dele e os outros dois lado a lado só com o cartão largo (512 px ou
-            mais, pela largura do próprio cartão, e não da tela): em colunas estreitas, valores grandes
-            quebravam no meio do número. R$ 999.999.999.999,99 ocupa cerca de 205 px. */}
+        {/* Colunas pela largura do cartão (container query): em colunas estreitas, valores grandes quebravam. */}
         <dl className="grid gap-4 @lg:grid-cols-2">
           <StatItem className="@lg:col-span-2" label={t('result.total', { period })} value={formatMoney(result.total)} />
           <StatItem label={t('result.contributed')} value={formatMoney(result.contributed)} />
@@ -97,8 +91,7 @@ export default function SimulatorPage() {
           labelledBy={`${id}-grafico`}
           heightClass="h-64"
           before={(
-            // Legenda em HTML, com a cor e o traço de cada série (contínuo no total, tracejado no
-            // aportado): não depende só da cor.
+            // Traço contínuo no total e tracejado no aportado: não depende só da cor.
             <ul className="mt-2 flex flex-wrap gap-x-5 gap-y-1 text-sm text-muted">
               <li className="flex items-center gap-1.5">
                 <span className="h-3 w-4 rounded-[3px] border-t-2 border-primary bg-primary/30" />
@@ -213,7 +206,7 @@ export default function SimulatorPage() {
 
         <section aria-labelledby={`${id}-resultado`} className="@container rounded-2xl border border-border bg-surface p-5 sm:p-6">
           <h2 id={`${id}-resultado`} className="text-lg font-semibold text-foreground">{t('result.title')}</h2>
-          {/* O aviso fica sempre junto ao resultado: o Kliny não promete nem indica rendimento. */}
+          {/* Sempre junto ao resultado: o Kliny não promete nem indica rendimento. */}
           <p className="mt-3 rounded-lg border border-border bg-background px-3 py-2.5 text-sm text-muted">{t('notice')}</p>
           <div className="mt-4">{renderResult()}</div>
         </section>

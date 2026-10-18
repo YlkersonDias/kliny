@@ -4,8 +4,7 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Orçamento por categoria (8.2), contra o MySQL. Os dados são criados uma vez por classe
-// (o cadastro tem limite por IP); cada teste usa categorias próprias.
+// Dados criados uma vez por classe (o cadastro tem limite por IP); cada teste usa categorias próprias.
 public sealed class BudgetFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -28,8 +27,7 @@ public sealed class BudgetFixture : IAsyncLifetime
         Rent = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Casa e contas" }, Ct));
         Free = await IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Passeios" }, Ct));
 
-        // Outubro de 2021 em Feira: 120 + 30,50 de gastos; uma receita e um gasto de outro mês
-        // na mesma categoria não contam.
+        // Outubro de 2021 em Feira: 120 + 30,50. A receita e o gasto de outro mês não contam.
         foreach (var (description, amount, date, category) in new (string, decimal, string, int?)[]
         {
             ("Mercado", -120.00m, "2021-10-03", Food),
@@ -46,7 +44,6 @@ public sealed class BudgetFixture : IAsyncLifetime
             response.EnsureSuccessStatusCode();
         }
 
-        // Operação de cofre (sem categoria) também não conta.
         var vault = await IdOf(client.PostAsJsonAsync("/api/vaults", new { name = "Reserva" }, Ct));
         using var deposit = await client.PostAsJsonAsync($"/api/vaults/{vault}/deposit", new { amount = 100m, date = "2021-10-06" }, Ct);
         deposit.EnsureSuccessStatusCode();
@@ -94,16 +91,13 @@ public class BudgetTests(BudgetFixture fixture) : IClassFixture<BudgetFixture>
         var food = Assert.Single(await ListAsync("2021-10"), b => b.GetProperty("categoryId").GetInt32() == fixture.Food);
         Assert.Equal("Feira", food.GetProperty("categoryName").GetString());
         Assert.Equal(800m, food.GetProperty("limit").GetDecimal());
-        // Só os gastos de outubro: sem a receita, sem os outros meses e sem o depósito no cofre.
         Assert.Equal(150.50m, food.GetProperty("spent").GetDecimal());
 
-        // Alterar não cria outro: continua um só.
         using (var changed = await SetAsync(fixture.Food, 100m))
             Assert.Equal(HttpStatusCode.OK, changed.StatusCode);
         food = Assert.Single(await ListAsync("2021-10"), b => b.GetProperty("categoryId").GetInt32() == fixture.Food);
         Assert.Equal(100m, food.GetProperty("limit").GetDecimal());
 
-        // Mês sem gasto: gasto zero.
         food = Assert.Single(await ListAsync("2021-12"), b => b.GetProperty("categoryId").GetInt32() == fixture.Food);
         Assert.Equal(0m, food.GetProperty("spent").GetDecimal());
 

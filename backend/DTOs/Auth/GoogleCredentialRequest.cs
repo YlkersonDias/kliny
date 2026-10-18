@@ -3,7 +3,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Auth;
 
-// O comprovante (ID token) que o botão do Google entrega à página. É um JWT de alguns KB.
+// O ID token que o botão do Google entrega à página: um JWT de alguns KB.
 public class GoogleCredentialRequest
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.GoogleCredentialRequired))]

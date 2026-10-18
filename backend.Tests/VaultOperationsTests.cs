@@ -4,9 +4,7 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Depósito, retirada e exclusão de cofre usam SELECT ... FOR UPDATE, que só um MySQL de verdade
-// executa. Cada teste cadastra o próprio usuário: o saldo da conta é cumulativo e não pode vazar
-// de um teste para outro.
+// Cada teste cadastra o próprio usuário: o saldo da conta é cumulativo.
 public class VaultOperationsTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -54,7 +52,6 @@ public class VaultOperationsTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.Equal(HttpStatusCode.BadRequest, await StatusOf(Operate(client, vault, "withdraw", 80m)));
         Assert.Equal(50m, await BalanceAsync(client, vault));
 
-        // Com saldo não apaga; sem saldo apaga, junto com o histórico.
         Assert.Equal(HttpStatusCode.Conflict, await StatusOf(client.DeleteAsync($"/api/vaults/{vault}", Ct)));
         Assert.Equal(HttpStatusCode.OK, await StatusOf(Operate(client, vault, "withdraw", 50m)));
         Assert.Equal(HttpStatusCode.NoContent, await StatusOf(client.DeleteAsync($"/api/vaults/{vault}", Ct)));
@@ -72,14 +69,14 @@ public class VaultOperationsTests(MySqlApi api) : IClassFixture<MySqlApi>
         var vault = await CreateVaultAsync(client, "Disputado");
         Assert.Equal(HttpStatusCode.OK, await StatusOf(Operate(client, vault, "deposit", 100m)));
 
-        // Cinco retiradas de 100 ao mesmo tempo, com 100 no cofre: a trava do cofre deixa passar uma.
+        // Com 100 no cofre, a trava do cofre deixa passar uma.
         var withdrawals = await Task.WhenAll(Enumerable.Range(0, 5)
             .Select(_ => StatusOf(Operate(client, vault, "withdraw", 100m))));
         Assert.Equal(1, withdrawals.Count(s => s == HttpStatusCode.OK));
         Assert.Equal(4, withdrawals.Count(s => s == HttpStatusCode.BadRequest));
         Assert.Equal(0m, await BalanceAsync(client, vault));
 
-        // Cinco depósitos de 100 ao mesmo tempo, com 200 na conta: a trava do usuário deixa passar dois.
+        // Com 200 na conta, a trava do usuário deixa passar dois.
         var deposits = await Task.WhenAll(Enumerable.Range(0, 5)
             .Select(_ => StatusOf(Operate(client, vault, "deposit", 100m))));
         Assert.Equal(2, deposits.Count(s => s == HttpStatusCode.OK));

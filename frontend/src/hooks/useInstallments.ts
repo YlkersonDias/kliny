@@ -16,7 +16,6 @@ export function useInstallments() {
   })
 }
 
-// As parcelas são movimentações: mudam também a lista, os relatórios e os orçamentos.
 function useInvalidateAfterChange() {
   const queryClient = useQueryClient()
   return () => Promise.all([

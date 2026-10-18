@@ -6,13 +6,12 @@ namespace Backend.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser) : DbContext(options)
 {
-    // Sem usuário logado (testes, ferramentas): o filtro global não devolve nada.
+    // Sem usuário logado, o filtro global não devolve nada.
     public AppDbContext(DbContextOptions<AppDbContext> options) : this(options, NoCurrentUser.Instance)
     {
     }
 
-    // Lido pelo filtro global a cada consulta (S.6b). Precisa ser membro do contexto: o EF só
-    // reavalia por instância o que é campo ou propriedade do DbContext.
+    // Precisa ser membro do contexto: o EF só reavalia por instância o que pertence ao DbContext.
     private int? CurrentUserId => currentUser.UserId;
 
     public DbSet<User> Users => Set<User>();
@@ -26,9 +25,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
     public DbSet<PasswordResetToken> PasswordResetTokens => Set<PasswordResetToken>();
     public DbSet<PendingRegistration> PendingRegistrations => Set<PendingRegistration>();
 
-    // O banco guarda os DateTime em UTC, mas a coluna datetime(6) não guarda o fuso: lido de volta,
-    // o valor vinha sem fuso e a API o serializava sem "Z", e o navegador o lia como hora local.
-    // Aqui todo DateTime é gravado em UTC e lido marcado como UTC. A coluna não muda.
+    // datetime(6) não guarda o fuso: todo DateTime é gravado em UTC e lido marcado como UTC.
     protected override void ConfigureConventions(ModelConfigurationBuilder configurationBuilder)
     {
         configurationBuilder.Properties<DateTime>().HaveConversion<UtcDateTimeConverter>();
@@ -38,10 +35,8 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
         value => value.Kind == DateTimeKind.Local ? value.ToUniversalTime() : value,
         value => DateTime.SpecifyKind(value, DateTimeKind.Utc));
 
-    // Filtro global (S.6b, segunda camada da regra 2): categorias, cofres e movimentações só
-    // aparecem para o dono, mesmo numa consulta que esqueça o Where(UserId). Os services continuam
-    // filtrando também. Users fica de fora: o login e a validação do token precisam achar o usuário
-    // antes de saber quem está logado. IgnoreQueryFilters() só com o UserId já filtrado no SQL.
+    // Filtro global: segunda camada do dono, para uma consulta que esqueça o Where(UserId). Users fica
+    // de fora (o login precisa achá-lo antes de saber quem está logado).
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<User>(entity =>
@@ -59,7 +54,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             entity.Property(c => c.Name).HasMaxLength(100).IsRequired();
             entity.Property(c => c.Color).HasMaxLength(CategoryAppearance.MaxLength);
             entity.Property(c => c.Icon).HasMaxLength(CategoryAppearance.MaxLength);
-            // A collation do banco ignora maiúsculas e acentos: "Mercado" e "mercado" contam como iguais.
+            // A collation ignora maiúsculas e acentos: "Mercado" e "mercado" são o mesmo nome.
             entity.HasIndex(c => new { c.UserId, c.Name }).IsUnique();
             entity.HasQueryFilter(c => c.UserId == CurrentUserId);
             entity.HasOne(c => c.User)
@@ -68,7 +63,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Orçamento (8.2): um por categoria de cada usuário. Apagar o usuário ou a categoria apaga o orçamento.
         modelBuilder.Entity<Budget>(entity =>
         {
             entity.Property(b => b.Amount).HasPrecision(18, 2);
@@ -84,8 +78,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Recorrência (8.5a). Apagar o usuário apaga as regras; apagar a categoria deixa a regra sem
-        // categoria. A NextDate é o controle de concorrência da sincronização.
+        // A NextDate é o controle de concorrência da sincronização.
         modelBuilder.Entity<Recurrence>(entity =>
         {
             entity.Property(r => r.Description).HasMaxLength(255).IsRequired();
@@ -103,8 +96,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // Compra parcelada (8.5b). Apagar o usuário apaga as compras; apagar a categoria deixa a
-        // compra sem categoria (as parcelas já ficam sem categoria pela chave delas).
         modelBuilder.Entity<InstallmentPlan>(entity =>
         {
             entity.Property(p => p.Description).HasMaxLength(245).IsRequired();
@@ -121,8 +112,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.SetNull);
         });
 
-        // Link de troca de senha: só o hash do token, único. Sem filtro global por usuário (como Users):
-        // quem usa o link não está logado. Apagar o usuário apaga os links.
+        // Sem filtro global: quem usa o link não está logado. A busca é sempre pelo hash.
         modelBuilder.Entity<PasswordResetToken>(entity =>
         {
             entity.Property(t => t.TokenHash).HasMaxLength(64).IsFixedLength().IsRequired();
@@ -133,9 +123,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .OnDelete(DeleteBehavior.Cascade);
         });
 
-        // Cadastro esperando a confirmação do e-mail: só o hash do token, único. Sem filtro global por
-        // usuário (ainda não existe usuário) e sem chave para Users. Índice no e-mail para encerrar os
-        // pedidos anteriores do mesmo endereço.
+        // Sem filtro global nem ligação com Users: o usuário ainda não existe.
         modelBuilder.Entity<PendingRegistration>(entity =>
         {
             entity.Property(p => p.Email).HasMaxLength(255).IsRequired();
@@ -145,8 +133,6 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             entity.HasIndex(p => p.Email);
         });
 
-        // Regra de categoria (8.4): um texto por usuário (a collation iguala maiúsculas e acentos).
-        // Apagar o usuário ou a categoria apaga a regra.
         modelBuilder.Entity<CategoryRule>(entity =>
         {
             entity.Property(r => r.Pattern).HasMaxLength(100).IsRequired();
@@ -181,8 +167,7 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
             entity.HasQueryFilter(t => t.UserId == CurrentUserId);
             entity.HasIndex(t => new { t.UserId, t.Date });
             entity.Property(t => t.IdempotencyKey).HasMaxLength(IdempotencyKey.MaxLength);
-            // Por usuário: a chave de um nunca encontra o lançamento de outro. O MySQL aceita
-            // vários NULL num índice único, então as movimentações comuns não são afetadas.
+            // O MySQL aceita vários NULL num índice único: as movimentações comuns não são afetadas.
             entity.HasIndex(t => new { t.UserId, t.IdempotencyKey }).IsUnique();
             entity.Property(t => t.ImportKey).HasMaxLength(64);
             entity.HasIndex(t => new { t.UserId, t.ImportKey }).IsUnique();
@@ -192,25 +177,22 @@ public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser c
                 .HasForeignKey(t => t.UserId)
                 .OnDelete(DeleteBehavior.Cascade);
 
-            // Apagar uma categoria não apaga as transações; elas ficam sem categoria.
             entity.HasOne(t => t.Category)
                 .WithMany(c => c.Transactions)
                 .HasForeignKey(t => t.CategoryId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Um cofre com movimentações não pode ser apagado, pois o saldo depende delas.
+            // Cofre com movimentações não pode ser apagado: o saldo depende delas.
             entity.HasOne(t => t.Vault)
                 .WithMany(v => v.Transactions)
                 .HasForeignKey(t => t.VaultId)
                 .OnDelete(DeleteBehavior.Restrict);
 
-            // Apagar a regra recorrente mantém as movimentações que ela gerou, sem o vínculo.
             entity.HasOne(t => t.Recurrence)
                 .WithMany(r => r.Transactions)
                 .HasForeignKey(t => t.RecurrenceId)
                 .OnDelete(DeleteBehavior.SetNull);
 
-            // Apagar a compra parcelada só com as parcelas futuras mantém as outras, sem o vínculo.
             entity.HasOne(t => t.InstallmentPlan)
                 .WithMany(p => p.Transactions)
                 .HasForeignKey(t => t.InstallmentPlanId)

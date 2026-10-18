@@ -39,7 +39,7 @@ export function useDeleteCategoryRule() {
   return useMutation({ mutationFn: (id: number) => deleteCategoryRule(id), onSuccess: invalidate })
 }
 
-// Quantas movimentações a regra mudaria, antes de confirmar. Sem cache: sempre o número de agora.
+// Sem cache: sempre o número de agora.
 export function useCategoryRulePreview(id: number, includeCategorized: boolean) {
   return useQuery({
     queryKey: categoryRuleKeys.preview(id, includeCategorized),
@@ -49,7 +49,6 @@ export function useCategoryRulePreview(id: number, includeCategorized: boolean) 
   })
 }
 
-// Aplicar muda a categoria de movimentações: a lista, os relatórios e os orçamentos mudam junto.
 export function useApplyCategoryRule() {
   const queryClient = useQueryClient()
   return useMutation({

@@ -4,16 +4,12 @@ import { lerp, screenOffset, tourHeight, tourProgress } from '../lib/landingMoti
 const PARALLAX_PX = 220
 
 interface LandingMotionRefs {
-  // A toca da abertura: os filhos com data-parallax andam no eixo Y conforme ela passa pela tela.
   stage: RefObject<HTMLElement | null>
-  // A seção de recursos e a trilha que anda de lado dentro dela.
   tour: RefObject<HTMLElement | null>
   track: RefObject<HTMLElement | null>
 }
 
-// Efeitos de rolagem da landing (8.6), com requestAnimationFrame e sem biblioteca. Com
-// "reduzir movimento" ligado nada se mexe, e no celular a trilha vira uma rolagem lateral comum
-// (data-static). Só mexe em transform, e só a cada rolagem ou enquanto a suavização não chega ao alvo.
+// Sem biblioteca. Com "reduzir movimento" nada se mexe, e no celular a trilha vira rolagem lateral comum.
 export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): void {
   useEffect(() => {
     const stageEl = stage.current, tourEl = tour.current, trackEl = track.current
@@ -24,13 +20,12 @@ export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): voi
     const items = [...stageEl.querySelectorAll<HTMLElement>('[data-parallax]')]
       .map((el) => ({ el, strength: Number(el.dataset.parallax), y: 0 }))
     let frame = 0
-    // Largura sem a barra de rolagem (innerWidth a inclui): senão o fim da trilha fica escondido atrás dela.
+    // innerWidth inclui a barra de rolagem: o fim da trilha ficaria escondido atrás dela.
     const visibleWidth = () => document.documentElement.clientWidth
 
     function layout() {
       const isStatic = reduce.matches || narrow.matches
       tourEl!.toggleAttribute('data-static', isStatic)
-      // Na rolagem lateral comum, a trilha recebe foco para andar com as setas do teclado.
       if (isStatic) trackEl!.setAttribute('tabindex', '0')
       else trackEl!.removeAttribute('tabindex')
       trackEl!.style.transform = ''
@@ -52,7 +47,7 @@ export function useLandingMotion({ stage, tour, track }: LandingMotionRefs): voi
         const target = offset * item.strength * PARALLAX_PX
         item.y = lerp(item.y, target)
         if (Math.abs(target - item.y) > 0.3) moving = true
-        // translate (e não transform), para não brigar com o transform da flutuação e da centralização.
+        // translate, e não transform, para não brigar com o transform da flutuação.
         item.el.style.translate = `0 ${item.y.toFixed(2)}px`
       }
       if (moving) request()

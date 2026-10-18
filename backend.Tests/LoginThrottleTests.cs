@@ -13,7 +13,7 @@ public class LoginThrottleTests
 
     public LoginThrottleTests()
     {
-        // Os valores aprovados (appsettings.json): 5 falhas em 15 min bloqueiam por 15 min.
+        // Os valores padrão: 5 falhas em 15 min bloqueiam por 15 min.
         _throttle = new LoginThrottle(Microsoft.Extensions.Options.Options.Create(new RateLimitOptions()), _time);
     }
 
@@ -53,7 +53,6 @@ public class LoginThrottleTests
         _time.Advance(TimeSpan.FromMinutes(15));
         Assert.Null(_throttle.GetLockout(Email));
 
-        // Depois do bloqueio, mais uma falha sozinha não bloqueia de novo.
         Fail(1);
         Assert.Null(_throttle.GetLockout(Email));
         Fail(4);
@@ -76,7 +75,6 @@ public class LoginThrottleTests
         _time.Advance(TimeSpan.FromMinutes(10));
         Fail(2);
         _time.Advance(TimeSpan.FromMinutes(6));
-        // As duas primeiras saíram da janela: só 3 falhas contam.
         Fail(1);
         Assert.Null(_throttle.GetLockout(Email));
         Fail(2);
@@ -104,7 +102,6 @@ public class LoginThrottleTests
     public void Limpeza_mantem_o_bloqueio_em_vigor()
     {
         Fail(5);
-        // Passa do limite de e-mails guardados, o que dispara a limpeza dos antigos.
         _time.Advance(TimeSpan.FromMinutes(1));
         for (var i = 0; i < 10_001; i++)
             _throttle.RegisterFailure($"outro{i}@kliny.test");
@@ -119,7 +116,6 @@ public class LoginThrottleTests
         for (var i = 0; i < 10_001; i++)
             _throttle.RegisterFailure($"outro{i}@kliny.test");
 
-        // Passou o bloqueio e a janela de todos: a próxima falha limpa o resto.
         _time.Advance(TimeSpan.FromMinutes(16));
         _throttle.RegisterFailure("novo@kliny.test");
 

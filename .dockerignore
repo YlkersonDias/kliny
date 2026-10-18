@@ -1,5 +1,4 @@
-# O que nunca entra no contexto dos builds do deploy (deploy/*.Dockerfile, contexto na raiz):
-# segredos, arquivos gerados no PC e o que não é preciso para montar as imagens.
+# Segredos e arquivos gerados nunca entram no contexto dos builds do deploy.
 **/.env
 **/.env.*
 !**/.env.example

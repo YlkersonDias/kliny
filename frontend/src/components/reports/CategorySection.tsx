@@ -15,11 +15,10 @@ interface CategorySectionProps {
   type: CategoryReportType
   rows: CategoryTotal[]
   onTypeChange: (type: CategoryReportType) => void
-  // Prévia do período anterior enquanto o novo carrega.
   isRefreshing?: boolean
 }
 
-// Valores com sinal: gasto com "−" (o total vem positivo da API), receita com "+".
+// O total vem positivo da API.
 function signed(type: CategoryReportType, value: number): string {
   return type === 'expense' ? formatOutflow(value) : formatSigned(value)
 }
@@ -28,7 +27,6 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
   const { t } = useTranslation('reports')
   const isExpense = type === 'expense'
   const categories = useCategories()
-  // Cada fatia na cor da categoria (sem categoria, cinza); categoria que não está na lista também.
   const slices = toSlices(rows, (id) => categoryLook(categories.data?.find((category) => category.id === id)))
   const total = totalOf(rows)
   const top = slices[0]
@@ -54,7 +52,7 @@ export function CategorySection({ type, rows, onTypeChange, isRefreshing = false
             chart={(
               <div className="grid grid-cols-1 items-center gap-6 lg:grid-cols-[minmax(0,16rem)_minmax(0,1fr)]">
                 <CategoryDonut slices={slices} total={total} totalLabel={isExpense ? t('category.totalExpense') : t('category.totalIncome')} />
-                {/* Legenda visual (a tabela abaixo traz as mesmas informações para todos). */}
+                {/* A tabela abaixo traz as mesmas informações para todos. */}
                 <ol className="min-w-0 divide-y divide-border">
                   {slices.map((slice) => (
                     <li key={slice.key} className="grid grid-cols-[1.5rem_1.5rem_minmax(0,1fr)_auto_auto] items-center gap-2.5 py-2 text-sm tabular-nums">

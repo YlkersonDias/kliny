@@ -6,8 +6,7 @@ using Backend.Services;
 
 namespace Backend.Tests;
 
-// Importação de extrato (8.3), contra o MySQL. Cada teste usa uma conta (Source) própria, para as
-// chaves não se cruzarem e os testes não dependerem da ordem.
+// Cada teste usa uma conta (Source) própria, para as chaves não se cruzarem.
 public sealed class ImportFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -103,7 +102,6 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         var first = Line("341:0002", "A1", "2022-02-01", -10m, "Padaria Imp2");
         await ImportAsync(first);
 
-        // O extrato do mês inteiro, exportado depois: a primeira já entrou.
         Assert.Equal((1, 1), await ImportAsync(first, Line("341:0002", "A2", "2022-02-02", -20m, "Farmácia Imp2")));
         Assert.Equal(2, (await SearchAsync("Imp2")).Length);
     }
@@ -127,7 +125,6 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         Assert.Equal((2, 0), await ImportAsync(lines));
         Assert.Equal((0, 2), await ImportAsync(lines));
 
-        // A mesma linha duas vezes no pedido é erro do leitor do arquivo: nada é gravado.
         Assert.Equal(HttpStatusCode.BadRequest, await PostStatusAsync("/api/imports",
             new { lines = new[] { Line("104:3333", null, "2022-04-02", -1m, "Dup Imp4"), Line("104:3333", null, "2022-04-02", -1m, "Dup Imp4") } }));
         Assert.Empty(await SearchAsync("Dup Imp4"));
@@ -199,7 +196,6 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         Assert.Equal(HttpStatusCode.BadRequest, await PostStatusAsync("/api/imports", new { lines = many }));
         Assert.Empty(await SearchAsync("Imp8"));
 
-        // Exatamente o limite passa.
         Assert.Equal((ImportRequest.MaxLines, 0), await ImportAsync(many[..ImportRequest.MaxLines]));
     }
 
@@ -237,12 +233,11 @@ public class ImportTests(ImportFixture fixture) : IClassFixture<ImportFixture>
         var key = ImportService.Key(line);
         Assert.Matches("^[0-9a-f]{64}$", key);
 
-        // Com FITID, a descrição não entra (o banco pode reescrever o texto); o valor entra normalizado.
+        // Com FITID, a descrição não entra: o banco pode reescrever o texto.
         Assert.Equal(key, ImportService.Key(new ImportLine { Source = "341:1", ExternalId = "F", Date = line.Date, Amount = -10.00m, Description = "Outra", Occurrence = 1 }));
         Assert.NotEqual(key, ImportService.Key(new ImportLine { Source = "341:2", ExternalId = "F", Date = line.Date, Amount = -10m, Description = "A", Occurrence = 1 }));
         Assert.NotEqual(key, ImportService.Key(new ImportLine { Source = "341:1", ExternalId = "F", Date = line.Date, Amount = -10m, Description = "A", Occurrence = 2 }));
 
-        // Sem FITID, a descrição entra.
         var noId = new ImportLine { Source = "341:1", Date = line.Date, Amount = -10m, Description = "A", Occurrence = 1 };
         Assert.NotEqual(ImportService.Key(noId), ImportService.Key(new ImportLine { Source = "341:1", Date = line.Date, Amount = -10m, Description = "B", Occurrence = 1 }));
     }

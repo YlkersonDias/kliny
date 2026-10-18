@@ -15,7 +15,6 @@ import { useTheme } from '../theme/useTheme'
 
 const THEMES: ThemePreference[] = ['light', 'dark', 'system']
 
-// Preferências deste navegador (tema e idioma) e as sessões da conta.
 export default function SettingsPage() {
   const { t } = useTranslation('settings')
   usePageTitle(t('title'))
@@ -32,7 +31,7 @@ export default function SettingsPage() {
     setSignOutError(null)
     try {
       await signOutEverywhere()
-      // Como o "Sair": vai para o login sem guardar esta página para depois.
+      // Sem guardar esta página para depois do login.
       navigate('/entrar', { replace: true })
     } catch (error) {
       setSignOutError(`${t('sessions.error')} ${error instanceof Error ? error.message : ''}`.trim())

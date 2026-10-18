@@ -1,9 +1,6 @@
-﻿# Backup do banco do Kliny (S.7): um mysqldump compactado, conferido e cifrado com a chave pública
-# dos backups (deploy/chave-backup/publica.asc) na pasta BACKUP_DIR do deploy/.env, com o usuário
-# kliny_backup (só leitura), e uma cópia em BACKUP_COPY_DIR (outro
-# disco), se estiver no .env. Nas duas pastas, apaga os backups com mais de 14 dias, o prazo dito
-# na política de privacidade (PRIVACY.backupRetention). Roda com o Kliny no ar; a tarefa agendada
-# o chama todo dia (ver deploy/README.md, "Backup do banco").
+﻿# Backup do banco: mysqldump compactado, conferido e cifrado com a chave pública, na pasta BACKUP_DIR
+# e, se houver, numa cópia em BACKUP_COPY_DIR. Apaga os backups com mais de 14 dias, o prazo da
+# política de privacidade. A tarefa agendada o chama todo dia (deploy/README.md, "Backup do banco").
 #   powershell -ExecutionPolicy Bypass -File deploy\backup.ps1
 $ErrorActionPreference = 'Stop'
 Set-Location $PSScriptRoot
@@ -22,7 +19,7 @@ $backupDir = Read-EnvValue 'BACKUP_DIR'
 $copyDir = Read-EnvValue 'BACKUP_COPY_DIR'
 $logFile = Join-Path $backupDir 'backup.log'
 
-# Uma linha por execução, para saber se o backup de cada dia rodou; guarda as últimas 200.
+# Uma linha por execução; guarda as últimas 200.
 function Write-Log([string]$message) {
     $line = '{0:yyyy-MM-dd HH:mm:ss}  {1}' -f (Get-Date), $message
     Write-Output $line
@@ -35,19 +32,17 @@ function Write-Log([string]$message) {
     }
 }
 
-# Chama o docker sem deixar o stderr virar erro fatal (no PowerShell 5.1, com 'Stop', ele vira);
-# devolve a saída como texto e o código de saída em $LASTEXITCODE.
+# No PowerShell 5.1, com 'Stop', o stderr de um programa externo vira erro fatal.
 function Invoke-Docker {
     $ErrorActionPreference = 'Continue'
     & docker @args 2>&1 | ForEach-Object { "$_" }
 }
 
-# Às 21h o Docker já está de pé; ao ligar o PC depois do horário (a tarefa roda assim que der),
-# ele pode ainda estar subindo.
+# Ao ligar o computador depois do horário da tarefa, o Docker pode ainda estar subindo.
 function Wait-Database {
     $deadline = (Get-Date).AddMinutes($DockerWaitMinutes)
     while ((Get-Date) -lt $deadline) {
-        # Sem cortar a saída (Select-Object -First): cortada, o $LASTEXITCODE fica -1.
+        # Sem Select-Object -First: com a saída cortada, o $LASTEXITCODE fica -1.
         $ids = @(Invoke-Docker compose ps -q mysql)
         if ($LASTEXITCODE -eq 0 -and $ids.Count -gt 0 -and $ids[0]) {
             $state = @(Invoke-Docker inspect --format '{{.State.Health.Status}}' $ids[0])
@@ -62,8 +57,8 @@ try {
     if (-not $backupDir) { throw 'BACKUP_DIR não está no deploy/.env' }
     Wait-Database
 
-    # O script roda dentro do container (deploy/mysql-backup.sh): o PowerShell 5.1 estraga texto com
-    # várias linhas e aspas passado a programas externos.
+    # O script roda dentro do container: o PowerShell 5.1 estraga texto com várias linhas e aspas
+    # passado a programas externos.
     $created = $null
     for ($attempt = 1; $attempt -le $Attempts; $attempt++) {
         $output = Invoke-Docker compose exec -T mysql sh /kliny/backup.sh

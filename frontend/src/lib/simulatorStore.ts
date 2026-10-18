@@ -1,12 +1,9 @@
 import type { SimulatorForm } from './simulator'
 
-// Valores do simulador (8.7) guardados no navegador, para a simulação continuar ali ao trocar de
-// página, recarregar ou fechar a aba. Só o que a pessoa digitou (nenhuma resposta da API, regra 14),
-// marcado com o Id de quem digitou: outra conta no mesmo navegador nunca vê. Some ao sair da conta
-// (clearSimulatorForm, no fim da sessão). Sem localStorage, o simulador funciona igual, só não lembra.
+// Só o que a pessoa digitou, com o Id de quem digitou: outra conta no mesmo navegador nunca vê.
+// Some ao sair da conta.
 
 const STORAGE_KEY = 'simulator.form'
-// Nenhum campo válido passa disso; texto maior é lixo.
 const MAX_FIELD_LENGTH = 40
 
 const TEXT_FIELDS = ['initial', 'monthly', 'rate', 'term'] as const
@@ -33,7 +30,6 @@ export function readSimulatorForm(userId: number): SimulatorForm | null {
   }
 }
 
-// Com os campos todos vazios, não guarda nada (e apaga o que havia).
 export function saveSimulatorForm(userId: number, form: SimulatorForm): void {
   try {
     if (TEXT_FIELDS.every((field) => form[field].trim() === '')) {
@@ -50,6 +46,6 @@ export function clearSimulatorForm(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
-    // Sem localStorage, não havia nada guardado.
+    // Sem localStorage (bloqueado ou cheio): só não lembra.
   }
 }

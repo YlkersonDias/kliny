@@ -13,14 +13,9 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// A API inteira com os services de verdade e um MySQL descartável: um banco novo por fixture
-// (kliny_test_<guid>), criado pelas migrations e apagado no fim.
-// Como em produção, a API conecta com um usuário só de DML (SELECT, INSERT, UPDATE, DELETE no
-// banco de teste), igual ao kliny_app; as migrations rodam com o usuário administrador, como
-// faria o kliny_migrator. Se o app passar a precisar de DDL, os testes quebram.
-// O servidor vem de KLINY_TEST_MYSQL (sem Database, com um usuário que cria bancos e usuários),
-// definida só no CI, onde o MySQL é um container de serviço. Sem ela os testes são pulados,
-// salvo no CI, onde a falta é erro. Nunca usa o banco kliny nem os usuários kliny_app e kliny_migrator.
+// A API com os services de verdade e um MySQL descartável (um banco por fixture). Como em produção,
+// a API conecta com um usuário só de DML. O servidor vem de KLINY_TEST_MYSQL: sem ela, os testes
+// são pulados, salvo no CI, onde a falta é erro.
 public sealed partial class MySqlApi : IAsyncLifetime
 {
     public const string ServerVariable = "KLINY_TEST_MYSQL";
@@ -33,10 +28,8 @@ public sealed partial class MySqlApi : IAsyncLifetime
 
     public bool IsAvailable => _app is not null;
 
-    // Os e-mails que a API "enviou" (recuperação de senha).
     public FakeEmailSender Emails { get; } = new();
 
-    // Conexão do usuário só de DML, a mesma que a API usa.
     public string AppConnectionString
     {
         get
@@ -59,7 +52,7 @@ public sealed partial class MySqlApi : IAsyncLifetime
             return;
         }
 
-        // Nomes só com hex do Guid: entram no SQL abaixo sem risco. Usuário do MySQL tem até 32 caracteres.
+        // Só hex de um Guid: entra no SQL abaixo sem risco (usuário do MySQL tem até 32 caracteres).
         var id = Guid.NewGuid().ToString("N");
         var database = $"kliny_test_{id}";
         _appUser = $"kliny_t_{id[..16]}";
@@ -78,9 +71,7 @@ public sealed partial class MySqlApi : IAsyncLifetime
         await using (var admin = AdminContext())
         {
             await admin.Database.MigrateAsync(Ct);
-            // Usuário, senha e nome do banco são literais/identificadores: o MySQL não aceita
-            // parâmetro vinculado nessas posições do CREATE USER e do GRANT. Sem risco de injeção,
-            // porque os três vêm só de hex de um Guid gerado aqui, nunca de entrada do usuário.
+            // O MySQL não aceita parâmetro no CREATE USER e no GRANT; os valores são só hex de um Guid.
 #pragma warning disable EF1002
             await admin.Database.ExecuteSqlRawAsync(
                 $"CREATE USER '{_appUser}'@'%' IDENTIFIED BY '{appPassword}'", Ct);
@@ -98,11 +89,9 @@ public sealed partial class MySqlApi : IAsyncLifetime
             return;
 
         await _app.DisposeAsync();
-        // Fecha as conexões ociosas do usuário de teste antes de apagá-lo junto com o banco.
         await using (var pooled = new MySqlConnection(AppConnectionString))
             await MySqlConnection.ClearPoolAsync(pooled);
         await using var admin = AdminContext();
-        // Mesmo motivo do CREATE USER: nome de usuário não aceita parâmetro vinculado aqui.
 #pragma warning disable EF1002
         await admin.Database.ExecuteSqlRawAsync($"DROP USER IF EXISTS '{_appUser}'@'%'");
 #pragma warning restore EF1002
@@ -115,9 +104,8 @@ public sealed partial class MySqlApi : IAsyncLifetime
     private void SkipIfUnavailable() =>
         Assert.SkipWhen(_app is null, $"Sem MySQL de teste ({ServerVariable}): roda no CI.");
 
-    // Cliente sem token; pula o teste se não há MySQL de teste. Por padrão, todo depósito e retirada
-    // sem Idempotency-Key ganha uma chave nova (cada envio é uma intenção diferente); com
-    // idempotencyKeys: false, a requisição sai como foi montada, para testar a falta da chave.
+    // Por padrão, todo depósito e retirada sem Idempotency-Key ganha uma chave nova; com
+    // idempotencyKeys: false, a requisição sai como foi montada.
     public HttpClient Client(string? token = null, bool idempotencyKeys = true)
     {
         SkipIfUnavailable();
@@ -127,8 +115,6 @@ public sealed partial class MySqlApi : IAsyncLifetime
         return client;
     }
 
-    // Cadastra pelo fluxo de verdade (pedido, e-mail com o link, senha pelo link) e devolve o token.
-    // O limite de cadastros por IP fica alto nos testes (ver App, abaixo).
     public async Task<string> RegisterAsync(string email, string password = "senha12345")
     {
         using var client = Client();
@@ -165,23 +151,16 @@ public sealed partial class MySqlApi : IAsyncLifetime
         {
             builder.UseEnvironment("Testing");
             builder.UseSetting("Jwt:Key", new string('k', 64));
-            // O appsettings.json só aceita o Host localhost; alguns testes usam https://kliny.test.
             builder.UseSetting("AllowedHosts", "localhost;kliny.test");
-            // O login com o Google, o vínculo e a exclusão de conta dividem o limite por IP do login
-            // (10 por minuto), e cada classe de teste faz mais que isso. O limite por IP é conferido
-            // no RateLimitingTests, sem MySQL; o bloqueio por e-mail continua o de produção.
+            // Limites por IP altos: todos os testes vêm do mesmo IP. Os limites são conferidos no RateLimitingTests.
             builder.UseSetting("RateLimits:LoginPerIp:PermitLimit", "1000");
-            // Mesmo motivo: a recuperação de senha tem o limite conferido no PasswordResetTests.
             builder.UseSetting("RateLimits:PasswordResetPerIp:PermitLimit", "1000");
-            // E o pedido de cadastro: cada conta de teste agora passa por ele (5 por hora em produção).
             builder.UseSetting("RateLimits:RegisterPerIp:PermitLimit", "1000");
-            // E a exportação (5 por hora em produção), conferida no RateLimitingTests.
             builder.UseSetting("RateLimits:ExportPerIp:PermitLimit", "1000");
             builder.UseSetting("Email:AppUrl", "https://kliny.test");
 
             builder.ConfigureServices(services =>
             {
-                // Troca a conexão do Program.cs (sem senha, do appsettings.json) pela do banco de teste.
                 foreach (var descriptor in services
                              .Where(d => d.ServiceType == typeof(IDbContextOptionsConfiguration<AppDbContext>))
                              .ToList())
@@ -189,9 +168,7 @@ public sealed partial class MySqlApi : IAsyncLifetime
                 services.ConfigureDbContext<AppDbContext>(options =>
                     options.UseMySql(connectionString, ServerVersion));
 
-                // Os testes não falam com o Google: o comprovante é montado pelo FakeGoogleTokenValidator.
                 services.AddSingleton<IGoogleTokenValidator, FakeGoogleTokenValidator>();
-                // Nem com o Resend: os e-mails ficam no FakeEmailSender.
                 services.AddSingleton<IEmailSender>(emails);
             });
         }

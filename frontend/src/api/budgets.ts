@@ -1,7 +1,7 @@
 import { apiRequest } from './client'
 import type { Budget } from './types'
 
-// Orçamento por categoria (8.2). O mês ("2026-10") vem do navegador: a API não escolhe período.
+// O mês ("2026-10") vem do navegador: a API não escolhe período.
 export function listBudgets(month: string, signal?: AbortSignal): Promise<Budget[]> {
   return apiRequest(`/budgets?month=${encodeURIComponent(month)}`, { signal })
 }

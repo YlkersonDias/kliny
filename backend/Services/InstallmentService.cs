@@ -21,14 +21,11 @@ public interface IInstallmentService
     Task DeleteAsync(int userId, int id, string scope, DateOnly today);
 }
 
-// Compras parceladas (8.5b). Toda consulta filtra pelo usuário do token (regra 2), além do
-// filtro global do AppDbContext.
 public class InstallmentService(AppDbContext db) : IInstallmentService
 {
     public const int MaxPerUser = 100;
 
-    // Valor de cada parcela, em reais: a divisão é feita em centavos, e a sobra vai na primeira.
-    // A soma é sempre exatamente o total (R$ 100 em 3x: 33,34 + 33,33 + 33,33).
+    // Em centavos, com a sobra na primeira: a soma é sempre o total (R$ 100 em 3x: 33,34 + 33,33 + 33,33).
     public static decimal[] Split(decimal total, int count)
     {
         var cents = (long)(total * 100);
@@ -99,7 +96,6 @@ public class InstallmentService(AppDbContext db) : IInstallmentService
             });
         }
 
-        // Um SaveChanges só: a compra e as parcelas entram juntas, ou nada entra.
         db.InstallmentPlans.Add(plan);
         await db.SaveChangesAsync();
 
@@ -118,7 +114,7 @@ public class InstallmentService(AppDbContext db) : IInstallmentService
             installments = installments.Where(t => t.Date > today);
         await installments.ExecuteDeleteAsync();
 
-        // As parcelas que ficaram perdem o vínculo (SET NULL) e continuam com o "(n/N)" na descrição.
+        // As parcelas que ficam perdem o vínculo e mantêm o "(n/N)" na descrição.
         await db.InstallmentPlans.Where(p => p.Id == id && p.UserId == userId).ExecuteDeleteAsync();
         await dbTransaction.CommitAsync();
     }

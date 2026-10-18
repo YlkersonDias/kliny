@@ -9,21 +9,19 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Tests;
 
-// A API inteira em memória, com o IAuthService trocado por um falso: não precisa de MySQL.
-// Cada teste cria a sua, para os limites começarem do zero.
+// A API em memória, com os services de autenticação falsos (sem MySQL). Uma por teste, para os
+// limites começarem do zero.
 public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null, string environment = "Testing")
     : WebApplicationFactory<Program>
 {
-    // Cabeçalho só dos testes: define o IP de origem da requisição.
+    // Só nos testes: define o IP de origem da requisição.
     public const string ClientIpHeader = "X-Test-Client-Ip";
 
     protected override void ConfigureWebHost(IWebHostBuilder builder)
     {
-        // Por padrão fora de Development: não lê o user-secrets da máquina (no CI ele nem existe).
-        // Development só para o que só existe lá (o OpenAPI).
+        // Fora de Development, para não ler o user-secrets da máquina.
         builder.UseEnvironment(environment);
         builder.UseSetting("Jwt:Key", new string('k', 64));
-        // O appsettings.json só aceita o Host localhost; alguns testes usam https://kliny.test.
         builder.UseSetting("AllowedHosts", "localhost;kliny.test");
         foreach (var (key, value) in settings ?? new Dictionary<string, string>())
             builder.UseSetting(key, value);
@@ -52,7 +50,7 @@ public sealed class TestApp(IReadOnlyDictionary<string, string>? settings = null
     }
 }
 
-// Login sempre errado (401), salvo o e-mail bloqueado (429) e o de falha (500); cadastro sempre aceito (201).
+// Login sempre errado (401), salvo o e-mail bloqueado (429) e o de falha (500).
 public sealed class FakeAuthService : IAuthService
 {
     public const string LockedEmail = "bloqueado@kliny.test";
@@ -80,7 +78,6 @@ public sealed class FakeAuthService : IAuthService
         Task.FromResult(new UserResponse(userId, "Teste", "teste@kliny.test", DateTime.UtcNow));
 }
 
-// Recuperação de senha sem banco: só para os testes de limite e de rota, que não chegam ao service.
 public sealed class FakePasswordResetService : IPasswordResetService
 {
     public Task RequestAsync(string email) => Task.CompletedTask;
@@ -88,7 +85,6 @@ public sealed class FakePasswordResetService : IPasswordResetService
     public Task ResetAsync(string token, string newPassword) => Task.CompletedTask;
 }
 
-// Cadastro sem banco nem e-mail: só para os testes de limite, rota e validação.
 public sealed class FakeRegistrationService : IRegistrationService
 {
     public Task RequestAsync(string name, string email) => Task.CompletedTask;

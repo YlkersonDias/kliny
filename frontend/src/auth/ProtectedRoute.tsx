@@ -3,15 +3,14 @@ import { Navigate, Outlet, useLocation, type Location } from 'react-router'
 import { FullPageSpinner } from '../components/ui/Spinner'
 import { useAuth } from './useAuth'
 
-// A landing (8.6) é carregada só quando alguém sem sessão abre "/": quem está logado não a baixa.
+// Só carregada quando alguém sem sessão abre "/".
 const LandingPage = lazy(() => import('../pages/LandingPage'))
 
 export interface RedirectState {
   from?: Location
 }
 
-// Páginas que exigem login. Quem está deslogado vai para /entrar e depois volta para cá; em "/",
-// vê a landing (o Dashboard, com sessão, continua no mesmo endereço e no mesmo AppLayout).
+// Quem está deslogado vai para /entrar e depois volta; em "/", vê a landing.
 export function ProtectedRoute() {
   const { user, isValidating } = useAuth()
   const location = useLocation()
@@ -30,7 +29,6 @@ export function ProtectedRoute() {
   return <Outlet />
 }
 
-// Login e cadastro. Quem já está logado vai para a página que tentou abrir, ou para o início.
 export function PublicOnlyRoute() {
   const { user, isValidating } = useAuth()
   const location = useLocation()

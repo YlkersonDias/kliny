@@ -19,7 +19,6 @@ import { MoneyInput } from '../ui/MoneyInput'
 const FIELDS = ['amount', 'date', 'description'] as const
 type Field = (typeof FIELDS)[number]
 
-// Mesma regra do VaultOperationRequest da API.
 const DESCRIPTION_MAX = 255
 
 export type VaultOperation = 'deposit' | 'withdraw'
@@ -32,8 +31,7 @@ interface Values {
 
 const toCents = (value: number) => Math.round(value * 100)
 
-// accountAvailable: saldo da conta na data do depósito; undefined enquanto carrega (ou se a consulta
-// falhar): aí só a API confere.
+// accountAvailable undefined (carregando ou falhou): só a API confere.
 function validate(
   values: Values, operation: VaultOperation, balance: number, accountAvailable: number | undefined, t: TFunction<['vaults', 'common']>,
 ): FieldErrors<Field> {
@@ -44,11 +42,10 @@ function validate(
     const amount = parseMoneyInput(values.amount)
     if (amount === null) errors.amount = t('common:validation.amountInvalid')
     else if (amount === 0) errors.amount = t('common:validation.amountPositive')
-    // A API confere de novo, com o saldo travado; aqui é só para avisar antes.
+    // Só avisa antes: a API confere de novo, com o saldo travado.
     else if (operation === 'withdraw' && toCents(amount) > toCents(balance)) {
       errors.amount = t('operation.insufficientVault', { balance: formatMoney(balance) })
     }
-    // Depósito só com saldo na conta na data escolhida (a API confere de novo, com a conta travada).
     else if (operation === 'deposit' && accountAvailable !== undefined && exceedsAccountBalance(amount, accountAvailable)) {
       errors.amount = depositShortfallMessage(accountAvailable, values.date)
     }
@@ -67,7 +64,6 @@ function validate(
 interface VaultOperationModalProps {
   vault: Vault
   operation: VaultOperation
-  // "Retirar saldo" (antes de apagar o cofre) já abre com o saldo inteiro.
   initialAmount?: number
   onClose: () => void
 }
@@ -82,8 +78,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   })
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
-  // Uma chave por intenção: a mesma numa nova tentativa com os mesmos valores (falha de rede,
-  // clique repetido), e outra quando um campo muda. Ver lib/idempotency.ts.
+  // Uma chave por intenção: a mesma numa nova tentativa, outra quando um campo muda.
   const [idempotencyKey, setIdempotencyKey] = useState(() => newIdempotencyKey())
   const amountRef = useRef<HTMLInputElement>(null)
   const dateRef = useRef<HTMLInputElement>(null)
@@ -92,14 +87,12 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   const withdraw = useWithdrawFromVault()
   const mutation = isWithdraw ? withdraw : deposit
 
-  // Saldo da conta na data do depósito (summary com from = to = data: o accountBalance soma tudo
-  // até esse dia). Só consulta com uma data válida; ao trocar a data, a anterior fica até a nova chegar.
+  // Saldo da conta na data do depósito (summary com from = to = data).
   const dateOk = isValidIsoDate(values.date) && !vaultOperationDateError(values.date, today())
   const account = useSummary({ from: values.date, to: values.date }, { enabled: !isWithdraw && dateOk, keepPrevious: true })
   const accountAvailable = !isWithdraw && dateOk && account.data && !account.isPlaceholderData
     ? account.data.accountBalance
     : undefined
-  // Dica do valor no depósito: sempre visível, com o disponível na data escolhida.
   const depositHint = !dateOk
     ? t('operation.pickDateFirst')
     : accountAvailable !== undefined
@@ -122,8 +115,7 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
   function change(field: Field, value: string) {
     setValues((current) => ({ ...current, [field]: value }))
     setIdempotencyKey(newIdempotencyKey())
-    // O saldo disponível depende da data: trocar a data também limpa o erro do valor, que ficaria
-    // falando da data anterior (e escondendo a dica com o disponível da nova).
+    // O disponível depende da data: trocar a data também limpa o erro do valor.
     setErrors((current) => ({ ...current, [field]: undefined, ...(field === 'date' ? { amount: undefined } : {}) }))
   }
 
@@ -139,7 +131,6 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
     const request = {
       amount: parseMoneyInput(values.amount)!,
       date: values.date,
-      // Sem descrição, a API usa "Depósito no cofre X" ou "Retirada do cofre X".
       ...(description ? { description } : {}),
     }
     mutation.mutate({ id: vault.id, request, idempotencyKey }, {
@@ -157,7 +148,6 @@ export function VaultOperationModal({ vault, operation, initialAmount, onClose }
     })
   }
 
-  // Retirada de cofre sem saldo: nada a preencher.
   if (isWithdraw && vault.balance <= 0) {
     return (
       <Modal title={title} size="sm" onClose={onClose}>

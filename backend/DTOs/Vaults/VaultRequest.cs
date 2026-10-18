@@ -9,7 +9,6 @@ public class VaultRequest : IValidatableObject
     [StringLength(100, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.VaultNameMaxLength))]
     public string Name { get; set; } = string.Empty;
 
-    // Meta opcional, em reais.
     public decimal? Goal { get; set; }
 
     public IEnumerable<ValidationResult> Validate(ValidationContext validationContext)

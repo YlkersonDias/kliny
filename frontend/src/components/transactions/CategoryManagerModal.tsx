@@ -17,7 +17,7 @@ import { CategoryRulesSection } from './CategoryRulesSection'
 
 interface CategoryManagerModalProps {
   onClose: () => void
-  // Avisa a página, que limpa o filtro se ele usava a categoria apagada.
+  // A página limpa o filtro se ele usava a categoria apagada.
   onDeleted?: (id: number) => void
 }
 
@@ -126,7 +126,6 @@ function NewCategoryForm({ inputRef }: { inputRef: RefObject<HTMLInputElement | 
     <form noValidate onSubmit={handleSubmit} className="space-y-3">
       {formError && <FormAlert>{formError}</FormAlert>}
       <div className="flex items-start gap-2">
-        {/* Como a categoria vai aparecer, com a cor e o ícone escolhidos abaixo. */}
         <span className="mt-[29px]"><CategoryIcon look={look} size="size-11" /></span>
         <Input
           ref={inputRef}
@@ -146,7 +145,6 @@ function NewCategoryForm({ inputRef }: { inputRef: RefObject<HTMLInputElement | 
   )
 }
 
-// Edita o nome, a cor e o ícone na própria linha da lista.
 function EditForm({ category, onDone }: { category: Category; onDone: () => void }) {
   const { t } = useTranslation(['categories', 'common'])
   const [name, setName] = useState(category.name)

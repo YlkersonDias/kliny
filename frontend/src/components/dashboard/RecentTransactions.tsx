@@ -4,7 +4,6 @@ import type { Transaction } from '../../api/types'
 import { formatDate } from '../../lib/dates'
 import { TransactionAmount, TransactionCategory, TransactionKindIcon } from '../transactions/TransactionParts'
 
-// Só leitura: editar e apagar ficam na tela de Movimentações.
 export function RecentTransactions({ items }: { items: Transaction[] }) {
   const { t } = useTranslation('dashboard')
   return (

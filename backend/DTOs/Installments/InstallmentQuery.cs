@@ -3,8 +3,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Installments;
 
-// A data de hoje no navegador (o servidor não sabe o fuso), para contar e apagar as parcelas
-// futuras: as com data depois de hoje. Aceita só a um dia, no máximo, da data UTC.
+// A data de hoje no navegador (o servidor não sabe o fuso), aceita só a um dia da data UTC.
 public class InstallmentQuery : IValidatableObject
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DateRequired))]
@@ -21,7 +20,7 @@ public class InstallmentQuery : IValidatableObject
     }
 }
 
-// Ao apagar: "all" leva todas as parcelas; "future", só as com data depois de hoje (lista fechada, regra 6).
+// Lista fechada.
 public static class InstallmentDeleteScope
 {
     public const string All = "all";

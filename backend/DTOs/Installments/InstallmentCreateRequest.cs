@@ -4,7 +4,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Installments;
 
-// Nova compra parcelada (8.5b). Sempre um gasto: o total vem positivo e as parcelas são gravadas negativas.
+// Sempre um gasto: o total vem positivo e as parcelas são gravadas negativas.
 public class InstallmentCreateRequest : IValidatableObject
 {
     public const int MinCount = 2;
@@ -39,12 +39,11 @@ public class InstallmentCreateRequest : IValidatableObject
                 yield return new ValidationResult(Messages.InstallmentTotalPositive, [nameof(Total)]);
             else if (AmountRules.Validate(total) is { } error)
                 yield return new ValidationResult(error, [nameof(Total)]);
-            // Pelo menos R$ 0,01 por parcela.
             else if (Count is { } parts and >= MinCount and <= MaxCount && total * 100 < parts)
                 yield return new ValidationResult(Messages.InstallmentTotalTooSmall, [nameof(Total)]);
         }
 
-        // Mesma janela da primeira data de uma recorrência: até um ano para trás ou para a frente.
+        // Mesma janela da primeira data de uma recorrência.
         if (FirstDate is { } first)
         {
             var today = DateOnly.FromDateTime(DateTime.UtcNow);

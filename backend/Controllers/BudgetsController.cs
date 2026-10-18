@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Orçamento por categoria (8.2). O usuário vem sempre do token; a categoria, da rota.
 [ApiController]
 [Authorize]
 [Route("api/budgets")]

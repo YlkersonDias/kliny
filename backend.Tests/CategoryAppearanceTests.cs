@@ -5,9 +5,6 @@ using static Backend.Tests.FakeGoogleTokenValidator;
 
 namespace Backend.Tests;
 
-// Cor e ícone das categorias e as categorias padrão das contas novas, contra o MySQL. Os endpoints
-// são os de sempre (o dono do recurso já é conferido no OwnershipTests); aqui, a lista fechada de
-// cores e ícones e o que uma conta nova ganha.
 public class CategoryAppearanceTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -74,8 +71,6 @@ public class CategoryAppearanceTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.Equal(DefaultsPt.Length, (await CategoriesAsync(token)).Length);
         }
 
-        // Conta que já existia (com as padrão do cadastro) e é vinculada no primeiro login com o
-        // Google: nada é acrescentado.
         var email = $"vincula-{Guid.NewGuid():N}@gmail.com";
         var existing = await api.RegisterAsync(email);
         using (var client = api.Client())
@@ -99,11 +94,9 @@ public class CategoryAppearanceTests(MySqlApi api) : IClassFixture<MySqlApi>
         using (var updated = await client.PutAsJsonAsync($"/api/categories/{id}", new { name = "Pets", color = "teal", icon = "gift" }, Ct))
             Assert.Equal(("Pets", "teal", "gift"), Read(await updated.Content.ReadFromJsonAsync<JsonElement>(Ct)));
 
-        // Sem cor e ícone (ou nulos): volta ao visual neutro.
         using (var cleared = await client.PutAsJsonAsync($"/api/categories/{id}", new { name = "Pets" }, Ct))
             Assert.Equal(("Pets", (string?)null, (string?)null), Read(await cleared.Content.ReadFromJsonAsync<JsonElement>(Ct)));
 
-        // Sem cor nem ícone na criação também vale.
         using var plain = await client.PostAsJsonAsync("/api/categories", new { name = "Sem visual" }, Ct);
         Assert.Equal(("Sem visual", (string?)null, (string?)null), Read(await plain.Content.ReadFromJsonAsync<JsonElement>(Ct)));
     }

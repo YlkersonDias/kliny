@@ -4,13 +4,11 @@ interface StatItemProps {
   label: string
   value: string
   valueClass?: string
-  // Ícone redondo à esquerda (receita, gasto ou cofre).
   icon?: { name: 'income' | 'expense' | 'vault'; className: string }
   className?: string
 }
 
-// Par rótulo/valor de um <dl>. O <div> só pode conter <dt> e <dd> (senão o leitor de tela pode não
-// ligar o rótulo ao valor), então o ícone fica dentro do <dt>, posicionado à esquerda do bloco.
+// O <div> de um <dl> só pode conter <dt> e <dd>: o ícone fica dentro do <dt>.
 export function StatItem({ label, value, valueClass = 'text-foreground', icon, className = '' }: StatItemProps) {
   return (
     <div className={`relative min-h-9 ${icon ? 'pl-12' : ''} ${className}`}>

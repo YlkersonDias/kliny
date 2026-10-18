@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Regras de categoria (8.4). O usuário vem sempre do token.
 [ApiController]
 [Authorize]
 [Route("api/category-rules")]
@@ -40,7 +39,6 @@ public class CategoryRulesController(ICategoryRuleService ruleService) : Control
         return NoContent();
     }
 
-    // ?preview=true só conta; sem ele, troca a categoria e devolve quantas mudaram.
     [HttpPost("{id:int}/apply")]
     [ProducesResponseType<CategoryRuleApplyResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status404NotFound)]

@@ -1,8 +1,6 @@
 import type { CsvMapping } from './csv'
 
-// Colunas escolhidas por layout de CSV (8.3b), guardadas no navegador para a próxima importação do
-// mesmo banco. Só a escolha das colunas (índices, formato da data, inverter): nenhum dado do
-// extrato nem da API (regra 14). Sem localStorage, a importação funciona igual, só não lembra.
+// Só a escolha das colunas (índices, formato da data, inverter): nenhum dado do extrato.
 
 const STORAGE_KEY = 'import.csvLayouts'
 const MAX_LAYOUTS = 20
@@ -39,7 +37,6 @@ export function saveMapping(layout: string, mapping: CsvMapping): void {
     const all = readAll()
     delete all[layout]
     const { date, dateFormat, description, description2, amount, credit, debit, id, invert } = mapping
-    // O mais recente por último; acima do limite, sai o mais antigo.
     const entries = [...Object.entries(all), [layout, { date, dateFormat, description, description2, amount, credit, debit, id, invert }] as const]
     localStorage.setItem(STORAGE_KEY, JSON.stringify(Object.fromEntries(entries.slice(-MAX_LAYOUTS))))
   } catch {

@@ -33,8 +33,7 @@ public class TransactionService(AppDbContext db) : ITransactionService
             _ => transactions,
         };
 
-        // Parametrizado pelo EF (regra 5). A collation do banco (utf8mb4_0900_ai_ci) faz a busca
-        // ignorar maiúsculas e acentos.
+        // A collation do banco (utf8mb4_0900_ai_ci) faz a busca ignorar maiúsculas e acentos.
         if (query.Search?.Trim() is { Length: > 0 } search)
             transactions = transactions.Where(t => t.Description.Contains(search));
 
@@ -48,7 +47,6 @@ public class TransactionService(AppDbContext db) : ITransactionService
     }
 
     // Sempre com desempate pela data e pelo Id, para a paginação nunca repetir nem pular item.
-    // Valor: pelo valor absoluto, então um gasto de R$ 500 vem antes de um de R$ 20.
     private static IQueryable<Transaction> Sort(IQueryable<Transaction> transactions, string? sort) => sort switch
     {
         TransactionSort.DateAsc => transactions.OrderBy(t => t.Date).ThenBy(t => t.Id),
@@ -90,8 +88,7 @@ public class TransactionService(AppDbContext db) : ITransactionService
         await db.SaveChangesAsync();
     }
 
-    // Operações de cofre ficam de fora: alterá-las aqui mudaria o saldo do cofre
-    // sem passar pelas regras de depósito e retirada.
+    // Alterar uma operação de cofre aqui mudaria o saldo sem passar pelas regras de depósito e retirada.
     private async Task<Transaction> FindEditableAsync(int userId, int id)
     {
         var transaction = await db.Transactions.FirstOrDefaultAsync(t => t.Id == id && t.UserId == userId)

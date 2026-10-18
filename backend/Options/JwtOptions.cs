@@ -12,7 +12,7 @@ public class JwtOptions
     [Required]
     public string Audience { get; set; } = string.Empty;
 
-    // Vem do user-secrets (Jwt:Key). HMAC-SHA256 exige pelo menos 32 bytes.
+    // HMAC-SHA256 exige pelo menos 32 bytes.
     [Required, MinLength(32)]
     public string Key { get; set; } = string.Empty;
 

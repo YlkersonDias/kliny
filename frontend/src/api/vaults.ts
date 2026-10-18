@@ -17,13 +17,12 @@ export function updateVault(id: number, request: VaultRequest): Promise<Vault> {
   return apiRequest(`/vaults/${id}`, { method: 'PUT', body: request })
 }
 
-// Só com saldo zero. Irreversível: apaga também os depósitos e retiradas do cofre.
+// Irreversível: apaga também os depósitos e retiradas do cofre.
 export function deleteVault(id: number): Promise<void> {
   return apiRequest(`/vaults/${id}`, { method: 'DELETE' })
 }
 
-// idempotencyKey: a mesma chave em envios repetidos (nova tentativa depois de falha de rede)
-// devolve o lançamento já gravado, sem criar outro. Ver lib/idempotency.ts.
+// A mesma idempotencyKey em envios repetidos devolve o lançamento já gravado, sem criar outro.
 export function depositToVault(id: number, request: VaultOperationRequest, idempotencyKey: string): Promise<VaultOperationResponse> {
   return apiRequest(`/vaults/${id}/deposit`, { method: 'POST', body: request, headers: { 'Idempotency-Key': idempotencyKey } })
 }

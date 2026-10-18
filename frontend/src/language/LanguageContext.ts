@@ -3,7 +3,7 @@ import type { Language } from '../lib/language'
 
 export interface LanguageContextValue {
   language: Language
-  // focusId: elemento que recebe o foco depois da troca (a tela é remontada e o foco se perderia).
+  // A tela é remontada na troca, e o foco se perderia.
   setLanguage: (language: Language, focusId?: string) => void
 }
 

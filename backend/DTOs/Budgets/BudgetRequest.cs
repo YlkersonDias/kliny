@@ -2,7 +2,6 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Backend.DTOs.Budgets;
 
-// Limite mensal, em reais. A categoria vem da rota.
 public class BudgetRequest : IValidatableObject
 {
     public decimal Amount { get; set; }

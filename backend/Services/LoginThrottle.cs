@@ -4,13 +4,11 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.Services;
 
-// Bloqueia o e-mail depois de MaxFailures falhas dentro de WindowMinutes, por LockoutMinutes.
 // Conta qualquer e-mail, exista a conta ou não, para o bloqueio não revelar quem está cadastrado.
-// Fica na memória: some ao reiniciar e vale para um servidor só.
+// Na memória: some ao reiniciar e vale para um servidor só.
 public class LoginThrottle(IOptions<RateLimitOptions> options, TimeProvider timeProvider) : ILoginThrottle
 {
-    // Acima disso, uma falha nova aproveita para descartar os e-mails que já não importam,
-    // no máximo uma vez por minuto (a varredura passa por todos).
+    // Acima disso, uma falha descarta os e-mails que já não importam (no máximo uma vez por minuto).
     private const int PruneThreshold = 10_000;
     private static readonly TimeSpan PruneInterval = TimeSpan.FromMinutes(1);
 
@@ -19,7 +17,6 @@ public class LoginThrottle(IOptions<RateLimitOptions> options, TimeProvider time
     // Corrida aqui só faz duas falhas varrerem juntas: inofensivo.
     private DateTimeOffset _lastPrune;
 
-    // E-mails guardados agora (para os testes da limpeza).
     internal int Count => _entries.Count;
 
     private TimeSpan Window =>TimeSpan.FromMinutes(_limits.WindowMinutes);
@@ -44,7 +41,7 @@ public class LoginThrottle(IOptions<RateLimitOptions> options, TimeProvider time
             var entry = _entries.GetOrAdd(email, _ => new Entry());
             lock (entry)
             {
-                // O Reset ou a limpeza podem ter tirado a entrada do dicionário entre o GetOrAdd e o lock.
+                // O Reset ou a limpeza podem ter tirado a entrada entre o GetOrAdd e o lock.
                 if (entry.Removed)
                     continue;
                 Record(entry, now);
@@ -74,13 +71,11 @@ public class LoginThrottle(IOptions<RateLimitOptions> options, TimeProvider time
         entry.Failures.Enqueue(now);
         if (entry.Failures.Count >= _limits.MaxFailures)
         {
-            // O bloqueio recomeça a contagem: depois dele, são mais MaxFailures falhas.
             entry.LockedUntil = now + Lockout;
             entry.Failures.Clear();
         }
     }
 
-    // Descarta e-mails sem bloqueio em vigor e sem falha dentro da janela.
     private void Prune(DateTimeOffset now)
     {
         foreach (var (email, entry) in _entries)
@@ -99,7 +94,6 @@ public class LoginThrottle(IOptions<RateLimitOptions> options, TimeProvider time
             RemoveLocked(email, entry);
     }
 
-    // Chamado com o lock da entrada: quem já tem a referência vê o Removed e busca outra.
     private void RemoveLocked(string email, Entry entry)
     {
         entry.Removed = true;

@@ -4,11 +4,10 @@ interface InputProps extends ComponentProps<'input'> {
   label: string
   error?: string
   hint?: string
-  // Texto fixo antes do valor (como "R$"), fora do que é digitado.
   prefix?: string
 }
 
-// Campo com rótulo visível. Dica e erro ficam ligados ao campo por aria-describedby.
+// Dica e erro ficam ligados ao campo por aria-describedby.
 export function Input({ label, error, hint, prefix, id, className = '', ...props }: InputProps) {
   const generatedId = useId()
   const inputId = id ?? generatedId

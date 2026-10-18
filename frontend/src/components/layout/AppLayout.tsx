@@ -15,24 +15,18 @@ export function AppLayout() {
   const { t } = useTranslation('layout')
   const { user, signOut } = useAuth()
   const navigate = useNavigate()
-  // Lança os recorrentes que faltam até o fim do mês (8.5a).
   useRecurrenceSync()
 
   function handleSignOut() {
-    // Volta para a landing (em "/", sem sessão), sem guardar a página atual: o próximo login pode
-    // ser de outra pessoa. Sessão expirada, "Sair de todos os dispositivos" e conta excluída
-    // continuam indo para o login, que mostra o aviso de cada caso.
-    // As duas na mesma transição: o React Router navega dentro de uma transição, e a sessão apagada
-    // fora dela chegava antes à tela, quando a página protegida ainda estava aberta e mandava para
-    // o login.
+    // Na mesma transição da navegação: fora dela, a sessão apagada chegava antes à tela e a página
+    // protegida mandava para o login.
     startTransition(() => {
       navigate('/', { replace: true })
       signOut()
     })
   }
 
-  // Marca clicável, levando ao início (no menu lateral e no cabeçalho do celular). O nome
-  // acessível começa pelo texto visível, como pede o WCAG 2.5.3.
+  // O nome acessível começa pelo texto visível (WCAG 2.5.3).
   const brand = (
     <Link
       to="/"
@@ -43,9 +37,6 @@ export function AppLayout() {
     </Link>
   )
 
-  // Atalho para /configuracoes. No menu lateral, o texto é "Configurações" (o nome da conta fica
-  // na linha de cima); no cabeçalho do celular, sem espaço para os dois, continua o nome. O nome
-  // acessível começa pelo texto visível (WCAG 2.5.3). No celular, 44 px de altura (alvo de toque).
   function settingsLink(layout: string, showName: boolean) {
     return (
       <NavLink
@@ -73,14 +64,12 @@ export function AppLayout() {
         {t('skipToContent')}
       </a>
 
-      {/* Desktop: menu lateral */}
       <aside className="fixed inset-y-0 left-0 hidden w-60 flex-col border-r border-border bg-surface md:flex">
         <div className="px-6 py-5">{brand}</div>
         <div className="flex-1 px-3">
           <Navigation variant="sidebar" />
         </div>
         <div className="border-t border-border p-3">
-          {/* Nome, Configurações e Sair com o mesmo px-4 do Button: os ícones ficam alinhados. */}
           <p className="truncate px-4 pb-1 pt-1.5 text-sm font-semibold text-foreground" title={user?.name}>
             {user?.name}
           </p>
@@ -95,7 +84,6 @@ export function AppLayout() {
         </div>
       </aside>
 
-      {/* Celular: cabeçalho no topo e menu na barra inferior */}
       <header className="sticky top-0 z-10 flex h-14 items-center justify-between gap-3 border-b border-border bg-surface px-4 md:hidden">
         {brand}
         <div className="flex min-w-0 items-center gap-1">

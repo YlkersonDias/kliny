@@ -2,9 +2,7 @@ using Backend.Security;
 
 namespace Backend.Tests;
 
-// Validador do Google falso: os testes não falam com o Google. O "comprovante" é um texto montado
-// por Credential(...), com o que o Google diria sobre a conta; qualquer outro texto é recusado,
-// como um comprovante inválido.
+// O "comprovante" é um texto montado por Credential(...); qualquer outro texto é recusado.
 public sealed class FakeGoogleTokenValidator : IGoogleTokenValidator
 {
     private const string Prefix = "fake-google";

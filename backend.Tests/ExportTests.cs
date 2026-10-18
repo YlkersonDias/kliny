@@ -6,15 +6,12 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Exportação dos dados (LGPD), contra o MySQL: o .zip leva tudo o que é da pessoa e nada interno.
-// Que outra pessoa não aparece no arquivo fica no OwnershipTests (regra 19).
 public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
     private static string Today => DateOnly.FromDateTime(DateTime.UtcNow).ToString("yyyy-MM-dd");
 
-    // O JSON e o CSV de dentro do .zip.
     public static async Task<(JsonElement Json, string Csv)> ReadZipAsync(HttpResponseMessage response)
     {
         var bytes = await response.Content.ReadAsByteArrayAsync(Ct);
@@ -37,7 +34,7 @@ public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
         return (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
     }
 
-    // Uma conta com um pouco de tudo, e uma descrição que o Excel executaria como fórmula.
+    // Inclui uma descrição que o Excel executaria como fórmula.
     private async Task<string> AccountWithDataAsync()
     {
         var token = await api.RegisterAsync($"exporta-{Guid.NewGuid():N}@kliny.test");
@@ -88,7 +85,7 @@ public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.True(account.GetProperty("hasPassword").GetBoolean());
         Assert.False(account.GetProperty("googleLinked").GetBoolean());
 
-        // 9 padrão do cadastro e a Feira.
+        // As 9 padrão do cadastro e a Feira.
         var feira = json.GetProperty("categories").EnumerateArray().Single(c => c.GetProperty("name").GetString() == "Feira");
         Assert.Equal("green", feira.GetProperty("color").GetString());
 
@@ -109,7 +106,6 @@ public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.Equal(2, json.GetProperty("installments")[0].GetProperty("count").GetInt32());
         Assert.Equal("Feira", json.GetProperty("categoryRules")[0].GetProperty("category").GetString());
 
-        // Nada interno: nem Ids do banco, nem hash, nem chaves.
         var raw = json.GetRawText();
         foreach (var field in new[] { "\"id\"", "userId", "passwordHash", "googleSubject", "tokenVersion", "importKey", "idempotencyKey", "categoryId", "vaultId" })
             Assert.DoesNotContain(field, raw, StringComparison.OrdinalIgnoreCase);
@@ -125,7 +121,6 @@ public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
 
         Assert.Equal("Data;Descrição;Valor;Tipo;Categoria;Cofre", lines[0]);
         Assert.Contains("05/01/2026;Salário;3000,50;Receita;;", lines);
-        // A fórmula vira texto (apóstrofo), e as aspas do texto são dobradas dentro das aspas do campo.
         Assert.Contains("06/01/2026;\"'=HYPERLINK(\"\"http://x\"\")\";-12,30;Gasto;Feira;", lines);
         Assert.Contains("07/01/2026;\"Pão; leite \"\"integral\"\"\";-8,00;Gasto;;", lines);
         Assert.Contains("08/01/2026;Depósito no cofre Viagem;-200,00;Depósito no cofre;;Viagem", lines);

@@ -8,8 +8,6 @@ using Microsoft.IdentityModel.Tokens;
 
 namespace Backend.Tests;
 
-// S.5: "Sair de todos os dispositivos" (POST /api/auth/logout-all) invalida na hora todos os
-// tokens do usuário. A versão do token (claim "tv") é conferida com a do banco a cada requisição.
 public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private const string Password = "senha12345";
@@ -37,8 +35,7 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
         return (await client.GetFromJsonAsync<JsonElement>("/api/auth/me", Ct)).GetProperty("id").GetInt32();
     }
 
-    // Token assinado com a mesma chave e o mesmo emissor da API de teste (MySqlApi), para o teste
-    // provar que a recusa vem da versão, e não da assinatura.
+    // Mesma chave e emissor da API de teste: a recusa vem da versão, e não da assinatura.
     private static string ForgeToken(int userId, int? tokenVersion, string algorithm = SecurityAlgorithms.HmacSha256)
     {
         var claims = new List<Claim> { new(JwtRegisteredClaimNames.Sub, userId.ToString()) };
@@ -67,7 +64,6 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
         using (var response = await client.PostAsync("/api/auth/logout-all", null, Ct))
             Assert.Equal(HttpStatusCode.NoContent, response.StatusCode);
 
-        // Os dois "aparelhos" caem, inclusive o que pediu o logout-all.
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(first));
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(second));
         using (var client = api.Client(second))
@@ -95,10 +91,8 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
     [Fact]
     public async Task Token_sem_versao_com_versao_errada_ou_de_usuario_inexistente_responde_401()
     {
-        // 4 cadastros nesta classe, dentro do limite de 5 por hora por IP.
         var userId = await UserIdAsync(await api.RegisterAsync("revoga-forja@kliny.test"));
 
-        // Controle: um token forjado com a versão atual do banco passa.
         var current = ForgeToken(userId, await CurrentVersionAsync(userId));
         Assert.Equal(HttpStatusCode.OK, await MeAsync(current));
 
@@ -106,7 +100,7 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(userId, tokenVersion: 999)));
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(999_999, tokenVersion: 0)));
 
-        // S.6: só HS256. Com a mesma chave e a versão certa, HS512 e token sem assinatura são recusados.
+        // Só HS256: com a mesma chave e a versão certa, HS512 e token sem assinatura são recusados.
         var version = await CurrentVersionAsync(userId);
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(ForgeToken(userId, version, SecurityAlgorithms.HmacSha512)));
         Assert.Equal(HttpStatusCode.Unauthorized, await MeAsync(UnsignedToken(userId, version)));
@@ -125,7 +119,6 @@ public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
             ]),
         });
 
-    // Lida direto no banco de teste, com o usuário só de DML da API.
     private async Task<int> CurrentVersionAsync(int userId)
     {
         await using var connection = new MySqlConnector.MySqlConnection(api.AppConnectionString);

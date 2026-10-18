@@ -13,7 +13,6 @@ interface SpendingSectionProps {
   today: string
 }
 
-// Gastos por dia do mês: gráfico (só visual) com resumo em texto e tabela como alternativa.
 export function SpendingSection({ points, today }: SpendingSectionProps) {
   const { t } = useTranslation('dashboard')
   const days = dailySpending(points, today)

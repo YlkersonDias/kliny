@@ -7,9 +7,6 @@ import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { Select } from '../ui/Select'
 
-// Importação de CSV (8.3b): a pessoa diz qual coluna é o quê, vendo as primeiras linhas já
-// convertidas. As colunas vêm sugeridas (pelo cabeçalho, ou a escolha guardada deste layout).
-
 interface CsvColumnsStepProps {
   fileName: string
   rows: string[][]
@@ -41,7 +38,6 @@ export function CsvColumnsStep({ fileName, rows, initial, busy, error, onConfirm
     setMapping((current) => ({ ...current, [field]: value }))
   }
 
-  // Nome da coluna: o do cabeçalho, ou "Coluna N" com um exemplo do conteúdo.
   const columns = Array.from({ length: width }, (_, i) => {
     const sample = data.find((row) => (row[i] ?? '') !== '')?.[i] ?? ''
     const name = mapping.hasHeader && header[i] ? header[i] : t('columns.column', { n: i + 1 })

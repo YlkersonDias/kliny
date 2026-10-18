@@ -12,7 +12,6 @@ import { usePageTitle } from '../hooks/usePageTitle'
 
 const titleStyle = "font-display leading-none font-[720] tracking-[-0.03em] text-balance [font-variation-settings:'wdth'_90]"
 const sectionTitle = `${titleStyle} text-[clamp(2rem,1.2rem+3vw,3.4rem)]`
-// A privacidade é a frase mais forte da página depois da abertura: título maior.
 const privacyTitle = `${titleStyle} text-[clamp(2.2rem,1.2rem+3.6vw,4rem)]`
 const primaryButton = 'inline-flex min-h-13 items-center rounded-full bg-primary px-6 font-semibold text-on-primary transition-colors duration-200 hover:bg-primary-hover focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
 const ghostButton = 'inline-flex min-h-13 items-center rounded-full border border-foreground/30 px-6 font-semibold text-foreground transition-colors duration-200 hover:bg-surface focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary'
@@ -25,7 +24,6 @@ const PROMISES = [
   { icon: 'moon', title: 'promises.theme', text: 'promises.themeText' },
 ] as const
 
-// Uma sequência de verdade: por isso os números.
 const STEPS = [
   { title: 'steps.account', text: 'steps.accountText' },
   { title: 'steps.balance', text: 'steps.balanceText' },
@@ -38,8 +36,7 @@ const FACTS = [
   { title: 'privacy.delete', text: 'privacy.deleteText' },
 ] as const
 
-// Landing (8.6): o que quem ainda não tem conta vê em "/". Carregada sob demanda (App.tsx), então
-// quem está logado não baixa nada daqui.
+// Carregada sob demanda: quem está logado não baixa nada daqui.
 export default function LandingPage() {
   const { t } = useTranslation(['landing', 'layout'])
   usePageTitle(t('pageTitle'))

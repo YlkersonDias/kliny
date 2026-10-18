@@ -1,8 +1,6 @@
 import type { Category } from '../api/types'
 
-// Cor e ícone das categorias: as mesmas chaves do backend (DTOs/Categories/CategoryAppearance.cs).
-// A cor vira o token --color-cat-<chave> do index.css (um tom em cada tema); o ícone, um desenho do
-// components/ui/CategoryIcon.tsx. Sem cor ou ícone, a categoria aparece cinza com a etiqueta.
+// As mesmas chaves do backend (DTOs/Categories/CategoryAppearance.cs). A cor vira o token --color-cat-<chave>.
 
 export const CATEGORY_COLORS = ['blue', 'indigo', 'purple', 'pink', 'orange', 'amber', 'teal', 'green', 'brown', 'gray'] as const
 export type CategoryColor = (typeof CATEGORY_COLORS)[number]

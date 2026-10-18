@@ -8,7 +8,7 @@ function formatBalance(value: number): string {
   return value < 0 ? formatSigned(value) : formatMoney(value)
 }
 
-// Convenção dos relatórios: expense e vaultDeposits vêm positivos; formatOutflow só põe o "−".
+// expense e vaultDeposits vêm positivos; formatOutflow só põe o "−".
 export function ReportSummary({ summary }: { summary: SummaryResponse }) {
   const { t } = useTranslation('reports')
   return (

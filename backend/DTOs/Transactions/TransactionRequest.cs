@@ -3,14 +3,13 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Transactions;
 
-// Não tem VaultId: operações de cofre usam os endpoints de cofre.
+// Sem VaultId: operações de cofre usam os endpoints de cofre.
 public class TransactionRequest : IValidatableObject
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionRequired))]
     [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionMaxLength))]
     public string Description { get; set; } = string.Empty;
 
-    // Positivo = receita; negativo = gasto.
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.AmountRequired))]
     public decimal? Amount { get; set; }
 

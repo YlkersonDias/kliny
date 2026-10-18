@@ -17,8 +17,7 @@ interface TransactionListProps {
   onDelete: (transaction: Transaction) => void
 }
 
-// Operações de cofre não têm editar nem apagar: só os endpoints de cofre as criam ou removem.
-// No lugar, um link para o cofre.
+// Operações de cofre não se editam nem se apagam aqui: só os endpoints de cofre.
 function Actions({ transaction, onEdit, onDelete }: { transaction: Transaction } & Omit<TransactionListProps, 'items'>) {
   const { t } = useTranslation('transactions')
   if (transaction.vaultId !== null) {
@@ -45,7 +44,6 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
   const { t } = useTranslation('transactions')
   return (
     <>
-      {/* Desktop: tabela */}
       <table className="hidden w-full text-left text-sm lg:table">
         <thead className="border-b border-border text-muted">
           <tr>
@@ -78,7 +76,6 @@ export function TransactionList({ items, onEdit, onDelete }: TransactionListProp
         </tbody>
       </table>
 
-      {/* Celular: cartões empilhados */}
       <ul className="divide-y divide-border lg:hidden">
         {items.map((transaction) => (
           <li key={transaction.id} className="flex items-center gap-3 px-4 py-3">

@@ -46,7 +46,7 @@ describe('contentSecurityPolicy', () => {
     expect(policy).toContain("base-uri 'none'")
     expect(policy).not.toContain('unsafe-inline')
     expect(policy).not.toContain('unsafe-eval')
-    // Ignorado pelo navegador numa <meta>: fica para o cabeçalho do servidor (S.7).
+    // Ignorado pelo navegador numa <meta>: vai no cabeçalho do nginx.
     expect(policy).not.toContain('frame-ancestors')
   })
 })

@@ -7,8 +7,7 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// Recuperação de senha, contra o MySQL. Os usuários são criados direto no banco (o cadastro tem
-// limite de 5 por hora por IP), um por teste, para os testes não dependerem da ordem.
+// Usuários criados direto no banco, um por teste (o cadastro tem limite por IP).
 public sealed class PasswordResetFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -30,7 +29,6 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
     [GeneratedRegex("^https://kliny\\.test/redefinir-senha#([A-Za-z0-9_-]{43})$", RegexOptions.Multiline)]
     private static partial Regex LinkPattern();
 
-    // Insere o usuário direto no banco, com a senha (ou sem, como uma conta só do Google).
     private async Task<string> CreateUserAsync(string name, string? password = OldPassword)
     {
         var email = $"{name}-{Guid.NewGuid():N}@kliny.test";
@@ -54,7 +52,6 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
         return response.StatusCode;
     }
 
-    // Pede o link e devolve o token que chegou no e-mail.
     private async Task<string> RequestTokenAsync(string email)
     {
         var seen = Api.Emails.CountFor(email);
@@ -105,7 +102,6 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
         Assert.Contains("Olá, Ana.", message.Text);
         Assert.Contains("30 minutos", message.Text);
 
-        // Sem conta: a mesma resposta, e nenhum e-mail.
         var nobody = $"ninguem-{Guid.NewGuid():N}@kliny.test";
         Assert.Equal(HttpStatusCode.NoContent, await ForgotAsync(nobody));
         await Task.Delay(300, Ct);
@@ -203,7 +199,6 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
         for (var i = 0; i < PasswordResetService.MaxPerHour; i++)
             await RequestTokenAsync(email);
 
-        // O quarto pedido responde igual, mas não manda nada.
         Assert.Equal(HttpStatusCode.NoContent, await ForgotAsync(email));
         await Task.Delay(300, Ct);
         Assert.Equal(PasswordResetService.MaxPerHour, Api.Emails.CountFor(email));
@@ -226,7 +221,7 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
         var email = await CreateUserAsync("regras");
         var token = await RequestTokenAsync(email);
         Assert.Equal(HttpStatusCode.BadRequest, (await ResetAsync(token, password)).Status);
-        // 37 "é" passam de 72 bytes (S.6).
+        // 37 "é" passam de 72 bytes.
         Assert.Equal(HttpStatusCode.BadRequest, (await ResetAsync(token, new string('é', 37))).Status);
         Assert.Equal(HttpStatusCode.NoContent, (await ResetAsync(token)).Status);
     }
@@ -266,8 +261,7 @@ public partial class PasswordResetTests(PasswordResetFixture fixture) : IClassFi
         Assert.All(results.Where(r => r.Status != HttpStatusCode.NoContent), r => Assert.Equal(HttpStatusCode.BadRequest, r.Status));
     }
 
-    // Regra 19: o link de uma pessoa só mexe na conta dela. Fica aqui, e não no OwnershipTests,
-    // porque trocar a senha de A ou B derrubaria os tokens que aqueles testes usam.
+    // Fica aqui, e não no OwnershipTests, porque trocar a senha derrubaria os tokens daqueles testes.
     [Fact]
     public async Task O_link_de_uma_pessoa_nao_mexe_na_conta_de_outra()
     {

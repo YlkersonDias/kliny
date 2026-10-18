@@ -2,7 +2,6 @@ using Backend.Services;
 
 namespace Backend.Tests;
 
-// Datas das recorrências mensais (8.5a), sem banco.
 public class RecurrenceScheduleTests
 {
     [Theory]

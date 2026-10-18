@@ -2,7 +2,6 @@ using System.Text.RegularExpressions;
 
 namespace Backend.Data;
 
-// Cabeçalho Idempotency-Key do depósito e da retirada (regra 18 de "Segurança (obrigatória)").
 // O frontend manda um UUID por intenção de operação; o formato aceito é mais largo, mas fechado.
 public static partial class IdempotencyKey
 {

@@ -5,7 +5,6 @@ import type { ProblemDetails } from './types'
 export class ApiError extends Error {
   readonly status: number
   readonly detail: string
-  // Primeira mensagem de cada campo, com o nome em camelCase (`Email` vira `email`).
   readonly fieldErrors: Record<string, string>
 
   constructor(status: number, detail: string, fieldErrors: Record<string, string> = {}) {
@@ -19,7 +18,6 @@ export class ApiError extends Error {
 
 let unauthorizedHandler: (() => void) | null = null
 
-// Chamado quando uma requisição feita com token recebe 401.
 export function setUnauthorizedHandler(handler: (() => void) | null): void {
   unauthorizedHandler = handler
 }
@@ -27,10 +25,8 @@ export function setUnauthorizedHandler(handler: (() => void) | null): void {
 interface RequestOptions {
   method?: 'GET' | 'POST' | 'PUT' | 'DELETE'
   body?: unknown
-  // false nas rotas públicas (login e cadastro): não envia token.
   auth?: boolean
   signal?: AbortSignal
-  // Cabeçalhos extras, como o Idempotency-Key do depósito e da retirada.
   headers?: Record<string, string>
 }
 
@@ -42,7 +38,6 @@ export async function apiRequest<T>(path: string, options: RequestOptions = {}):
   return JSON.parse(text) as T
 }
 
-// Resposta que é um arquivo (a exportação dos dados), com os mesmos erros e o mesmo 401 do apiRequest.
 export async function apiBlob(path: string, options: RequestOptions = {}): Promise<Blob> {
   const response = await send(path, options)
   return response.blob()
@@ -53,7 +48,6 @@ async function send(
   { method = 'GET', body, auth = true, signal, headers: extraHeaders }: RequestOptions,
 ): Promise<Response> {
   const token = auth ? getSessionToken() : null
-  // Accept-Language: a API responde as mensagens de erro no idioma da tela.
   const headers = new Headers({ Accept: 'application/json', 'Accept-Language': currentLanguage() })
   if (token) headers.set('Authorization', `Bearer ${token}`)
   if (body !== undefined) headers.set('Content-Type', 'application/json')
@@ -92,7 +86,6 @@ async function readProblem(response: Response): Promise<ProblemDetails | null> {
   }
 }
 
-// `$.name` (erro de leitura do JSON) e `Email` (validação) viram `name` e `email`.
 function toFieldName(key: string): string {
   const last = key.replace(/^\$\./, '').split('.').pop() ?? key
   return last.charAt(0).toLowerCase() + last.slice(1)
@@ -101,7 +94,7 @@ function toFieldName(key: string): string {
 function toApiError(status: number, problem: ProblemDetails | null): ApiError {
   const fieldErrors: Record<string, string> = {}
   for (const [key, messages] of Object.entries(problem?.errors ?? {})) {
-    // `request` é o corpo inteiro, não um campo do formulário.
+    // `request` é o corpo inteiro, não um campo.
     if (key === 'request' || messages.length === 0) continue
     fieldErrors[toFieldName(key)] ??= messages[0]
   }
@@ -119,7 +112,6 @@ function defaultMessage(status: number): string {
     case 403: return i18n.t('errors:forbidden')
     case 404: return i18n.t('errors:notFound')
     case 409: return i18n.t('errors:conflict')
-    // A API manda o tempo de espera no detail; este texto é só para resposta sem ele.
     case 429: return i18n.t('errors:tooManyRequests')
     default: return i18n.t('errors:generic')
   }

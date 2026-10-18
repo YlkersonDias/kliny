@@ -31,7 +31,6 @@ type Field = (typeof FIELDS)[number]
 
 type Kind = 'income' | 'expense'
 
-// Só em nova movimentação: lançar uma vez, todo mês (8.5a) ou em parcelas (8.5b, só gasto).
 type Repeat = 'none' | 'monthly' | 'installments'
 
 interface Values {
@@ -42,14 +41,12 @@ interface Values {
   categoryId: string // '' = sem categoria
   repeat: Repeat
   endDate: string // '' = sem data final
-  count: string // número de parcelas digitado
+  count: string
 }
 
-// Mesma regra do TransactionRequest da API (StringLength(255), conferido no backend).
 const DESCRIPTION_MAX = 255
 
 interface Rules {
-  // A primeira data da recorrência, quando há data final no formulário; senão, null.
   startDate: string | null
   installments: boolean
 }
@@ -84,7 +81,6 @@ function validate(values: Values, rules: Rules, t: TFunction<['transactions', 'c
   return errors
 }
 
-// Nova movimentação já preenchida (como o "Saldo inicial" da conta nova).
 export interface TransactionPreset {
   kind: Kind
   description: string
@@ -111,7 +107,7 @@ function initialValues(transaction?: Transaction, preset?: TransactionPreset, re
   }
 }
 
-// Nomes da API que no formulário são outro campo: a primeira data é "date", e o total é "amount".
+// Nomes da API que no formulário são outro campo.
 const API_FIELDS: Record<string, Field> = { startDate: 'date', firstDate: 'date', total: 'amount' }
 
 function withFormFields(error: unknown): unknown {
@@ -122,11 +118,9 @@ function withFormFields(error: unknown): unknown {
 }
 
 interface TransactionFormModalProps {
-  // Sem transaction nem recurrence: nova movimentação.
   transaction?: Transaction
-  // Edição de um lançamento recorrente (8.5a): sem a data, que não muda, e com a data final.
+  // Edição de recorrente: sem a data, que não muda, e com a data final.
   recurrence?: Recurrence
-  // Só para nova movimentação. Com preset, o foco começa no valor.
   preset?: TransactionPreset
   onClose: () => void
 }
@@ -140,7 +134,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
   const [formError, setFormError] = useState<string | null>(null)
   const [isCreatingCategory, setIsCreatingCategory] = useState(false)
-  // Escolhida pela pessoa: daí em diante, as regras de categoria (8.4) não mexem mais no campo.
+  // Depois que a pessoa escolhe a categoria, as regras não mexem mais no campo.
   const [categoryChosen, setCategoryChosen] = useState(false)
   const descriptionRef = useRef<HTMLInputElement>(null)
   const amountRef = useRef<HTMLInputElement>(null)
@@ -159,7 +153,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const isPending = create.isPending || update.isPending || createRecurrence.isPending || updateRecurrence.isPending
     || createInstallment.isPending
 
-  // Parcelado só vale para gasto: trocar para receita volta a "Não repete" sem apagar o que foi digitado.
+  // Parcelado só vale para gasto.
   const repeat: Repeat = !isNew ? 'none'
     : values.repeat === 'installments' && values.kind !== 'expense' ? 'none' : values.repeat
   const isRecurring = isRecurrenceEdit || repeat === 'monthly'
@@ -167,15 +161,13 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const startDate = isRecurrenceEdit ? recurrence.startDate : values.date
   const day = isRecurrenceEdit ? recurrence.dayOfMonth : (isValidIsoDate(values.date) ? dayOfMonth(values.date) : null)
 
-  // Enquanto a lista carrega, a categoria gravada já aparece no campo.
   const saved = transaction ?? recurrence
   const categoryOptions: Category[] = categories.data
     ?? (saved?.categoryId != null ? [{ id: saved.categoryId, name: saved.categoryName ?? '', color: null, icon: null }] : [])
-  // Regra de categoria (8.4): só em nova movimentação e enquanto a pessoa não escolheu a categoria.
-  // A sugestão é derivada da descrição (não um efeito): some se a descrição deixar de bater.
+  // Sugestão derivada da descrição (não um efeito): some se a descrição deixar de bater.
   const suggestion = isNew && !categoryChosen ? matchRule(values.description, rules.data ?? []) : null
   const chosenCategoryId = isNew && !categoryChosen ? (suggestion ? String(suggestion.categoryId) : '') : values.categoryId
-  // Categoria apagada enquanto o formulário estava aberto vira "Sem categoria".
+  // Categoria apagada com o formulário aberto vira "Sem categoria".
   const categoryValue = categoryOptions.some((category) => String(category.id) === chosenCategoryId) ? chosenCategoryId : ''
 
   function showErrors(fieldErrors: FieldErrors<Field>) {
@@ -248,7 +240,7 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
 
   const kindOption = (kind: Kind, label: string) => {
     const checked = values.kind === kind
-    // Fundo branco também quando marcado: sobre um fundo tingido o gasto ficaria abaixo de 4,5:1.
+    // Fundo branco também quando marcado: sobre fundo tingido o gasto ficaria abaixo de 4,5:1.
     const colors = kind === 'income'
       ? 'has-checked:border-income has-checked:ring-1 has-checked:ring-income has-checked:text-income'
       : 'has-checked:border-expense has-checked:ring-1 has-checked:ring-expense has-checked:text-expense'
@@ -274,7 +266,6 @@ export function TransactionFormModal({ transaction, recurrence, preset, onClose 
   const shortMonth = day !== null && day > 28 ? t('recurring.shortMonthHint') : ''
   const repeatHint = day === null ? undefined : [t('recurring.repeatHint', { day }), shortMonth].filter(Boolean).join(' ')
 
-  // Prévia das parcelas: quanto fica cada uma e quando termina.
   const total = parseMoneyInput(values.amount)
   const count = parseInstallmentCount(values.count)
   let installmentPreview: string | undefined

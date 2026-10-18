@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Compras parceladas (8.5b). O usuário vem sempre do token; "today" vem do navegador.
 [ApiController]
 [Authorize]
 [Route("api/installments")]

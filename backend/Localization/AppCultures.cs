@@ -2,8 +2,7 @@ using System.Globalization;
 
 namespace Backend.Localization;
 
-// Idiomas da API, escolhidos pelo Accept-Language (RequestLocalization no Program.cs).
-// O português é o padrão: idioma ausente ou não suportado responde em pt-BR.
+// Idioma ausente ou não suportado responde em pt-BR.
 public static class AppCultures
 {
     public const string Portuguese = "pt-BR";
@@ -12,7 +11,7 @@ public static class AppCultures
 
     private static readonly CultureInfo PtBr = CultureInfo.GetCultureInfo(Portuguese);
 
-    // A moeda é sempre o real, nos dois idiomas: em inglês fica "R$1,234.56" (o en-US do .NET usaria "$").
+    // A moeda é sempre o real: o en-US do .NET usaria "$".
     private static readonly NumberFormatInfo EnUsReal = CreateEnUsReal();
 
     private static NumberFormatInfo CreateEnUsReal()
@@ -22,14 +21,13 @@ public static class AppCultures
         return NumberFormatInfo.ReadOnly(format);
     }
 
-    // Idioma da requisição atual (o RequestLocalization define o CurrentUICulture).
     public static bool IsEnglish => CultureInfo.CurrentUICulture.Name == English;
 
-    // Mesmo formato do formatMoney do frontend: "R$ 1.234,56" ou "R$1,234.56".
+    // Mesmo formato do formatMoney do frontend.
     public static string FormatMoney(decimal value) =>
         IsEnglish ? value.ToString("C", EnUsReal) : value.ToString("C", PtBr);
 
-    // Mesmo formato do formatDate do frontend: "05/10/2026" ou "10/05/2026".
+    // Mesmo formato do formatDate do frontend.
     public static string FormatDate(DateOnly date) =>
         IsEnglish
             ? date.ToString("MM/dd/yyyy", CultureInfo.InvariantCulture)

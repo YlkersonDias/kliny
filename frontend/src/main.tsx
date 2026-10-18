@@ -11,9 +11,8 @@ import App from './App.tsx'
 import { UpdatePrompt } from './components/ui/UpdatePrompt'
 import './index.css'
 
-// networkMode 'always': sem rede, o padrão do TanStack Query é pausar a requisição em silêncio
-// (botão girando sem aviso até a conexão voltar). Assim ela falha na hora e a tela mostra
-// "Não foi possível conectar ao servidor"; ao reconectar, as consultas são refeitas sozinhas.
+// Sem rede, o padrão do TanStack Query pausa a requisição em silêncio; com 'always', ela falha
+// na hora e a tela mostra o erro.
 const queryClient = new QueryClient({
   defaultOptions: {
     mutations: {
@@ -21,7 +20,7 @@ const queryClient = new QueryClient({
     },
     queries: {
       networkMode: 'always',
-      // Erros 4xx não melhoram tentando de novo; falhas de rede e 5xx têm mais duas tentativas.
+      // Erros 4xx não melhoram tentando de novo.
       retry: (failureCount, error) => {
         if (error instanceof ApiError && error.status >= 400 && error.status < 500) return false
         return failureCount < 2

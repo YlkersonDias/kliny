@@ -12,7 +12,7 @@ import { splitApiError } from '../lib/forms'
 
 const EMAIL_MAX = 255
 
-// "Esqueci minha senha". A resposta é sempre a mesma, tenha o e-mail conta ou não (regra 4).
+// A resposta é sempre a mesma, tenha o e-mail conta ou não.
 export default function ForgotPasswordPage() {
   const { t } = useTranslation('auth')
   usePageTitle(t('forgot.title'))

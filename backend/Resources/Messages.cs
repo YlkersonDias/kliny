@@ -2,17 +2,12 @@ using Backend.Localization;
 
 namespace Backend.Resources;
 
-// Mensagens da API em português e inglês, lado a lado: Text(português, inglês).
-// O idioma vem do Accept-Language (RequestLocalization no Program.cs); o padrão é o português.
-// Não usa .resx: o idioma extra viraria um assembly satélite (en-US\Backend.resources.dll), e
-// políticas como o Smart App Control do Windows bloqueiam esse DLL em silêncio, deixando tudo em português.
-// Os DTOs usam estas propriedades em ErrorMessageResourceType/ErrorMessageResourceName.
+// Mensagens em português e inglês, lado a lado, escolhidas pelo Accept-Language. Não usa .resx: o
+// idioma extra viraria um assembly satélite, que políticas como o Smart App Control bloqueiam em silêncio.
 public static class Messages
 {
     private static string Text(string portuguese, string english) =>
         AppCultures.IsEnglish ? english : portuguese;
-
-    // Mensagens com {0} e {1}: usar com string.Format.
 
     public static string InvalidCredentials => Text(
         "E-mail ou senha inválidos.",
@@ -106,7 +101,6 @@ public static class Messages
         "Ícone inválido.",
         "Invalid icon.");
 
-    // Categorias com que toda conta nova nasce (DefaultCategories), no idioma da requisição.
     public static string DefaultCategoryFood => Text("Alimentação", "Food");
     public static string DefaultCategoryHousing => Text("Moradia", "Housing");
     public static string DefaultCategoryTransport => Text("Transporte", "Transportation");
@@ -370,7 +364,6 @@ public static class Messages
         + "After the change, Kliny signs out of every device where your account is open.\n\n"
         + "If you did not ask for this, you can ignore this email: your password stays the same.\n\nKliny");
 
-    // Avisos de segurança: vão só para o e-mail da própria conta, com o nome da dona dela.
     public static string PasswordChangedSubject => Text(
         "A senha da sua conta no Kliny foi trocada",
         "Your Kliny password was changed");
@@ -465,8 +458,6 @@ public static class Messages
     public static string TimelineDayMaxDays => Text(
         "Com agrupamento por dia, o período deve ter no máximo {0} dias.",
         "When grouping by day, the period must be at most {0} days.");
-
-    // Exportação dos dados: cabeçalho e tipos do CSV das movimentações.
 
     public static string ExportCsvDate => Text("Data", "Date");
     public static string ExportCsvDescription => Text("Descrição", "Description");

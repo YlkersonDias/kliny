@@ -9,11 +9,10 @@ import { Button } from '../ui/Button'
 import { CategoryIcon } from '../ui/CategoryIcon'
 import { FormAlert } from '../ui/FormAlert'
 
-// Cor da barra e do texto de cada situação. O texto sempre diz a situação: nunca só a cor.
+// O texto sempre diz a situação: nunca só a cor.
 const BAR: Record<BudgetStatus, string> = { ok: 'bg-primary', near: 'bg-vault', over: 'bg-expense' }
 const TEXT: Record<BudgetStatus, string> = { ok: 'text-muted', near: 'text-vault-text', over: 'text-expense' }
 
-// "Orçamento do mês" no Dashboard (8.2): quanto de cada limite já foi gasto no mês.
 export function BudgetsOverview({ month }: { month: string }) {
   const { t } = useTranslation(['dashboard', 'common'])
   const budgets = useBudgets(month)

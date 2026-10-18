@@ -23,7 +23,6 @@ export function useRecurrences() {
   })
 }
 
-// Lança o que falta e, se algo entrou, atualiza as telas que mostram movimentações.
 async function syncAndRefresh(queryClient: QueryClient): Promise<void> {
   const { created } = await syncRecurrences(today())
   const refresh: Promise<void>[] = [queryClient.invalidateQueries({ queryKey: recurrenceKeys.all })]
@@ -37,7 +36,7 @@ async function syncAndRefresh(queryClient: QueryClient): Promise<void> {
   await Promise.all(refresh)
 }
 
-// Uma falha na sincronização não desfaz a regra já gravada: a próxima abertura do app lança o que faltar.
+// Uma falha na sincronização não desfaz a regra gravada: a próxima abertura lança o que faltar.
 async function trySyncAndRefresh(queryClient: QueryClient): Promise<void> {
   try {
     await syncAndRefresh(queryClient)
@@ -58,7 +57,7 @@ export function useUpdateRecurrence() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: ({ id, request }: { id: number; request: RecurrenceUpdateRequest }) => updateRecurrence(id, request),
-    // Retomar uma pausada ou estender a data final pode ter algo a lançar neste mês.
+    // Retomar ou estender a data final pode ter algo a lançar neste mês.
     onSuccess: () => trySyncAndRefresh(queryClient),
   })
 }
@@ -67,7 +66,6 @@ export function useDeleteRecurrence() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => deleteRecurrence(id),
-    // As movimentações já lançadas ficam, mas perdem o vínculo (e o ícone de recorrente).
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: recurrenceKeys.all }),
       queryClient.invalidateQueries({ queryKey: ['transactions'] }),
@@ -75,8 +73,7 @@ export function useDeleteRecurrence() {
   })
 }
 
-// Ao abrir o app e quando a aba volta a aparecer num dia novo (aba aberta de um dia para o outro).
-// Em silêncio: uma falha aqui não atrapalha a tela, e a próxima tentativa lança o que faltar.
+// Ao abrir o app e quando a aba volta a aparecer num dia novo. Uma falha aqui não atrapalha a tela.
 export function useRecurrenceSync(): void {
   const queryClient = useQueryClient()
   const syncedOn = useRef<string | null>(null)

@@ -6,7 +6,7 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.Services.Email;
 
-// Só texto: nenhum HTML montado com dados do usuário (o nome entra como texto).
+// Só texto: nenhum HTML montado com dados do usuário.
 public record EmailMessage(string To, string Subject, string Text);
 
 public interface IEmailSender
@@ -14,8 +14,7 @@ public interface IEmailSender
     Task SendAsync(EmailMessage message, CancellationToken cancellationToken);
 }
 
-// Fila do envio: o pedido de "Esqueci minha senha" responde na hora, e o e-mail sai em segundo
-// plano. Sem isso, o tempo da resposta (com ou sem envio) revelaria se o e-mail tem conta (regra 4).
+// O e-mail sai em segundo plano: o tempo da resposta não pode revelar se o e-mail tem conta.
 public interface IEmailQueue
 {
     /// <returns>false se a fila está cheia (o e-mail não sai).</returns>
@@ -34,8 +33,7 @@ public sealed class EmailQueue : IEmailQueue
         _channel.Reader.ReadAllAsync(cancellationToken);
 }
 
-// Esvazia a fila. O log nunca leva o destinatário, o assunto nem o texto (que tem o link com o
-// token): só se deu certo ou não (regras 11 e 16).
+// O log nunca leva o destinatário, o assunto nem o texto (que tem o link com o token).
 public sealed class EmailWorker(EmailQueue queue, IEmailSender sender, ILogger<EmailWorker> logger) : BackgroundService
 {
     protected override async Task ExecuteAsync(CancellationToken stoppingToken)
@@ -54,7 +52,7 @@ public sealed class EmailWorker(EmailQueue queue, IEmailSender sender, ILogger<E
     }
 }
 
-// Resend (https://resend.com/docs/api-reference/emails/send-email): POST /emails com a chave.
+// https://resend.com/docs/api-reference/emails/send-email
 public sealed class ResendEmailSender(HttpClient http, IOptions<EmailOptions> options, ILogger<ResendEmailSender> logger) : IEmailSender
 {
     public const string BaseAddress = "https://api.resend.com/";

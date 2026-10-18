@@ -1,9 +1,7 @@
 import { GOOGLE_CLIENT_ID } from '../config/app'
 
-// Login com o Google (Google Identity Services). O script do Google só é carregado nas telas que
-// mostram o botão, nunca no resto do app. O Google pede um único initialize() por página: o
-// callback dele entrega o comprovante (ID token) ao botão que foi clicado, identificado pelo
-// state de cada botão.
+// O script do Google só é carregado nas telas com o botão. O Google pede um único initialize() por
+// página: o comprovante vai ao botão clicado, identificado pelo state de cada um.
 
 export const GOOGLE_SCRIPT = 'https://accounts.google.com/gsi/client'
 
@@ -51,8 +49,7 @@ function dispatch(response: CredentialResponse) {
   handlers.get(response.state)?.(response.credential)
 }
 
-// Carrega o script uma vez e inicializa o cliente. Se falhar (sem rede, bloqueador), a próxima
-// chamada tenta de novo.
+// Se falhar (sem rede, bloqueador), a próxima chamada tenta de novo.
 export function loadGoogleIdentity(): Promise<GoogleIdentityApi> {
   loading ??= new Promise<GoogleIdentityApi>((resolve, reject) => {
     const ready = () => {
@@ -90,7 +87,6 @@ export function loadGoogleIdentity(): Promise<GoogleIdentityApi> {
   return loading
 }
 
-// Liga o botão (pelo state) a quem trata o comprovante. Devolve a função que desliga.
 export function registerGoogleHandler(state: string, handler: (credential: string) => void): () => void {
   handlers.set(state, handler)
   return () => {
@@ -98,7 +94,6 @@ export function registerGoogleHandler(state: string, handler: (credential: strin
   }
 }
 
-// Ao sair do Kliny, o Google não deve oferecer a mesma conta automaticamente.
 export function disableGoogleAutoSelect() {
   window.google?.accounts?.id?.disableAutoSelect()
 }

@@ -4,14 +4,13 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Budgets;
 
-// Mês do gasto, no formato 2026-10. Obrigatório, como o período dos relatórios: o servidor não
-// sabe o fuso de quem usa, então é o frontend que diz qual é o mês atual.
+// Obrigatório: o servidor não sabe o fuso de quem usa, então o frontend diz qual é o mês atual.
 public class BudgetQuery : IValidatableObject
 {
     public string? Month { get; set; }
 
-    // Métodos, e não propriedades: a validação do ASP.NET lê todas as propriedades públicas, e estas
-    // quebrariam (500) com um mês inválido antes de o Validate responder 400. Só chamar depois dele.
+    // Métodos, e não propriedades: a validação do ASP.NET as leria antes do Validate, e um mês
+    // inválido viraria 500.
     public DateOnly FirstDay() => DateOnly.ParseExact(Month!, "yyyy-MM", CultureInfo.InvariantCulture);
     public DateOnly LastDay() => FirstDay().AddMonths(1).AddDays(-1);
 

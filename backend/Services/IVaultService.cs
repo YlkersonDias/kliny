@@ -21,21 +21,16 @@ public interface IVaultService
     /// <exception cref="Exceptions.ConflictException">O cofre ainda tem saldo.</exception>
     Task DeleteAsync(int userId, int id);
 
-    /// <summary>Grava uma transação negativa no cofre: o dinheiro sai da conta e entra no cofre.</summary>
-    /// <remarks>
-    /// <paramref name="idempotencyKey"/> (cabeçalho Idempotency-Key) é obrigatória: um envio repetido com a
-    /// mesma chave devolve o lançamento já gravado (<c>Replayed</c> verdadeiro), sem criar outro nem conferir
-    /// o saldo de novo.
-    /// </remarks>
+    /// <summary>Depósito: o dinheiro sai da conta e entra no cofre.</summary>
+    /// <remarks>Uma <paramref name="idempotencyKey"/> repetida devolve o lançamento já gravado.</remarks>
     /// <exception cref="Exceptions.NotFoundException">O cofre não existe ou é de outro usuário.</exception>
     /// <exception cref="Exceptions.BusinessRuleException">Saldo da conta insuficiente, ou chave ausente ou inválida.</exception>
-    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente (422).</exception>
+    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente.</exception>
     Task<VaultOperationResult> DepositAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey);
 
-    /// <summary>Grava uma transação positiva no cofre: o dinheiro sai do cofre e volta para a conta.</summary>
-    /// <remarks>Mesma idempotência do depósito.</remarks>
+    /// <summary>Retirada: o dinheiro sai do cofre e volta para a conta. Mesma idempotência do depósito.</summary>
     /// <exception cref="Exceptions.NotFoundException">O cofre não existe ou é de outro usuário.</exception>
-    /// <exception cref="Exceptions.BusinessRuleException">O valor é maior que o saldo do cofre, ou chave ausente ou inválida.</exception>
-    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente (422).</exception>
+    /// <exception cref="Exceptions.BusinessRuleException">Valor maior que o saldo do cofre, ou chave ausente ou inválida.</exception>
+    /// <exception cref="Exceptions.UnprocessableException">A chave já foi usada numa operação diferente.</exception>
     Task<VaultOperationResult> WithdrawAsync(int userId, int id, VaultOperationRequest request, string? idempotencyKey);
 }

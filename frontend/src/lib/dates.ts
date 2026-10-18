@@ -1,7 +1,5 @@
-// Datas como texto YYYY-MM-DD, igual à API.
-// Nunca usar new Date("2026-10-02"): o JavaScript lê como meia-noite UTC e,
-// no Brasil, isso mostra o dia anterior. "Hoje" usa a data local do navegador.
-// Exibição no formato do idioma da tela (dd/mm/aaaa ou mm/dd/yyyy); cada função aceita o idioma.
+// Datas como texto YYYY-MM-DD, igual à API. Nunca usar new Date("2026-10-02"): o JavaScript lê
+// como meia-noite UTC e, no Brasil, mostra o dia anterior.
 
 import { currentLanguage } from '../i18n'
 import type { Language } from './language'
@@ -21,13 +19,12 @@ function isLeapYear(year: number): boolean {
   return (year % 4 === 0 && year % 100 !== 0) || year % 400 === 0
 }
 
-// Calculado à mão: new Date(ano, ...) trata anos de 0 a 99 como 1900 a 1999.
+// À mão: new Date(ano, ...) trata anos de 0 a 99 como 1900 a 1999.
 function daysInMonth(year: number, month: number): number {
   if (month === 2) return isLeapYear(year) ? 29 : 28
   return [4, 6, 9, 11].includes(month) ? 30 : 31
 }
 
-// Data local (e não UTC) de um Date.
 export function toIsoDate(date: Date): string {
   return `${pad(date.getFullYear(), 4)}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}`
 }
@@ -36,7 +33,6 @@ export function today(now: Date = new Date()): string {
   return toIsoDate(now)
 }
 
-// Do dia 1 ao último dia do mês atual.
 export function currentMonthRange(now: Date = new Date()): DateRange {
   const year = now.getFullYear()
   const month = now.getMonth() + 1
@@ -46,7 +42,7 @@ export function currentMonthRange(now: Date = new Date()): DateRange {
   }
 }
 
-// Mesmo intervalo da coluna date do MySQL e do DateOnly do .NET.
+// O intervalo da coluna date do MySQL e do DateOnly do .NET.
 export function isValidIsoDate(text: string): boolean {
   const match = ISO_PATTERN.exec(text)
   if (!match) return false
@@ -54,8 +50,7 @@ export function isValidIsoDate(text: string): boolean {
   return year >= 1 && month >= 1 && month <= 12 && day >= 1 && day <= daysInMonth(year, month)
 }
 
-// "months" meses depois de uma data YYYY-MM-DD, no mesmo dia; num mês mais curto, o último dia dele
-// (31/01 + 1 mês = 28/02), como o RecurrenceSchedule do backend.
+// No mesmo dia; num mês mais curto, o último dia dele (31/01 + 1 mês = 28/02), como na API.
 export function addMonthsClamped(iso: string, months: number): string {
   const [year, month, day] = iso.split('-').map(Number)
   const index = year * 12 + (month - 1) + months
@@ -69,8 +64,6 @@ const monthYear: Record<Language, Intl.DateTimeFormat> = {
   'en-US': new Intl.DateTimeFormat('en-US', { month: 'long', year: 'numeric' }),
 }
 
-// "2026-10-02" vira "Outubro de 2026" ("October 2026"). O Date é montado com números (hora local),
-// nunca com o texto.
 export function formatMonthYear(iso: string, language: Language = currentLanguage()): string {
   const match = ISO_PATTERN.exec(iso)
   if (!match) return iso
@@ -85,8 +78,6 @@ const longDate: Record<Language, Intl.DateTimeFormat> = {
   'en-US': new Intl.DateTimeFormat('en-US', { day: 'numeric', month: 'long', year: 'numeric' }),
 }
 
-// "2026-10-05" vira "5 de outubro de 2026" ("October 5, 2026"), sem dia da semana. Como no formatMonthYear, o Date
-// é montado com números (hora local), nunca com o texto.
 export function formatLongDate(iso: string, language: Language = currentLanguage()): string {
   if (!isValidIsoDate(iso)) return iso
   const date = new Date(2000, Number(iso.slice(5, 7)) - 1, Number(iso.slice(8, 10)))
@@ -94,15 +85,13 @@ export function formatLongDate(iso: string, language: Language = currentLanguage
   return longDate[language].format(date)
 }
 
-// Instante da API (createdAt, em UTC com "Z") para a data local do navegador: "2026-10-06T01:30:00Z"
-// é 05/10/2026 no Brasil. Sem fuso no texto, trata como UTC (é como o backend grava).
+// Instante da API (UTC) para a data local: "2026-10-06T01:30:00Z" é 05/10 no Brasil.
 export function formatTimestampDate(timestamp: string, language: Language = currentLanguage()): string {
   const withZone = /(Z|[+-]\d{2}:\d{2})$/.test(timestamp) ? timestamp : `${timestamp}Z`
   const date = new Date(withZone)
   return Number.isNaN(date.getTime()) ? '' : formatDate(toIsoDate(date), language)
 }
 
-// "2026-10-02" vira "02/10/2026" (em inglês, "10/02/2026"). Texto fora do formato volta como veio.
 export function formatDate(iso: string, language: Language = currentLanguage()): string {
   const match = ISO_PATTERN.exec(iso)
   if (!match) return iso

@@ -54,7 +54,7 @@ export default function TransactionsPage() {
     setSearchParams(new URLSearchParams(), { replace: true })
   }
 
-  // Página além da última (depois de apagar o último item dela, ou URL antiga): vai para a última.
+  // Página além da última (depois de apagar o último item, ou URL antiga): vai para a última.
   const data = transactions.data
   const lastPage = data ? Math.max(1, Math.ceil(data.totalCount / data.pageSize)) : 1
   const isPastLastPage = data !== undefined && !transactions.isPlaceholderData && filters.page > lastPage
@@ -101,7 +101,7 @@ export default function TransactionsPage() {
             image="sem-resultados"
             title={t('empty.filteredTitle')}
             description={filters.search.trim()
-              // O texto digitado entra como elemento pronto, nunca pelo parser de tags (regra 13).
+              // O texto digitado entra como elemento pronto, nunca pelo parser de tags.
               ? <Trans t={t} i18nKey="empty.searchDescription" components={{ search: <strong className="font-semibold text-foreground">{filters.search.trim()}</strong> }} />
               : t('empty.filteredDescription')}
             action={<Button variant="secondary" onClick={clearFilters}>{t('empty.clearFilters')}</Button>}

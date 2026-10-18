@@ -2,7 +2,7 @@ using Backend.DTOs.Reports;
 
 namespace Backend.Services;
 
-// Nos relatórios, gastos e depósitos em cofre vêm com valor positivo.
+// Gastos e depósitos em cofre vêm com valor positivo.
 public interface IReportService
 {
     Task<SummaryResponse> GetSummaryAsync(int userId, ReportPeriodQuery query);

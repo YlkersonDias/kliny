@@ -10,7 +10,7 @@ using MsOptions = Microsoft.Extensions.Options.Options;
 
 namespace Backend.Tests;
 
-// O AuthService com o LoginThrottle de verdade e o banco em memória do EF (sem MySQL).
+// Com o LoginThrottle de verdade e o banco em memória do EF.
 public class AuthServiceLockoutTests : IDisposable
 {
     private const string Email = "ana@kliny.test";
@@ -46,7 +46,6 @@ public class AuthServiceLockoutTests : IDisposable
 
     public void Dispose() => _db.Dispose();
 
-    // Os avisos de segurança não fazem parte do que estes testes conferem.
     private sealed class NoNotifier : ISecurityNotifier
     {
         public void PasswordChanged(User user) { }
@@ -100,14 +99,12 @@ public class AuthServiceLockoutTests : IDisposable
     [Fact]
     public async Task Email_sem_conta_tambem_e_bloqueado()
     {
-        // Mesmo comportamento com ou sem conta: o bloqueio não revela quem está cadastrado.
+        // O bloqueio não revela quem está cadastrado.
         await FailTimes(5, "ninguem@kliny.test");
 
         await Assert.ThrowsAsync<TooManyRequestsException>(() => Login("ninguem@kliny.test", "qualquer"));
     }
 
-    // S.6: e-mail sem conta também roda o BCrypt, com o mesmo custo do cadastro, para o tempo da
-    // resposta não revelar quem tem conta (regra 4).
     [Fact]
     public void Hash_fixo_tem_o_mesmo_custo_do_cadastro()
     {
@@ -118,8 +115,7 @@ public class AuthServiceLockoutTests : IDisposable
     [Fact]
     public async Task Email_sem_conta_tambem_roda_o_bcrypt()
     {
-        // Só um limite inferior, que não oscila no CI: com custo 11 o BCrypt leva dezenas de
-        // milissegundos; sem ele, a resposta para um e-mail sem conta sairia em menos de 1 ms.
+        // Só um limite inferior, que não oscila no CI: sem o BCrypt, sairia em menos de 1 ms.
         _ = AuthService.TimingHash;
         var stopwatch = System.Diagnostics.Stopwatch.StartNew();
         Assert.Null(await Login("ninguem@kliny.test", "qualquer-senha"));

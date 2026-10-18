@@ -1,7 +1,6 @@
 namespace Backend.Exceptions;
 
-// Exceções de domínio lançadas pelos services. O ApiExceptionHandler converte cada uma
-// no status HTTP correspondente; a mensagem vai para o "detail" do ProblemDetails.
+// O ApiExceptionHandler converte cada uma no status HTTP; a mensagem vai para o "detail".
 
 /// <summary>Registro inexistente ou de outro usuário (404).</summary>
 public class NotFoundException(string message) : Exception(message);
@@ -9,7 +8,7 @@ public class NotFoundException(string message) : Exception(message);
 /// <summary>Conflito com o estado atual, como um valor único repetido (409).</summary>
 public class ConflictException(string message) : Exception(message);
 
-/// <summary>Pedido bem formado, mas contraditório: repetir não adianta (422). Ex.: Idempotency-Key reaproveitada com outro conteúdo.</summary>
+/// <summary>Pedido bem formado, mas contraditório, como uma Idempotency-Key reaproveitada (422).</summary>
 public class UnprocessableException(string message) : Exception(message);
 
 /// <summary>Dados válidos no formato, mas que ferem uma regra de negócio (400).</summary>

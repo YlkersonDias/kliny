@@ -5,8 +5,7 @@ import { formatSigned } from '../../lib/money'
 import { CategoryIcon } from '../ui/CategoryIcon'
 import { Icon } from '../ui/Icon'
 
-// Peças de uma linha de movimentação, do ponto de vista da conta (sinal do banco).
-// Usadas na tela de Movimentações e no Dashboard.
+// Do ponto de vista da conta (sinal do banco).
 
 type Kind = 'income' | 'expense' | 'vault'
 
@@ -18,11 +17,11 @@ function kindOf(transaction: Transaction): Kind {
 const KIND = {
   income: { text: 'text-income', icon: 'text-income' },
   expense: { text: 'text-expense', icon: 'text-expense' },
-  // Âmbar só no ícone; o texto usa vault-text, que tem contraste.
+  // Âmbar só no ícone: no texto, não tem contraste.
   vault: { text: 'text-vault-text', icon: 'text-vault' },
 } as const
 
-// Valor sempre com sinal e ícone: receita e gasto não dependem só da cor.
+// Sempre com sinal e ícone: receita e gasto não dependem só da cor.
 export function TransactionAmount({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation('transactions')
   const kind = kindOf(transaction)
@@ -43,7 +42,6 @@ export function TransactionKindIcon({ transaction }: { transaction: Transaction 
   )
 }
 
-// Gerada por um lançamento recorrente (8.5a): ícone com o texto para o leitor de tela e a dica.
 export function RecurringMark({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation('transactions')
   if (transaction.recurrenceId === null) return null
@@ -55,7 +53,7 @@ export function RecurringMark({ transaction }: { transaction: Transaction }) {
   )
 }
 
-// Parcela de uma compra parcelada (8.5b); o "(n/N)" já está na descrição.
+// O "(n/N)" já está na descrição.
 export function InstallmentMark({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation('transactions')
   if (transaction.installmentPlanId === null) return null
@@ -67,9 +65,6 @@ export function InstallmentMark({ transaction }: { transaction: Transaction }) {
   )
 }
 
-// O nome da categoria com o ícone colorido dela ao lado (a cor e o ícone vêm da lista de categorias,
-// já em cache). A seta de receita ou gasto continua à esquerda da linha: a cor da categoria nunca
-// substitui o sinal e o ícone do valor.
 export function TransactionCategory({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation(['transactions', 'common'])
   const categories = useCategories()

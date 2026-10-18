@@ -9,7 +9,7 @@ export const categoryKeys = {
   all: ['categories'] as const,
 }
 
-// A API ordena pela collation do banco; aqui a ordem segue o idioma da tela (acentos junto da letra).
+// A ordem segue o idioma da tela, e não a collation do banco.
 function sortByName(categories: Category[]): Category[] {
   return [...categories].sort((a, b) => a.name.localeCompare(b.name, currentLanguage()))
 }
@@ -34,7 +34,7 @@ export function useCreateCategory() {
   })
 }
 
-// Renomear e apagar mudam o categoryName exibido nas movimentações.
+// Renomear e apagar mudam o nome exibido nas movimentações, no orçamento e nas regras.
 export function useUpdateCategory() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -42,9 +42,7 @@ export function useUpdateCategory() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: categoryKeys.all }),
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
-      // O orçamento mostra o nome da categoria e some quando ela é apagada.
       queryClient.invalidateQueries({ queryKey: ['budgets'] }),
-      // As regras mostram o nome da categoria e são apagadas com ela (8.4).
       queryClient.invalidateQueries({ queryKey: categoryRuleKeys.all }),
     ]),
   })
@@ -57,9 +55,7 @@ export function useDeleteCategory() {
     onSuccess: () => Promise.all([
       queryClient.invalidateQueries({ queryKey: categoryKeys.all }),
       queryClient.invalidateQueries({ queryKey: transactionKeys.all }),
-      // O orçamento mostra o nome da categoria e some quando ela é apagada.
       queryClient.invalidateQueries({ queryKey: ['budgets'] }),
-      // As regras mostram o nome da categoria e são apagadas com ela (8.4).
       queryClient.invalidateQueries({ queryKey: categoryRuleKeys.all }),
       queryClient.invalidateQueries({ queryKey: ['reports'] }),
     ]),

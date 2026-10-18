@@ -31,7 +31,7 @@ export function TimelineSection({ points, grouping, isRefreshing = false }: Time
             labelledBy="ao-longo-do-tempo"
             heightClass="h-56"
             before={(
-              // Legenda com ícone e sinal: as barras não dependem só do verde e do vermelho.
+              // Ícone e sinal: as barras não dependem só do verde e do vermelho.
               <ul className="flex flex-wrap gap-x-5 gap-y-1 text-sm">
                 <li className="flex items-center gap-1.5 text-income">
                   <span className="size-3 rounded-[3px] bg-income" />

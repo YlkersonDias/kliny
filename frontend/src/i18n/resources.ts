@@ -27,9 +27,8 @@ import enSimulator from '../locales/en-US/simulator.json'
 import enTransactions from '../locales/en-US/transactions.json'
 import enVaults from '../locales/en-US/vaults.json'
 
-// Um arquivo por área da interface. O português é a referência dos tipos das chaves (i18next.d.ts).
-// Plurais: o português trata 0 como singular ("0 cofre"), então toda chave com contagem tem
-// também a forma _zero, igual à do plural ("0 cofres"). O inglês repete as mesmas chaves.
+// O português é a referência dos tipos. Ele trata 0 como singular, então toda chave com contagem
+// tem também a forma _zero, igual à do plural.
 export const defaultNS = 'common'
 
 const ptBR = {
@@ -38,8 +37,7 @@ const ptBR = {
   privacy: ptPrivacy, landing: ptLanding, imports: ptImports, simulator: ptSimulator,
 }
 
-// satisfies: chave do português que falta no inglês não compila. A chave a mais e as variáveis
-// de cada texto são conferidas pelo teste resources.test.ts.
+// satisfies: chave do português que falta no inglês não compila (o resto, o resources.test.ts confere).
 const enUS = {
   common: enCommon, errors: enErrors, auth: enAuth, layout: enLayout, settings: enSettings,
   dashboard: enDashboard, transactions: enTransactions, categories: enCategories, vaults: enVaults, reports: enReports,

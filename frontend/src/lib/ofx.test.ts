@@ -1,9 +1,7 @@
 import { describe, expect, it } from 'vitest'
 import { decodeStatement, OfxError, parseOfx, parseOfxAmount, parseOfxDate } from './ofx'
 
-// Extratos de exemplo com dados inventados, no jeito de cada banco: OFX 1.x (SGML, tags de
-// valor sem fechar), cabeçalho com CHARSET:1252, data com hora e fuso, vírgula decimal, conta de
-// cartão e OFX 2.x (XML).
+// Extratos de exemplo com dados inventados, no jeito de cada banco.
 const SGML_HEADER = `OFXHEADER:100
 DATA:OFXSGML
 VERSION:102

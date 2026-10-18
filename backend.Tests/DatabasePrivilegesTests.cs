@@ -3,9 +3,8 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// O usuário da API nos testes tem só DML, como o kliny_app em produção. Se estes testes
-// falharem, o usuário de teste ganhou privilégio demais e os outros testes deixaram de provar
-// que o app funciona só com DML.
+// Se estes testes falharem, o usuário de teste ganhou privilégio demais, e os outros deixaram de
+// provar que o app funciona só com DML.
 public class DatabasePrivilegesTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -46,7 +45,6 @@ public class DatabasePrivilegesTests(MySqlApi api) : IClassFixture<MySqlApi>
     [Fact]
     public async Task Api_funciona_so_com_DML()
     {
-        // Cadastro, consulta e o SELECT ... FOR UPDATE do depósito, com o usuário restrito.
         var token = await api.RegisterAsync("dml@kliny.test");
         using var client = api.Client(token);
 

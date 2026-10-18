@@ -3,8 +3,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Recurrences;
 
-// Alteração de uma recorrência (8.5a). Vale só para as próximas ocorrências; as já geradas ficam
-// como estão. O dia e a data de início não mudam: para isso, apagar e criar outra.
+// Vale só para as próximas ocorrências. O dia e a data de início não mudam.
 public class RecurrenceUpdateRequest : IValidatableObject
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionRequired))]

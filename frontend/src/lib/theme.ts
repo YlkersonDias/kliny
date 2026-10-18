@@ -1,6 +1,4 @@
-// Tema da interface. A preferência fica no localStorage, por navegador (não na conta).
-// O script do index.html repete esta regra para aplicar o tema antes do React: mudou aqui,
-// mudar lá também (mesma chave e mesmos valores).
+// O script do index.html repete esta regra para aplicar o tema antes do React: mudou aqui, mudar lá.
 
 import { THEME_COLORS } from './themeColors'
 
@@ -9,16 +7,12 @@ export type Theme = 'light' | 'dark'
 
 export const THEME_STORAGE_KEY = 'ui.theme'
 export const DARK_QUERY = '(prefers-color-scheme: dark)'
-// Quem nunca escolheu abre no escuro, qualquer que seja o tema do sistema operacional.
 export const DEFAULT_THEME_PREFERENCE: ThemePreference = 'dark'
 
-
-// Cor da barra do navegador e do app instalado (7.4); as cores ficam em themeColors.ts.
 export function applyThemeColor(theme: Theme): void {
   document.querySelector('meta[name="theme-color"]')?.setAttribute('content', THEME_COLORS[theme])
 }
 
-// Valor ausente, inválido ou de outra versão vale o padrão (escuro).
 export function parseThemePreference(value: unknown): ThemePreference {
   return value === 'light' || value === 'dark' || value === 'system' ? value : DEFAULT_THEME_PREFERENCE
 }
@@ -28,8 +22,7 @@ export function resolveTheme(preference: ThemePreference, systemPrefersDark: boo
   return preference
 }
 
-// O localStorage pode estar bloqueado (o acesso lança erro): aí vale o padrão, e a escolha
-// feita na tela dura só até recarregar.
+// O localStorage pode estar bloqueado: aí vale o padrão.
 export function readThemePreference(): ThemePreference {
   try {
     return parseThemePreference(localStorage.getItem(THEME_STORAGE_KEY))
@@ -38,11 +31,11 @@ export function readThemePreference(): ThemePreference {
   }
 }
 
-// Guarda as três opções, inclusive "system": ausente significa o padrão (escuro), não o sistema.
+// Guarda também "system": ausente significa o padrão (escuro), não o sistema.
 export function saveThemePreference(preference: ThemePreference): void {
   try {
     localStorage.setItem(THEME_STORAGE_KEY, preference)
   } catch {
-    // Sem localStorage, a escolha vale só nesta aba.
+    // Sem localStorage (bloqueado ou cheio): só não lembra.
   }
 }

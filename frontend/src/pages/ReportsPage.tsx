@@ -37,7 +37,6 @@ export default function ReportsPage() {
   const filters = parseReportFilters(searchParams)
   const { period } = filters
   const periodError = getPeriodError(period)
-  // Com o período inválido, nada é consultado (a API recusaria).
   const enabled = !periodError
   const { grouping, dayAllowed } = enabled
     ? resolveGrouping(period, filters.grouping)
@@ -48,13 +47,11 @@ export default function ReportsPage() {
   const categories = useCategoryReport(period, filters.type, options)
   const timeline = useTimeline(period, grouping, options)
 
-  // Trocar filtros não enche o histórico do navegador.
   function update(patch: Partial<ReportFilters>) {
     setSearchParams(reportFiltersToParams({ ...filters, ...patch }), { replace: true })
   }
 
   function changePreset(preset: PeriodPreset) {
-    // Ao entrar em "Personalizado", começa do período que estava na tela.
     update(preset === 'personalizado' ? { preset, period } : { preset, period: presetRange(preset) })
   }
 

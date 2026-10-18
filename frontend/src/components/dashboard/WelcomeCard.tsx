@@ -3,8 +3,7 @@ import { Link } from 'react-router'
 import { Button } from '../ui/Button'
 import { Icon } from '../ui/Icon'
 
-// Conta sem nenhuma movimentação: orienta a lançar o "Saldo inicial",
-// já que a API não tem campo de saldo de abertura.
+// A API não tem saldo de abertura: orienta a lançar o "Saldo inicial".
 export function WelcomeCard({ onStart }: { onStart: () => void }) {
   const { t } = useTranslation('dashboard')
   return (
@@ -12,7 +11,6 @@ export function WelcomeCard({ onStart }: { onStart: () => void }) {
       aria-labelledby="comece"
       className="flex flex-col items-center gap-6 rounded-2xl border border-border bg-surface p-6 text-center sm:flex-row sm:items-center sm:p-8 sm:text-left"
     >
-      {/* Decorativa: o título já diz tudo. */}
       <picture className="shrink-0">
         <source srcSet="/mascote/kliny-apontando-512.webp" type="image/webp" />
         <img

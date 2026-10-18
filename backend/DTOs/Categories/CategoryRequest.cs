@@ -9,8 +9,7 @@ public class CategoryRequest : IValidatableObject
     [StringLength(100, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.CategoryNameMaxLength))]
     public string Name { get; set; } = string.Empty;
 
-    // Opcionais: sem eles (ou nulos), a categoria fica com a cor neutra e a etiqueta. O PUT grava o
-    // que vier, então quem edita manda os três campos.
+    // O PUT grava o que vier: sem cor e ícone, volta ao visual neutro.
     public string? Color { get; set; }
     public string? Icon { get; set; }
 

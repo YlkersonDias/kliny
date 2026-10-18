@@ -1,7 +1,6 @@
 namespace Backend.Models;
 
-// Orçamento (8.2): limite mensal de gasto de uma categoria, o mesmo para todos os meses.
-// Um por categoria; apagar a categoria apaga o orçamento dela.
+// Limite mensal de gasto de uma categoria, o mesmo para todos os meses.
 public class Budget
 {
     public int Id { get; set; }

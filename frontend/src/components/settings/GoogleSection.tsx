@@ -7,8 +7,7 @@ import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 import { GoogleButton } from '../ui/GoogleButton'
 
-// "Conta Google" em /configuracoes: vincular (entrar também com o Google) ou desvincular.
-// Conta sem senha (criada pelo Google) não desvincula: ficaria sem forma de entrar.
+// Conta sem senha não desvincula: ficaria sem forma de entrar.
 export function GoogleSection() {
   const { t } = useTranslation('settings')
   const { user, updateUser } = useAuth()

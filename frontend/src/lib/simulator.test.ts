@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest'
 import { MONEY_MAX } from './money'
 import { monthlyRate, parsePercentInput, parseSimulatorForm, simulate, type SimulatorForm } from './simulator'
 
-// Valores padrão da calculadora analisada (análise de 10/10/2026): R$ 50.000 de capital, 0,9% ao
-// mês, R$ 2.000 por mês, 240 meses. Os balanços anuais da análise servem de referência.
+// Balanços anuais de uma calculadora de juros compostos de referência.
 const DEFAULT = { initial: 50_000, monthly: 2_000, rate: 0.9, rateUnit: 'month' as const, months: 240 }
 
 function ok(result: ReturnType<typeof simulate>) {
@@ -52,7 +51,6 @@ describe('simulate', () => {
 
   it('taxa ao ano usa a equivalente mensal composta', () => {
     expect(monthlyRate(12, 'year')).toBeCloseTo(0.0094888, 6)
-    // 12% ao ano, R$ 1.000 parados por 12 meses: R$ 1.120 no fim.
     expect(ok(simulate({ initial: 1_000, monthly: 0, rate: 12, rateUnit: 'year', months: 12 })).total).toBeCloseTo(1_120, 6)
   })
 

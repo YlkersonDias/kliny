@@ -5,12 +5,11 @@ import { Icon } from './Icon'
 interface PaginationProps {
   page: number
   lastPage: number
-  // Contagem já com o nome do item ("13 movimentações"), com o plural do idioma.
+  // Já com o plural do idioma ("13 movimentações").
   itemsLabel: string
   onPageChange: (page: number) => void
 }
 
-// Rodapé de lista paginada: contagem sempre, botões só quando há mais de uma página.
 export function Pagination({ page, lastPage, itemsLabel, onPageChange }: PaginationProps) {
   const { t } = useTranslation()
   return (

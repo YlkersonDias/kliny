@@ -25,7 +25,7 @@ function isSession(value: unknown): value is Session {
   return typeof id === 'number' && typeof name === 'string' && typeof email === 'string'
 }
 
-// Lê a sessão guardada. JSON corrompido, formato inesperado ou token vencido são descartados.
+// JSON corrompido, formato inesperado ou token vencido são descartados.
 export function loadSession(): Session | null {
   try {
     const raw = localStorage.getItem(STORAGE_KEY)
@@ -43,7 +43,7 @@ export function saveSession(session: Session): void {
   try {
     localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
   } catch {
-    // Sem localStorage a sessão vale só até recarregar a página.
+    // Sem localStorage (bloqueado ou cheio): só não lembra.
   }
 }
 
@@ -52,7 +52,7 @@ export function clearSession(): void {
   try {
     localStorage.removeItem(STORAGE_KEY)
   } catch {
-    // Nada a limpar.
+    // Sem localStorage (bloqueado ou cheio): só não lembra.
   }
 }
 

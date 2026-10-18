@@ -5,7 +5,7 @@ import {
 } from '../../lib/categoryAppearance'
 import { CategoryGlyph } from '../ui/CategoryIcon'
 
-// Opção de radio: o <input> é de verdade (sr-only, setas trocam a opção), e a <label> é o alvo.
+// O <input> é de verdade (sr-only, setas trocam a opção), e a <label> é o alvo.
 const OPTION = 'flex size-9 cursor-pointer items-center justify-center rounded-full border-2 border-transparent '
   + 'transition-colors has-checked:border-foreground has-focus-visible:outline-2 has-focus-visible:outline-offset-2 '
   + 'has-focus-visible:outline-primary'
@@ -15,7 +15,6 @@ interface CategoryAppearanceFieldsProps {
   onChange: (value: CategoryLook) => void
 }
 
-// Cor e ícone de uma categoria, escolhidos nas listas fechadas (as mesmas do backend).
 export function CategoryAppearanceFields({ value, onChange }: CategoryAppearanceFieldsProps) {
   const { t } = useTranslation('categories')
   const id = useId()

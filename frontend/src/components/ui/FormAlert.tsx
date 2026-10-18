@@ -10,7 +10,6 @@ interface FormAlertProps {
   children: ReactNode
 }
 
-// Mensagem geral de um formulário. Erros são anunciados na hora pelo leitor de tela.
 export function FormAlert({ variant = 'error', children }: FormAlertProps) {
   return (
     <div

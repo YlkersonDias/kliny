@@ -11,8 +11,7 @@ import { FormAlert } from '../ui/FormAlert'
 import { IconButton } from '../ui/IconButton'
 import { Spinner } from '../ui/Spinner'
 
-// Compras parceladas (8.5b), dentro do modal "Recorrentes e parcelas". Cada parcela é uma
-// movimentação e se edita em Movimentações; aqui só se apaga a compra.
+// Cada parcela é uma movimentação e se edita em Movimentações; aqui só se apaga a compra.
 export function InstallmentSection() {
   const { t } = useTranslation(['transactions', 'common'])
   const installments = useInstallments()
@@ -86,7 +85,7 @@ export function InstallmentSection() {
 function DeleteInstallmentDialog({ plan, onClose }: { plan: InstallmentPlan; onClose: () => void }) {
   const { t } = useTranslation('transactions')
   const mutation = useDeleteInstallment()
-  // Começa no mais seguro: só as futuras (as já pagas continuam no extrato).
+  // Começa no mais seguro: só as futuras.
   const [scope, setScope] = useState<'future' | 'all'>('future')
 
   return (

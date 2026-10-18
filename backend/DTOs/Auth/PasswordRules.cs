@@ -5,11 +5,10 @@ namespace Backend.DTOs.Auth;
 
 public static class PasswordRules
 {
-    // O BCrypt só usa os primeiros 72 bytes da senha (em UTF-8). Um "é" ocupa 2 bytes e um emoji, 4.
+    // O BCrypt só usa os primeiros 72 bytes da senha (em UTF-8).
     public const int MaxBytes = 72;
 }
 
-// Tamanho máximo em bytes UTF-8, e não em caracteres (S.6).
 [AttributeUsage(AttributeTargets.Property)]
 public sealed class MaxUtf8BytesAttribute(int maxBytes) : ValidationAttribute
 {

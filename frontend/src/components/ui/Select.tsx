@@ -6,7 +6,6 @@ interface SelectProps extends ComponentProps<'select'> {
   hint?: string
 }
 
-// Mesma aparência e ligação de dica e erro do Input.
 export function Select({ label, error, hint, id, className = '', children, ...props }: SelectProps) {
   const generatedId = useId()
   const selectId = id ?? generatedId

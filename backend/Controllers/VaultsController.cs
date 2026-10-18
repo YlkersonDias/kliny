@@ -52,7 +52,6 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
         return NoContent();
     }
 
-    // Idempotency-Key obrigatória: repetir o envio com a mesma chave não cria um segundo lançamento.
     [HttpPost("{id:int}/deposit")]
     [ProducesResponseType<VaultOperationResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]
@@ -71,7 +70,7 @@ public class VaultsController(IVaultService vaultService) : ControllerBase
         int id, VaultOperationRequest request, [FromHeader(Name = IdempotencyKey.Header)] string? idempotencyKey) =>
         Result(await vaultService.WithdrawAsync(User.GetUserId(), id, request, idempotencyKey));
 
-    // Repetição: mesmo 200 e mesmo lançamento, com o cabeçalho Idempotent-Replayed para quem quiser saber.
+    // Repetição: mesmo 200 e mesmo lançamento, com o cabeçalho Idempotent-Replayed.
     private OkObjectResult Result(VaultOperationResult result)
     {
         if (result.Replayed)

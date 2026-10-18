@@ -7,8 +7,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
-// Orçamento por categoria (8.2). Toda consulta filtra pelo usuário do token (regra 2), além do
-// filtro global do AppDbContext.
 public class BudgetService(AppDbContext db) : IBudgetService
 {
     public async Task<IReadOnlyList<BudgetResponse>> ListAsync(int userId, BudgetQuery query)
@@ -20,7 +18,7 @@ public class BudgetService(AppDbContext db) : IBudgetService
         if (budgets.Count == 0)
             return [];
 
-        // Gasto do mês por categoria: só gastos (valor negativo), fora de cofre, como nos relatórios.
+        // Só gastos, fora de cofre, como nos relatórios.
         var categoryIds = budgets.Select(b => b.CategoryId).ToList();
         var from = query.FirstDay();
         var to = query.LastDay();
@@ -40,7 +38,7 @@ public class BudgetService(AppDbContext db) : IBudgetService
 
     public async Task<BudgetLimitResponse> SetAsync(int userId, int categoryId, BudgetRequest request)
     {
-        // Categoria de outro usuário responde como inexistente (404), sem revelar que existe.
+        // Categoria de outro usuário responde como inexistente.
         if (!await db.Categories.AnyAsync(c => c.Id == categoryId && c.UserId == userId))
             throw new NotFoundException(Messages.CategoryNotFound);
 
@@ -61,7 +59,7 @@ public class BudgetService(AppDbContext db) : IBudgetService
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            // Dois pedidos ao mesmo tempo para a mesma categoria: o outro criou primeiro; vale este valor.
+            // Outro pedido simultâneo criou primeiro: vale este valor.
             db.ChangeTracker.Clear();
             await db.Budgets
                 .Where(b => b.CategoryId == categoryId && b.UserId == userId)

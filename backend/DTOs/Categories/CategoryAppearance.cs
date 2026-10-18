@@ -1,8 +1,7 @@
 namespace Backend.DTOs.Categories;
 
-// Cor e ícone de uma categoria: só chaves de uma lista fechada (regras 6 e 7), nunca um código de
-// cor ou um desenho vindo de fora. O frontend tem a mesma lista (lib/categoryAppearance.ts), com o
-// tom de cada cor nos dois temas e o desenho de cada ícone. Nulo: cor neutra e ícone de etiqueta.
+// Só chaves de uma lista fechada, nunca um código de cor ou desenho vindo de fora. O frontend tem a
+// mesma lista (lib/categoryAppearance.ts).
 public static class CategoryAppearance
 {
     public const int MaxLength = 20;

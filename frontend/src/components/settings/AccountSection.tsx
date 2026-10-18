@@ -8,10 +8,7 @@ import { GoogleButton } from '../ui/GoogleButton'
 import { Input } from '../ui/Input'
 import { ExportData } from './ExportData'
 
-// "Privacidade e conta" em /configuracoes: link para a política, a cópia dos dados e a exclusão da conta.
-// Excluir exige a senha (ou, em conta criada pelo Google, entrar de novo com o Google) e marcar a
-// caixa de que nada pode ser desfeito; a sessão só termina depois que a API confirmou (como no
-// "Sair de todos os dispositivos").
+// A sessão só termina depois que a API confirmou.
 export function AccountSection() {
   const { t } = useTranslation('settings')
   const { user, deleteAccount } = useAuth()
@@ -41,12 +38,10 @@ export function AccountSection() {
     setError(null)
     try {
       await deleteAccount(hasPassword ? { password } : { googleCredential: googleCredential ?? undefined })
-      // Como o "Sair": vai para o login sem guardar esta página para depois.
       navigate('/entrar', { replace: true })
     } catch (caught) {
-      // A API explica o motivo (senha incorreta, muitas tentativas, sem conexão).
       setError(caught instanceof Error && caught.message ? caught.message : t('account.error'))
-      // O comprovante do Google vale uma vez: em caso de erro, a pessoa confirma de novo.
+      // O comprovante do Google vale uma vez.
       setGoogleCredential(null)
       setDeleting(false)
     }

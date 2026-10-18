@@ -51,7 +51,7 @@ public class CategoryService(AppDbContext db) : ICategoryService
 
     private async Task SaveAsync(int userId, Category category)
     {
-        // A comparação usa a collation do banco, a mesma do índice único.
+        // Pela collation do banco, a mesma do índice único.
         if (await db.Categories.AnyAsync(c => c.UserId == userId && c.Name == category.Name && c.Id != category.Id))
             throw new ConflictException(Messages.CategoryDuplicateName);
 

@@ -7,8 +7,7 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// Cadastro com confirmação de e-mail (regra 4), contra o MySQL. As contas que já precisam existir
-// são criadas direto no banco; o limite de cadastros por IP é conferido no RateLimitingTests.
+// As contas que já precisam existir são criadas direto no banco.
 public sealed class RegistrationFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -94,7 +93,6 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
         Assert.Contains($"https://kliny.test/criar-conta#{token}", message.Text);
         Assert.Contains("24 horas", message.Text);
 
-        // Antes do link, não existe conta.
         Assert.Equal(0, await UsersWithAsync(email));
         Assert.Equal(HttpStatusCode.Unauthorized, await LoginAsync(email, Password));
 
@@ -125,7 +123,6 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
         Assert.Contains("https://kliny.test/esqueci-senha", message.Text);
         Assert.DoesNotContain("criar-conta", message.Text);
 
-        // Nada mudou: nenhum pedido pendente, e a senha antiga continua.
         Assert.Equal(0, await CountAsync("SELECT COUNT(*) FROM PendingRegistrations WHERE Email = @email", email));
         Assert.Equal(HttpStatusCode.OK, await LoginAsync(email, "senha-antiga-1"));
     }
@@ -195,7 +192,6 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
             await Api.Emails.WaitForAsync(email, i, Ct);
         }
 
-        // O quarto responde igual, mas não manda nada.
         Assert.Equal(HttpStatusCode.Accepted, await RequestAsync(email));
         await Task.Delay(300, Ct);
         Assert.Equal(RegistrationEmailThrottle.MaxPerHour, Api.Emails.CountFor(email));
@@ -213,7 +209,6 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
         Assert.Equal(HttpStatusCode.BadRequest, status);
         Assert.Equal("Já existe uma conta com este e-mail. Entre ou use \"Esqueci minha senha\".", body.GetProperty("detail").GetString());
         Assert.Equal(1, await UsersWithAsync(email));
-        // A conta que já existia não ganhou a senha do link.
         Assert.Equal(HttpStatusCode.Unauthorized, await LoginAsync(email, Password));
         Assert.Equal(0, await CountAsync("SELECT COUNT(*) FROM PendingRegistrations WHERE Email = @email", email));
     }

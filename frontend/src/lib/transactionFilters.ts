@@ -2,8 +2,7 @@ import type { TransactionQuery, TransactionSort, TransactionType } from '../api/
 import i18n from '../i18n'
 import { isValidIsoDate, type DateRange } from './dates'
 
-// Filtros da tela de Movimentações, guardados na URL em português:
-// ?de=2026-10-01&ate=2026-10-31&categoria=3&tipo=gastos&busca=mercado&ordem=maior&pagina=2
+// Filtros na URL: ?de=2026-10-01&ate=2026-10-31&categoria=3&tipo=gastos&busca=mercado&ordem=maior&pagina=2
 // Parâmetro ausente = valor padrão; "de=" vazio = sem limite inicial.
 
 export const PAGE_SIZE = 20
@@ -13,7 +12,6 @@ export type TypeFilter = '' | 'receitas' | 'gastos' | 'cofres'
 // '' = mais recentes primeiro (o padrão da API).
 export type SortFilter = '' | 'antigas' | 'maior' | 'menor'
 
-// Mesmo limite da API.
 export const SEARCH_MAX = 100
 
 export interface TransactionFilters {
@@ -38,7 +36,6 @@ const SORT_TO_API: Record<Exclude<SortFilter, ''>, TransactionSort> = {
   menor: 'amount-asc',
 }
 
-// "?pagina=": inteiro de 1 a PAGE_MAX; qualquer outra coisa vira 1.
 export function parsePage(value: string | null): number {
   const page = Number(value ?? '1')
   return Number.isInteger(page) && page >= 1 && page <= PAGE_MAX ? page : 1
@@ -64,12 +61,11 @@ export function parseFilters(params: URLSearchParams, defaultRange: DateRange): 
     sort: Object.hasOwn(SORT_TO_API, sort) ? (sort as SortFilter) : '',
     page: parsePage(params.get('pagina')),
   }
-  // Operações de cofre não têm categoria: a combinação não faz sentido (e a API recusa "sem").
+  // Operações de cofre não têm categoria (e a API recusa "sem" com tipo=cofres).
   if (filters.type === 'cofres') filters.category = ''
   return filters
 }
 
-// Só o que difere do padrão vai para a URL.
 export function filtersToParams(filters: TransactionFilters, defaultRange: DateRange): URLSearchParams {
   const params = new URLSearchParams()
   if (filters.from !== defaultRange.from) params.set('de', filters.from)
@@ -100,7 +96,7 @@ export function isDefaultPeriod(filters: TransactionFilters, defaultRange: DateR
   return filters.from === defaultRange.from && filters.to === defaultRange.to
 }
 
-// Filtros além do período (categoria, tipo e busca). A ordem não filtra nada.
+// A ordem não conta como filtro.
 export function hasOtherFilters(filters: TransactionFilters): boolean {
   return filters.category !== '' || filters.type !== '' || filters.search.trim() !== ''
 }
