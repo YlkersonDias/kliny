@@ -1,9 +1,9 @@
-using Backend.Data;
-using Backend.DTOs.Reports;
-using Backend.Models;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Reports;
+using Kliny.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // No banco, gasto e depósito em cofre são negativos; aqui saem positivos.
 public class ReportService(AppDbContext db) : IReportService

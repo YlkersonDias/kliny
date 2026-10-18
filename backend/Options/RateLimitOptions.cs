@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Options;
+namespace Kliny.Api.Options;
 
 // Seção "RateLimits" do appsettings.json.
 public class RateLimitOptions

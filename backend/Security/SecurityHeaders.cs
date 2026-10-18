@@ -1,4 +1,4 @@
-namespace Backend.Security;
+namespace Kliny.Api.Security;
 
 // Aplicados no OnStarting: o UseExceptionHandler limpa os cabeçalhos ao tratar uma exceção.
 public static class SecurityHeaders

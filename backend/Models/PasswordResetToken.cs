@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // Guarda só o SHA-256 do token. Uso único; pedir outro link encerra os anteriores.
 public class PasswordResetToken

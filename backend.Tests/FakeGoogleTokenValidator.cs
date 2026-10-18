@@ -1,6 +1,6 @@
-using Backend.Security;
+using Kliny.Api.Security;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // O "comprovante" é um texto montado por Credential(...); qualquer outro texto é recusado.
 public sealed class FakeGoogleTokenValidator : IGoogleTokenValidator

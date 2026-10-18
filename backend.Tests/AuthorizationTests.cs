@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Um endpoint novo sem proteção quebra estes testes.
 public partial class AuthorizationTests

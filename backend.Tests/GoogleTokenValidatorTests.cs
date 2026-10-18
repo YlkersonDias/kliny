@@ -1,7 +1,7 @@
-using Backend.Security;
+using Kliny.Api.Security;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Sem rede: só casos recusados antes de buscar as chaves do Google.
 public class GoogleTokenValidatorTests

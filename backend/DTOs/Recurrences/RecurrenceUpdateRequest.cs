@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Recurrences;
+namespace Kliny.Api.DTOs.Recurrences;
 
 // Vale só para as próximas ocorrências. O dia e a data de início não mudam.
 public class RecurrenceUpdateRequest : IValidatableObject

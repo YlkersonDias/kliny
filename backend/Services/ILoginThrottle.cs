@@ -1,4 +1,4 @@
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // O e-mail chega já normalizado (sem espaços, minúsculo).
 public interface ILoginThrottle

@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Usuários criados uma vez (o cadastro tem limite por IP); cada teste cria os próprios cofres.
 public sealed class IdempotencyFixture : IAsyncLifetime

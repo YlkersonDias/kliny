@@ -2,9 +2,9 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using MySqlConnector;
-using static Backend.Tests.FakeGoogleTokenValidator;
+using static Kliny.Api.Tests.FakeGoogleTokenValidator;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Com o validador do Google falso.
 public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>

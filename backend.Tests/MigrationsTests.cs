@@ -1,10 +1,10 @@
-using Backend.Data;
+using Kliny.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Sobe as migrations uma a uma, desce todas com dados conferindo que o esquema volta ao de antes, e
 // confere que o modelo do EF não tem mudança sem migration.

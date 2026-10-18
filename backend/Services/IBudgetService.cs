@@ -1,6 +1,6 @@
-using Backend.DTOs.Budgets;
+using Kliny.Api.DTOs.Budgets;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IBudgetService
 {

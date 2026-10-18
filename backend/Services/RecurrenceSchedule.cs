@@ -1,4 +1,4 @@
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // Sem banco, para testar os casos de calendário.
 public static class RecurrenceSchedule

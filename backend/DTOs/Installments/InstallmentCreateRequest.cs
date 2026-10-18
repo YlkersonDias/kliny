@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.DTOs.Recurrences;
-using Backend.Resources;
+using Kliny.Api.DTOs.Recurrences;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Installments;
+namespace Kliny.Api.DTOs.Installments;
 
 // Sempre um gasto: o total vem positivo e as parcelas são gravadas negativas.
 public class InstallmentCreateRequest : IValidatableObject

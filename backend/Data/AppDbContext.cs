@@ -1,8 +1,8 @@
-using Backend.DTOs.Categories;
-using Backend.Models;
+using Kliny.Api.DTOs.Categories;
+using Kliny.Api.Models;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Data;
+namespace Kliny.Api.Data;
 
 public class AppDbContext(DbContextOptions<AppDbContext> options, ICurrentUser currentUser) : DbContext(options)
 {

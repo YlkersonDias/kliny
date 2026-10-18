@@ -55,7 +55,7 @@ inclusive o túnel e os backups, está no [deploy/README.md](deploy/README.md).
 
 - **Frontend** (pasta `frontend`): `npm ci` e `npm run dev`. O Vite repassa `/api` para
   `http://localhost:5228`.
-- **Backend** (pasta `backend`): a conexão com o MySQL e a chave do JWT ficam no user-secrets
+- **Backend** (projeto `Kliny.Api`, na pasta `backend`): a conexão com o MySQL e a chave do JWT ficam no user-secrets
   (`ConnectionStrings:DefaultConnection` e `Jwt:Key`, com pelo menos 32 caracteres); depois,
   `dotnet run`.
 - **Testes:** `npm test` no frontend e `dotnet test --solution Kliny.sln` na raiz. Os testes com

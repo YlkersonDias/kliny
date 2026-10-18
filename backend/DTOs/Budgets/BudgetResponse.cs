@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Budgets;
+namespace Kliny.Api.DTOs.Budgets;
 
 // Spent vem positivo, como o expense dos relatórios.
 public record BudgetResponse(int CategoryId, string CategoryName, decimal Limit, decimal Spent);

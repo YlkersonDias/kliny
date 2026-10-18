@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public sealed class CategoryRuleFixture : IAsyncLifetime
 {
@@ -212,7 +212,7 @@ public class CategoryRuleTests(CategoryRuleFixture fixture) : IClassFixture<Cate
         using (var client = Client(fixture.LimitToken))
             category = await CategoryRuleFixture.IdOf(client.PostAsJsonAsync("/api/categories", new { name = "Geral" }, Ct));
         using var limitClient = Client(fixture.LimitToken);
-        for (var i = 0; i < Backend.Services.CategoryRuleService.MaxPerUser; i++)
+        for (var i = 0; i < Kliny.Api.Services.CategoryRuleService.MaxPerUser; i++)
         {
             using var created = await limitClient.PostAsJsonAsync("/api/category-rules", new { pattern = $"regra {i}", categoryId = category }, Ct);
             Assert.Equal(HttpStatusCode.Created, created.StatusCode);

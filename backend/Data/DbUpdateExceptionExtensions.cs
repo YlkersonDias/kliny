@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using MySqlConnector;
 
-namespace Backend.Data;
+namespace Kliny.Api.Data;
 
 public static class DbUpdateExceptionExtensions
 {

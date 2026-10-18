@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Backend.DTOs.Imports;
-using Backend.Services;
+using Kliny.Api.DTOs.Imports;
+using Kliny.Api.Services;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Cada teste usa uma conta (Source) própria, para as chaves não se cruzarem.
 public sealed class ImportFixture : IAsyncLifetime

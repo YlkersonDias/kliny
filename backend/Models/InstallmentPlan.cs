@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // As parcelas são criadas de uma vez como movimentações de verdade, com "(n/N)" na descrição.
 public class InstallmentPlan

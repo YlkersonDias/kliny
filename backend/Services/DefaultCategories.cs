@@ -1,7 +1,7 @@
-using Backend.Models;
-using Backend.Resources;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // Os nomes saem no idioma da requisição que cria a conta e ficam gravados assim.
 public static class DefaultCategories

@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Options;
+namespace Kliny.Api.Options;
 
 public class JwtOptions
 {

@@ -1,8 +1,8 @@
 using System.Collections.Concurrent;
-using Backend.Options;
+using Kliny.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // Conta qualquer e-mail, exista a conta ou não, para o bloqueio não revelar quem está cadastrado.
 // Na memória: some ao reiniciar e vale para um servidor só.

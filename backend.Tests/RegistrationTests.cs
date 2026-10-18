@@ -1,11 +1,11 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Backend.Security;
-using Backend.Services;
+using Kliny.Api.Security;
+using Kliny.Api.Services;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // As contas que já precisam existir são criadas direto no banco.
 public sealed class RegistrationFixture : IAsyncLifetime

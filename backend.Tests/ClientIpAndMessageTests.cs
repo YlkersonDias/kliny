@@ -1,8 +1,8 @@
 using System.Globalization;
 using System.Net;
-using Backend.RateLimiting;
+using Kliny.Api.RateLimiting;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class ClientIpTests
 {

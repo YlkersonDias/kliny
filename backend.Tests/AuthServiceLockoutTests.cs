@@ -1,14 +1,14 @@
-using Backend.Data;
-using Backend.DTOs.Auth;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Options;
-using Backend.Services;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Auth;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Options;
+using Kliny.Api.Services;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Time.Testing;
 using MsOptions = Microsoft.Extensions.Options.Options;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Com o LoginThrottle de verdade e o banco em memória do EF.
 public class AuthServiceLockoutTests : IDisposable

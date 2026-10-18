@@ -1,6 +1,6 @@
-using Backend.DTOs.Vaults;
+using Kliny.Api.DTOs.Vaults;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IVaultService
 {

@@ -1,12 +1,12 @@
-using Backend.Data;
-using Backend.DTOs;
-using Backend.DTOs.Transactions;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Resources;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs;
+using Kliny.Api.DTOs.Transactions;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public class TransactionService(AppDbContext db) : ITransactionService
 {

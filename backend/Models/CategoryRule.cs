@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // "Descrição contém Pattern → categoria": só sugere, ou é aplicada quando a pessoa pede.
 public class CategoryRule

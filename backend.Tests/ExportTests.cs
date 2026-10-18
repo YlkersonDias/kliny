@@ -4,7 +4,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class ExportTests(MySqlApi api) : IClassFixture<MySqlApi>
 {

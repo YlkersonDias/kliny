@@ -1,11 +1,11 @@
-using Backend.Extensions;
-using Backend.RateLimiting;
-using Backend.Services;
+using Kliny.Api.Extensions;
+using Kliny.Api.RateLimiting;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 
-namespace Backend.Controllers;
+namespace Kliny.Api.Controllers;
 
 [ApiController]
 [Authorize]

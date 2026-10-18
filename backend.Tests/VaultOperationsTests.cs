@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Cada teste cadastra o próprio usuário: o saldo da conta é cumulativo.
 public class VaultOperationsTests(MySqlApi api) : IClassFixture<MySqlApi>

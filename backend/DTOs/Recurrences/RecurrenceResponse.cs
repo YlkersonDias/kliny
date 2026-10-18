@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Recurrences;
+namespace Kliny.Api.DTOs.Recurrences;
 
 // Amount com o sinal da movimentação. NextDate: a próxima ocorrência ainda não gerada.
 public record RecurrenceResponse(

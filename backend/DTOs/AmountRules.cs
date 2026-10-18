@@ -1,6 +1,6 @@
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs;
+namespace Kliny.Api.DTOs;
 
 // O sinal (zero, positivo, negativo) fica a cargo de cada DTO.
 public static class AmountRules

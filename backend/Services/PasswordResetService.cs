@@ -1,14 +1,14 @@
-using Backend.Data;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Options;
-using Backend.Resources;
-using Backend.Security;
-using Backend.Services.Email;
+using Kliny.Api.Data;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Options;
+using Kliny.Api.Resources;
+using Kliny.Api.Security;
+using Kliny.Api.Services.Email;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IPasswordResetService
 {

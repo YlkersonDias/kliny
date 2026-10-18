@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.Options;
+namespace Kliny.Api.Options;
 
 // Sem chave, nada é enviado: o desenvolvimento e os testes funcionam sem o serviço.
 public class EmailOptions : IValidatableObject

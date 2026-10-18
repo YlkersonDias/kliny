@@ -1,9 +1,9 @@
 using System.Net.Http.Json;
 using System.Text.Json;
-using Backend.Data;
+using Kliny.Api.Data;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public sealed class GlobalQueryFilterFixture : IAsyncLifetime
 {

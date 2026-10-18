@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Dados criados uma vez por classe (o cadastro tem limite por IP); cada teste usa categorias próprias.
 public sealed class BudgetFixture : IAsyncLifetime

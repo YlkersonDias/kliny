@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Transactions;
+namespace Kliny.Api.DTOs.Transactions;
 
 // Sem VaultId: operações de cofre usam os endpoints de cofre.
 public class TransactionRequest : IValidatableObject

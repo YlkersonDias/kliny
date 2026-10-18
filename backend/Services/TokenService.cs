@@ -1,13 +1,13 @@
 using System.Security.Claims;
 using System.Text;
-using Backend.Models;
-using Backend.Options;
-using Backend.Security;
+using Kliny.Api.Models;
+using Kliny.Api.Options;
+using Kliny.Api.Security;
 using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public class TokenService(IOptions<JwtOptions> options) : ITokenService
 {

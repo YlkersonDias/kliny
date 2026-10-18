@@ -1,6 +1,6 @@
-using Backend.DTOs.Categories;
+using Kliny.Api.DTOs.Categories;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface ICategoryService
 {

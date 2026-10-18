@@ -1,15 +1,15 @@
-using Backend.DTOs.Auth;
-using Backend.Extensions;
-using Backend.RateLimiting;
-using Backend.Resources;
-using Backend.Security;
-using Backend.Services;
+using Kliny.Api.DTOs.Auth;
+using Kliny.Api.Extensions;
+using Kliny.Api.RateLimiting;
+using Kliny.Api.Resources;
+using Kliny.Api.Security;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Controllers;
+namespace Kliny.Api.Controllers;
 
 [ApiController]
 [Route("api/auth")]

@@ -8,7 +8,7 @@
   </PropertyGroup>
 
   <ItemGroup>
-    <InternalsVisibleTo Include="Backend.Tests" />
+    <InternalsVisibleTo Include="Kliny.Api.Tests" />
   </ItemGroup>
 
   <ItemGroup>

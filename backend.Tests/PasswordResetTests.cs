@@ -2,10 +2,10 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 using System.Text.RegularExpressions;
-using Backend.Services;
+using Kliny.Api.Services;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Usuários criados direto no banco, um por teste (o cadastro tem limite por IP).
 public sealed class PasswordResetFixture : IAsyncLifetime

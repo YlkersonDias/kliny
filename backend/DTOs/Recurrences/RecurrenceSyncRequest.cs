@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Recurrences;
+namespace Kliny.Api.DTOs.Recurrences;
 
 // O servidor não sabe o fuso: aceita só a um dia da data UTC (os fusos vão de UTC-12 a UTC+14).
 public class RecurrenceSyncRequest : IValidatableObject

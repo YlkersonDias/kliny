@@ -1,6 +1,6 @@
-using Backend.Localization;
+using Kliny.Api.Localization;
 
-namespace Backend.Resources;
+namespace Kliny.Api.Resources;
 
 // Mensagens em português e inglês, lado a lado, escolhidas pelo Accept-Language. Não usa .resx: o
 // idioma extra viraria um assembly satélite, que políticas como o Smart App Control bloqueiam em silêncio.

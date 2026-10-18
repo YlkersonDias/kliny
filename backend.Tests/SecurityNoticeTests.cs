@@ -1,10 +1,10 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.RegularExpressions;
-using Backend.Services.Email;
-using static Backend.Tests.FakeGoogleTokenValidator;
+using Kliny.Api.Services.Email;
+using static Kliny.Api.Tests.FakeGoogleTokenValidator;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public partial class SecurityNoticeTests(MySqlApi api) : IClassFixture<MySqlApi>
 {

@@ -1,9 +1,9 @@
-using Backend.Data;
+using Kliny.Api.Data;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Backend.Security;
+namespace Kliny.Api.Security;
 
 // A versão de token (claim "tv") é conferida com a do banco a cada requisição. Sem cache, de
 // propósito: com cache, um token revogado ainda valeria até o cache vencer.

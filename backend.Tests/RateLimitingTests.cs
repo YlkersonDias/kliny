@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class RateLimitingTests
 {
@@ -198,7 +198,7 @@ public class RateLimitingTests
         using var app = new TestApp(new Dictionary<string, string> { [key] = value });
 
         var error = Assert.ThrowsAny<Exception>(() => app.CreateClient());
-        Assert.Contains(nameof(Backend.Options.RateLimitOptions), error.ToString());
+        Assert.Contains(nameof(Kliny.Api.Options.RateLimitOptions), error.ToString());
     }
 
     [Fact]

@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace Backend.Localization;
+namespace Kliny.Api.Localization;
 
 // Idioma ausente ou não suportado responde em pt-BR.
 public static class AppCultures

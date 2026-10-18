@@ -1,6 +1,6 @@
-using Backend.DTOs.Auth;
+using Kliny.Api.DTOs.Auth;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IAuthService
 {

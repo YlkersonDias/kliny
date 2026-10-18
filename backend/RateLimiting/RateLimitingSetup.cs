@@ -1,11 +1,11 @@
 using System.Threading.RateLimiting;
-using Backend.Options;
-using Backend.Services;
+using Kliny.Api.Options;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.RateLimiting;
 using Microsoft.Extensions.DependencyInjection.Extensions;
 using Microsoft.Extensions.Options;
 
-namespace Backend.RateLimiting;
+namespace Kliny.Api.RateLimiting;
 
 // O limite por e-mail do login fica no LoginThrottle: o rate limiter decide antes de ler o corpo.
 public static class RateLimitingSetup

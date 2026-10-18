@@ -6,7 +6,7 @@ using System.Text.Json;
 using Microsoft.IdentityModel.JsonWebTokens;
 using Microsoft.IdentityModel.Tokens;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class TokenRevocationTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
