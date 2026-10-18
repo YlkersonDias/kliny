@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // As datas partem de hoje (UTC), porque a sincronização só aceita a data de hoje.
 public sealed class RecurrenceFixture : IAsyncLifetime

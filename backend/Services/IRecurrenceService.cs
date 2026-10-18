@@ -1,6 +1,6 @@
-using Backend.DTOs.Recurrences;
+using Kliny.Api.DTOs.Recurrences;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IRecurrenceService
 {

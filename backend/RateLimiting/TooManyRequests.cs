@@ -1,7 +1,7 @@
 using System.Globalization;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.RateLimiting;
+namespace Kliny.Api.RateLimiting;
 
 public static class TooManyRequests
 {

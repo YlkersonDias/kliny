@@ -1,7 +1,7 @@
 using System.Net;
 using System.Net.Sockets;
 
-namespace Backend.RateLimiting;
+namespace Kliny.Api.RateLimiting;
 
 public static class ClientIp
 {

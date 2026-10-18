@@ -1,7 +1,7 @@
 using System.Security.Claims;
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Backend.Extensions;
+namespace Kliny.Api.Extensions;
 
 public static class ClaimsPrincipalExtensions
 {

@@ -4,9 +4,9 @@
 useDefault = true
 
 [[allowlists]]
-description = "Chaves Idempotency-Key de exemplo do Backend.http (não são segredo)"
+description = "Chaves Idempotency-Key de exemplo do Kliny.Api.http (não são segredo)"
 condition = "AND"
-paths = ['''^backend/Backend\.http$''']
+paths = ['''^backend/Kliny\.Api\.http$''']
 regexes = ['''^exemplo-(deposito|retirada)-\d+$''', '''^3f6c2a1e-9b0d-4c55-8a7e-1d2b3c4d5e6f$''']
 
 [[allowlists]]

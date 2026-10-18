@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // As ocorrências viram movimentações de verdade (com RecurrenceId), geradas pela sincronização.
 public class Recurrence

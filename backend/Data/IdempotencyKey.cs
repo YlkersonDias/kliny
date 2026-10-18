@@ -1,6 +1,6 @@
 using System.Text.RegularExpressions;
 
-namespace Backend.Data;
+namespace Kliny.Api.Data;
 
 // O frontend manda um UUID por intenção de operação; o formato aceito é mais largo, mas fechado.
 public static partial class IdempotencyKey

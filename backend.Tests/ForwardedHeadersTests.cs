@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using Microsoft.AspNetCore.Mvc.Testing;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // X-Forwarded-For e X-Forwarded-Proto só valem vindos de um proxy das redes confiáveis: senão
 // qualquer um fugiria do limite por IP.

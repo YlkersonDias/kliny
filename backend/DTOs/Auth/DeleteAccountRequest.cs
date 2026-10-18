@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Auth;
+namespace Kliny.Api.DTOs.Auth;
 
 // A senha atual ou, em conta só do Google, um comprovante novo do Google: um token roubado sozinho
 // não apaga a conta. O AuthService decide qual dos dois vale.

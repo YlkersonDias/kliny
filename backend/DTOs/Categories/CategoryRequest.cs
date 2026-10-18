@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Categories;
+namespace Kliny.Api.DTOs.Categories;
 
 public class CategoryRequest : IValidatableObject
 {

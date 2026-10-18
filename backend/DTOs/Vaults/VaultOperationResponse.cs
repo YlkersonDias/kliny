@@ -1,6 +1,6 @@
-using Backend.DTOs.Transactions;
+using Kliny.Api.DTOs.Transactions;
 
-namespace Backend.DTOs.Vaults;
+namespace Kliny.Api.DTOs.Vaults;
 
 public record VaultOperationResponse(TransactionResponse Transaction, decimal Balance);
 

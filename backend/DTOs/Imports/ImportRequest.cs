@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Imports;
+namespace Kliny.Api.DTOs.Imports;
 
 // Uma linha do extrato, já lida pelo navegador: o arquivo nunca chega à API.
 public class ImportLine : IValidatableObject

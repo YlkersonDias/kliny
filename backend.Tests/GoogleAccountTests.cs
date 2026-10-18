@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using static Backend.Tests.FakeGoogleTokenValidator;
+using static Kliny.Api.Tests.FakeGoogleTokenValidator;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class GoogleAccountTests(MySqlApi api) : IClassFixture<MySqlApi>
 {

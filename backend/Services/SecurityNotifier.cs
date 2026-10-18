@@ -1,10 +1,10 @@
-using Backend.Models;
-using Backend.Options;
-using Backend.Resources;
-using Backend.Services.Email;
+using Kliny.Api.Models;
+using Kliny.Api.Options;
+using Kliny.Api.Resources;
+using Kliny.Api.Services.Email;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 /// <summary>
 /// Avisa a dona da conta, por e-mail, quando o acesso a ela muda, para ela reagir se não foi ela.

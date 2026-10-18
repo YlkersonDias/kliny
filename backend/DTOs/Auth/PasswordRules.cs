@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
 using System.Text;
 
-namespace Backend.DTOs.Auth;
+namespace Kliny.Api.DTOs.Auth;
 
 public static class PasswordRules
 {

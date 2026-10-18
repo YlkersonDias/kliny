@@ -6,7 +6,7 @@ using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.Routing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public partial class SecurityHeadersTests
 {

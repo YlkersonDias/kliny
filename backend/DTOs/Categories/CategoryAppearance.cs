@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Categories;
+namespace Kliny.Api.DTOs.Categories;
 
 // Só chaves de uma lista fechada, nunca um código de cor ou desenho vindo de fora. O frontend tem a
 // mesma lista (lib/categoryAppearance.ts).

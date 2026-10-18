@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Auth;
+namespace Kliny.Api.DTOs.Auth;
 
 public class LoginRequest
 {

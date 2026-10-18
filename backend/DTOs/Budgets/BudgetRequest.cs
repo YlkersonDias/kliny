@@ -1,6 +1,6 @@
 using System.ComponentModel.DataAnnotations;
 
-namespace Backend.DTOs.Budgets;
+namespace Kliny.Api.DTOs.Budgets;
 
 public class BudgetRequest : IValidatableObject
 {

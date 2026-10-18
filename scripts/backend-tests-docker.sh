@@ -2,7 +2,7 @@
 # Roda os testes do backend num container do SDK do .NET, com um MySQL 8.4 descartável, como no CI.
 #
 #   scripts/backend-tests-docker.sh                                # todos os testes
-#   scripts/backend-tests-docker.sh Backend.Tests.MigrationsTests  # só uma classe
+#   scripts/backend-tests-docker.sh Kliny.Api.Tests.MigrationsTests  # só uma classe
 #   scripts/backend-tests-docker.sh --down                         # apaga os containers e a rede
 #
 # Os containers ficam ligados entre uma execução e outra. A senha do MySQL só existe dentro deles.

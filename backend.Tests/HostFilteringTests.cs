@@ -1,6 +1,6 @@
 using System.Net;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class HostFilteringTests
 {

@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // Limite mensal de gasto de uma categoria, o mesmo para todos os meses.
 public class Budget

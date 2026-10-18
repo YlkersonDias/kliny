@@ -1,6 +1,6 @@
 using Microsoft.IdentityModel.JsonWebTokens;
 
-namespace Backend.Data;
+namespace Kliny.Api.Data;
 
 public interface ICurrentUser
 {

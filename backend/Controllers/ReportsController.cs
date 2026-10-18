@@ -1,10 +1,10 @@
-using Backend.DTOs.Reports;
-using Backend.Extensions;
-using Backend.Services;
+using Kliny.Api.DTOs.Reports;
+using Kliny.Api.Extensions;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers;
+namespace Kliny.Api.Controllers;
 
 // Nos relatórios, gastos e depósitos em cofre vêm positivos.
 [ApiController]

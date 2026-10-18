@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Reports;
+namespace Kliny.Api.DTOs.Reports;
 
 // Expense e VaultDeposits vêm positivos, ao contrário do banco.
 public record SummaryResponse(

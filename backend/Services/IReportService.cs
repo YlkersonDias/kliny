@@ -1,6 +1,6 @@
-using Backend.DTOs.Reports;
+using Kliny.Api.DTOs.Reports;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 // Gastos e depósitos em cofre vêm com valor positivo.
 public interface IReportService

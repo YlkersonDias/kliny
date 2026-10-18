@@ -1,8 +1,8 @@
-using Backend.Options;
-using Backend.Services;
+using Kliny.Api.Options;
+using Kliny.Api.Services;
 using Microsoft.Extensions.Time.Testing;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class LoginThrottleTests
 {

@@ -1,14 +1,14 @@
 using System.Globalization;
 using System.Security.Cryptography;
 using System.Text;
-using Backend.Data;
-using Backend.DTOs.Imports;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Resources;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Imports;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IImportService
 {

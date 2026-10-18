@@ -1,9 +1,9 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Backend.Data;
-using Backend.Security;
-using Backend.Services.Email;
+using Kliny.Api.Data;
+using Kliny.Api.Security;
+using Kliny.Api.Services.Email;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.EntityFrameworkCore;
@@ -11,7 +11,7 @@ using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.Extensions.DependencyInjection;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // A API com os services de verdade e um MySQL descartável (um banco por fixture). Como em produção,
 // a API conecta com um usuário só de DML. O servidor vem de KLINY_TEST_MYSQL: sem ela, os testes

@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Installments;
+namespace Kliny.Api.DTOs.Installments;
 
 // Remaining: parcelas ainda ligadas à compra com data depois de hoje.
 public record InstallmentResponse(

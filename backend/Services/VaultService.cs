@@ -1,13 +1,13 @@
-using Backend.Data;
-using Backend.DTOs.Transactions;
-using Backend.DTOs.Vaults;
-using Backend.Exceptions;
-using Backend.Localization;
-using Backend.Models;
-using Backend.Resources;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Transactions;
+using Kliny.Api.DTOs.Vaults;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Localization;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public class VaultService(AppDbContext db) : IVaultService
 {

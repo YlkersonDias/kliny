@@ -1,6 +1,6 @@
-using Backend.Services;
+using Kliny.Api.Services;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class RecurrenceScheduleTests
 {

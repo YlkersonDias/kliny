@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Reports;
+namespace Kliny.Api.DTOs.Reports;
 
 public enum CategoryReportType
 {

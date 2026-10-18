@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Auth;
+namespace Kliny.Api.DTOs.Auth;
 
 // O ID token que o botão do Google entrega à página: um JWT de alguns KB.
 public class GoogleCredentialRequest

@@ -1,4 +1,4 @@
-namespace Backend.DTOs.Transactions;
+namespace Kliny.Api.DTOs.Transactions;
 
 public record TransactionResponse(
     int Id,

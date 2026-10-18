@@ -1,10 +1,10 @@
-using Backend.DTOs.Imports;
-using Backend.Extensions;
-using Backend.Services;
+using Kliny.Api.DTOs.Imports;
+using Kliny.Api.Extensions;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers;
+namespace Kliny.Api.Controllers;
 
 // O corpo pode chegar a 1 MB (1.000 linhas), acima dos 64 kB dos outros endereços no nginx.
 [ApiController]

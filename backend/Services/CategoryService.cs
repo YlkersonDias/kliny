@@ -1,11 +1,11 @@
-using Backend.Data;
-using Backend.DTOs.Categories;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Resources;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Categories;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public class CategoryService(AppDbContext db) : ICategoryService
 {

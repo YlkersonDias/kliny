@@ -1,8 +1,8 @@
 using System.ComponentModel.DataAnnotations;
 using System.Globalization;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Budgets;
+namespace Kliny.Api.DTOs.Budgets;
 
 // Obrigatório: o servidor não sabe o fuso de quem usa, então o frontend diz qual é o mês atual.
 public class BudgetQuery : IValidatableObject

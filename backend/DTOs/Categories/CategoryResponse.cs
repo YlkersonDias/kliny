@@ -1,6 +1,6 @@
-using Backend.Models;
+using Kliny.Api.Models;
 
-namespace Backend.DTOs.Categories;
+namespace Kliny.Api.DTOs.Categories;
 
 public record CategoryResponse(int Id, string Name, string? Color, string? Icon)
 {

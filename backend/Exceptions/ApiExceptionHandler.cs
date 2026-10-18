@@ -1,7 +1,7 @@
-using Backend.RateLimiting;
+using Kliny.Api.RateLimiting;
 using Microsoft.AspNetCore.Diagnostics;
 
-namespace Backend.Exceptions;
+namespace Kliny.Api.Exceptions;
 
 public class ApiExceptionHandler(IProblemDetailsService problemDetailsService) : IExceptionHandler
 {

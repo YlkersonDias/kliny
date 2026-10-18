@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Installments;
+namespace Kliny.Api.DTOs.Installments;
 
 // A data de hoje no navegador (o servidor não sabe o fuso), aceita só a um dia da data UTC.
 public class InstallmentQuery : IValidatableObject

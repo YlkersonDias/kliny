@@ -1,9 +1,9 @@
 using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
-using Backend.Services;
+using Kliny.Api.Services;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class InstallmentSplitTests
 {

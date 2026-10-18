@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // A conta só é criada quando quem recebeu o link escolhe a senha: ninguém cria uma conta com o
 // e-mail de outra pessoa e uma senha que só ele conhece.

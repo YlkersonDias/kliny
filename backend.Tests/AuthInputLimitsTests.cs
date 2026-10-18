@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // O BCrypt só usa os primeiros 72 bytes da senha.
 public class AuthInputLimitsTests

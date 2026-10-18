@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Reports;
+namespace Kliny.Api.DTOs.Reports;
 
 public enum TimelineGrouping
 {

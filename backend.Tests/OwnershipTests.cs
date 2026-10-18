@@ -2,7 +2,7 @@ using System.Net;
 using System.Net.Http.Json;
 using System.Text.Json;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Dados criados uma vez por execução: o cadastro tem limite por IP. Datas no passado, porque
 // depósito e retirada não aceitam data futura.

@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 public class Category
 {

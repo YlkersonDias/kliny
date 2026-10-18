@@ -3,7 +3,7 @@ using System.Net.Http.Json;
 using System.Text.Json;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
 {

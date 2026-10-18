@@ -1,12 +1,12 @@
-using Backend.Data;
-using Backend.DTOs.Auth;
-using Backend.Exceptions;
-using Backend.Models;
-using Backend.Resources;
-using Backend.Security;
+using Kliny.Api.Data;
+using Kliny.Api.DTOs.Auth;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Models;
+using Kliny.Api.Resources;
+using Kliny.Api.Security;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public class AuthService(
     AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle, IGoogleTokenValidator googleValidator,

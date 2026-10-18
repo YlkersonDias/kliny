@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
-namespace Backend.Migrations
+namespace Kliny.Api.Migrations
 {
     /// <inheritdoc />
     public partial class AddBudgets : Migration

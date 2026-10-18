@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Vaults;
+namespace Kliny.Api.DTOs.Vaults;
 
 // O valor é sempre positivo: o endpoint define o sinal gravado.
 public class VaultOperationRequest : IValidatableObject

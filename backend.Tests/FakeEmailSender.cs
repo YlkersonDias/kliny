@@ -1,7 +1,7 @@
 using System.Collections.Concurrent;
-using Backend.Services.Email;
+using Kliny.Api.Services.Email;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Os testes nunca falam com o Resend.
 public sealed class FakeEmailSender : IEmailSender

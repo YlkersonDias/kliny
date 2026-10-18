@@ -1,10 +1,10 @@
 using System.Net.Http.Headers;
 using System.Net.Http.Json;
 using System.Threading.Channels;
-using Backend.Options;
+using Kliny.Api.Options;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Services.Email;
+namespace Kliny.Api.Services.Email;
 
 // Só texto: nenhum HTML montado com dados do usuário.
 public record EmailMessage(string To, string Subject, string Text);

@@ -1,10 +1,10 @@
-using Backend.DTOs.Installments;
-using Backend.Extensions;
-using Backend.Services;
+using Kliny.Api.DTOs.Installments;
+using Kliny.Api.Extensions;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 
-namespace Backend.Controllers;
+namespace Kliny.Api.Controllers;
 
 [ApiController]
 [Authorize]

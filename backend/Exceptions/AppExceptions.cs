@@ -1,4 +1,4 @@
-namespace Backend.Exceptions;
+namespace Kliny.Api.Exceptions;
 
 // O ApiExceptionHandler converte cada uma no status HTTP; a mensagem vai para o "detail".
 
@@ -16,7 +16,7 @@ public class BusinessRuleException(string message) : Exception(message);
 
 /// <summary>Tentativas demais; vira 429 com o cabeçalho Retry-After.</summary>
 public class TooManyRequestsException(TimeSpan retryAfter)
-    : Exception(Backend.RateLimiting.TooManyRequests.Message(retryAfter))
+    : Exception(Kliny.Api.RateLimiting.TooManyRequests.Message(retryAfter))
 {
     public TimeSpan RetryAfter { get; } = retryAfter;
 }

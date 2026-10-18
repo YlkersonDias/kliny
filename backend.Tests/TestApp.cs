@@ -1,13 +1,13 @@
 using System.Net;
-using Backend.DTOs.Auth;
-using Backend.Exceptions;
-using Backend.Services;
+using Kliny.Api.DTOs.Auth;
+using Kliny.Api.Exceptions;
+using Kliny.Api.Services;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // A API em memória, com os services de autenticação falsos (sem MySQL). Uma por teste, para os
 // limites começarem do zero.

@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Recurrences;
+namespace Kliny.Api.DTOs.Recurrences;
 
 // O dia de todos os meses é o da StartDate.
 public class RecurrenceCreateRequest : IValidatableObject

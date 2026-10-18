@@ -1,7 +1,7 @@
 using System.ComponentModel.DataAnnotations;
-using Backend.Resources;
+using Kliny.Api.Resources;
 
-namespace Backend.DTOs.Vaults;
+namespace Kliny.Api.DTOs.Vaults;
 
 public class VaultRequest : IValidatableObject
 {

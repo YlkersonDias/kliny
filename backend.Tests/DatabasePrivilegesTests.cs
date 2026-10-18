@@ -1,7 +1,7 @@
 using System.Net.Http.Json;
 using MySqlConnector;
 
-namespace Backend.Tests;
+namespace Kliny.Api.Tests;
 
 // Se estes testes falharem, o usuário de teste ganhou privilégio demais, e os outros deixaram de
 // provar que o app funciona só com DML.

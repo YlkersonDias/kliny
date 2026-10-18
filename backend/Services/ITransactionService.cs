@@ -1,7 +1,7 @@
-using Backend.DTOs;
-using Backend.DTOs.Transactions;
+using Kliny.Api.DTOs;
+using Kliny.Api.DTOs.Transactions;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface ITransactionService
 {

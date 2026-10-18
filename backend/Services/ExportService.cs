@@ -3,12 +3,12 @@ using System.IO.Compression;
 using System.Text;
 using System.Text.Json;
 using System.Text.Json.Serialization;
-using Backend.Data;
-using Backend.Localization;
-using Backend.Resources;
+using Kliny.Api.Data;
+using Kliny.Api.Localization;
+using Kliny.Api.Resources;
 using Microsoft.EntityFrameworkCore;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface IExportService
 {

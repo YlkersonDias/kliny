@@ -1,4 +1,4 @@
-namespace Backend.Models;
+namespace Kliny.Api.Models;
 
 // Amount positivo = receita; negativo = gasto. Com VaultId: depósito é negativo, retirada é positiva.
 public class Transaction

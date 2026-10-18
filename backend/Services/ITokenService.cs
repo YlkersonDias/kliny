@@ -1,6 +1,6 @@
-using Backend.Models;
+using Kliny.Api.Models;
 
-namespace Backend.Services;
+namespace Kliny.Api.Services;
 
 public interface ITokenService
 {

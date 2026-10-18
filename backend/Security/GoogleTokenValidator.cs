@@ -1,7 +1,7 @@
 using Google.Apis.Auth;
 using Microsoft.Extensions.Options;
 
-namespace Backend.Security;
+namespace Kliny.Api.Security;
 
 // Subject ("sub") é o identificador fixo da conta Google: o Google pede para usá-lo, e não o e-mail.
 public record GoogleIdentity(string Subject, string Email, bool EmailVerified, string? HostedDomain, string? Name)
