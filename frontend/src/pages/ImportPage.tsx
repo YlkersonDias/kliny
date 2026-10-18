@@ -18,8 +18,7 @@ import { restoreMapping, saveMapping } from '../lib/csvMappingStore'
 import { decodeStatement, IMPORT_MAX_LINES, OFX_MAX_BYTES, OfxError, parseOfx, type StatementLine } from '../lib/ofx'
 import { buildReviewRows, dateSpan, type ReviewRow } from '../lib/statementImport'
 
-// Importação de extrato (8.3a OFX, 8.3b CSV). O arquivo é lido aqui e descartado; a API recebe só
-// as linhas marcadas. Passos: escolher o arquivo, (no CSV) dizer as colunas, revisar e o resultado.
+// O arquivo é lido só aqui e descartado: a API recebe só as linhas marcadas.
 
 interface CsvFile {
   fileName: string
@@ -43,7 +42,6 @@ export default function ImportPage() {
   const [reading, setReading] = useState(false)
   const inputRef = useRef<HTMLInputElement>(null)
 
-  // As regras sugerem a categoria; sem elas carregadas, a revisão sairia sem as sugestões.
   const ready = !rules.isPending && !categories.isPending
 
   async function handleFile(event: ChangeEvent<HTMLInputElement>) {
@@ -100,7 +98,6 @@ export default function ImportPage() {
     setChoosingColumns(true)
   }
 
-  // Confere as linhas com a API e abre a revisão.
   function review(fileName: string, lines: StatementLine[], skipped: number) {
     if (lines.length === 0) {
       setReading(false)
@@ -172,7 +169,7 @@ export default function ImportPage() {
     )
   }
 
-  // Escondido: os botões abrem o seletor de arquivo (o click() funciona mesmo com display: none).
+  // O click() funciona mesmo com display: none.
   const fileInput = (
     <input
       ref={inputRef}
@@ -271,8 +268,7 @@ function toImportLine(line: StatementLine): ImportLine {
   }
 }
 
-// A API responde a validação por linha ("Lines[3].Amount"): a primeira mensagem de campo diz mais
-// que o "Confira os campos destacados", que aqui não tem campo para destacar.
+// A validação vem por linha ("Lines[3].Amount"): a primeira mensagem de campo diz mais que a genérica.
 function errorMessage(error: Error): string {
   if (error instanceof ApiError) return Object.values(error.fieldErrors)[0] ?? error.detail
   return error.message

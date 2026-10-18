@@ -8,12 +8,11 @@ public class User
     // Null em conta criada só pelo Google: ela não entra pelo login com senha.
     public string? PasswordHash { get; set; }
 
-    // Identificador fixo da conta Google vinculada ("sub" do ID token), único. Null sem Google.
+    // "sub" do ID token do Google.
     public string? GoogleSubject { get; set; }
     public DateTime CreatedAt { get; set; } = DateTime.UtcNow;
 
-    // Versão dos tokens (S.5): vai no JWT (claim "tv") e é conferida a cada requisição.
-    // "Sair de todos os dispositivos" incrementa, e os tokens emitidos antes deixam de valer.
+    // Vai no JWT (claim "tv"): incrementar invalida todos os tokens emitidos antes.
     public int TokenVersion { get; set; }
 
     public ICollection<Category> Categories { get; set; } = new List<Category>();

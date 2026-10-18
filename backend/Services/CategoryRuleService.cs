@@ -26,8 +26,6 @@ public interface ICategoryRuleService
     Task<CategoryRuleApplyResponse> ApplyAsync(int userId, int id, CategoryRuleApplyQuery query);
 }
 
-// Regras de categoria (8.4). Toda consulta filtra pelo usuário do token (regra 2), além do filtro
-// global do AppDbContext.
 public class CategoryRuleService(AppDbContext db) : ICategoryRuleService
 {
     public const int MaxPerUser = 100;
@@ -73,8 +71,7 @@ public class CategoryRuleService(AppDbContext db) : ICategoryRuleService
             .FirstOrDefaultAsync()
             ?? throw new NotFoundException(Messages.CategoryRuleNotFound);
 
-        // Mesma busca do extrato (8.1): LIKE parametrizado pelo EF, sem diferenciar maiúsculas nem
-        // acentos pela collation do banco. Operações de cofre ficam de fora: não têm categoria.
+        // A mesma busca do extrato; operações de cofre ficam de fora, porque não têm categoria.
         var matching = db.Transactions.Where(t => t.UserId == userId && t.VaultId == null && t.Description.Contains(rule.Pattern));
         matching = query.IncludeCategorized
             ? matching.Where(t => t.CategoryId == null || t.CategoryId != rule.CategoryId)
@@ -103,7 +100,6 @@ public class CategoryRuleService(AppDbContext db) : ICategoryRuleService
 
     private async Task SaveAsync(int userId, CategoryRule rule)
     {
-        // A comparação usa a collation do banco, a mesma do índice único.
         if (await db.CategoryRules.AnyAsync(r => r.UserId == userId && r.Pattern == rule.Pattern && r.Id != rule.Id))
             throw new ConflictException(Messages.CategoryRulePatternInUse);
         try

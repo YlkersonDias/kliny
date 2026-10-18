@@ -5,8 +5,7 @@ import { today } from '../../lib/dates'
 import { Button } from '../ui/Button'
 import { FormAlert } from '../ui/FormAlert'
 
-// "Baixar meus dados" (LGPD, portabilidade): um .zip com o JSON completo e o CSV das movimentações.
-// O arquivo vai direto para o download da pessoa e não fica guardado no navegador (regra 14).
+// O arquivo vai direto para o download e não fica guardado no navegador.
 export function ExportData() {
   const { t } = useTranslation('settings')
   const [loading, setLoading] = useState(false)
@@ -25,11 +24,9 @@ export function ExportData() {
       // A data local, e não a do servidor.
       link.download = `kliny-dados-${today()}.zip`
       link.click()
-      // Depois do clique o navegador já tem o arquivo; a URL temporária pode sair da memória.
       setTimeout(() => URL.revokeObjectURL(url), 0)
       setDone(true)
     } catch (caught) {
-      // A API explica o motivo (muitas tentativas, sem conexão).
       setError(caught instanceof Error && caught.message ? caught.message : t('account.exportError'))
     } finally {
       setLoading(false)

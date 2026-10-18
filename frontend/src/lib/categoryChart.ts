@@ -3,8 +3,7 @@ import i18n, { currentLanguage } from '../i18n'
 import { categoryColorVar, DEFAULT_COLOR, DEFAULT_ICON, type CategoryLook } from './categoryAppearance'
 import type { Language } from './language'
 
-// Fatias do gráfico de rosca por categoria. A API já manda do maior total para o menor.
-// No máximo 7 fatias: com mais categorias, as 6 maiores e "Outras", que soma o resto.
+// No máximo 7 fatias: as 6 maiores e "Outras", que soma o resto.
 
 export const MAX_SLICES = 7
 
@@ -15,7 +14,6 @@ const PERCENT: Record<Language, Intl.NumberFormat> = {
   'en-US': new Intl.NumberFormat('en-US', { minimumFractionDigits: 1, maximumFractionDigits: 1 }),
 }
 
-// Percentual com uma casa, sem o "%" (fica no texto traduzido): 12,5 ou 12.5.
 export function formatPercent(value: number, language: Language = currentLanguage()): string {
   return PERCENT[language].format(value)
 }
@@ -25,17 +23,12 @@ export interface CategorySlice {
   name: string
   total: number
   count: number
-  // Sobre o total do período, com 1 casa; a soma pode não dar exatamente 100.
   percentage: number
-  // Posição de 1 a 7, igual ao número do selo e da legenda.
   rank: number
-  // A cor da categoria (ou, sem lookOf, o token da escala pela posição); "Outras" usa hachura.
   color: string
-  // Cor e ícone da categoria, para a legenda (cinza e etiqueta sem categoria; nulo em "Outras").
   look: CategoryLook | null
   isOther: boolean
   isUncategorized: boolean
-  // Quantas categorias "Outras" junta (0 nas demais).
   groupedCount: number
 }
 
@@ -43,7 +36,7 @@ function percentage(cents: number, totalCents: number): number {
   return totalCents === 0 ? 0 : Math.round((cents * 1000) / totalCents) / 10
 }
 
-// lookOf: a cor e o ícone de cada categoria (pelo Id). Sem ele, a escala lilás pela posição.
+// Sem lookOf, a escala lilás pela posição.
 export function toSlices(rows: CategoryTotal[], lookOf?: (categoryId: number) => CategoryLook | undefined): CategorySlice[] {
   const sorted = [...rows].sort((a, b) => b.total - a.total)
   const totalCents = sorted.reduce((sum, row) => sum + toCents(row.total), 0)
@@ -86,7 +79,6 @@ export function toSlices(rows: CategoryTotal[], lookOf?: (categoryId: number) =>
   return slices
 }
 
-// Nome exibido de uma linha da tabela completa (que lista todas, sem agrupar).
 export function categoryName(row: CategoryTotal): string {
   return row.categoryName ?? i18n.t('uncategorized')
 }

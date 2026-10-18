@@ -5,8 +5,7 @@ import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { simulate } from '../../lib/simulator'
 import { Icon } from '../ui/Icon'
 
-// Todos os cartões com a mesma largura e a mesma altura (a do mais alto, pela trilha): a descrição
-// reserva três linhas, e o exemplo ocupa o resto, com o conteúdo centralizado.
+// Todos com a mesma altura (a do mais alto): a descrição reserva três linhas.
 function Panel({ title, text, children }: { title: string; text: string; children: ReactNode }) {
   return (
     <article className="flex w-[min(84vw,24rem)] flex-none snap-center flex-col gap-5 rounded-3xl border border-border bg-surface p-6 shadow-lg shadow-primary/10">
@@ -14,7 +13,6 @@ function Panel({ title, text, children }: { title: string; text: string; childre
         <h3 className="font-display text-2xl leading-tight font-[680] tracking-[-0.02em]">{title}</h3>
         <p className="mt-1.5 min-h-[3lh] text-[0.95rem] text-muted">{text}</p>
       </div>
-      {/* Exemplo visual de uma tela do app; o título e o texto acima já dizem o que ela faz. */}
       <div aria-hidden="true" className="flex flex-1 flex-col justify-center rounded-2xl border border-border p-3.5 text-sm">{children}</div>
     </article>
   )
@@ -41,7 +39,6 @@ function Row({ title, sub, amount, kind, mark }: {
   )
 }
 
-// Cofre com a barra da meta: âmbar até atingir e verde quando atinge, como no app.
 function Vault({ name, detail, percent, reached = false }: { name: string; detail: string; percent: number; reached?: boolean }) {
   return (
     <div className="px-1 py-1.5">
@@ -79,8 +76,7 @@ function Choice({ label, on = false, lang }: { label: string; on?: boolean; lang
   )
 }
 
-// Fatias da rosca de exemplo: as cores da escala de categorias dos Relatórios. O círculo tem
-// perímetro 100, então o valor é o comprimento do traço, e cada fatia começa onde a anterior acabou.
+// O círculo tem perímetro 100: o valor é o comprimento do traço.
 const SLICES = [
   { key: 'reportsHome', value: 38, start: 0, color: 'var(--color-category-1)' },
   { key: 'reportsFood', value: 24, start: 38, color: 'var(--color-category-3)' },
@@ -88,20 +84,18 @@ const SLICES = [
   { key: 'reportsOther', value: 18, start: 82, color: 'var(--color-category-7)' },
 ] as const
 
-// Exemplo do simulador, calculado com a mesma conta do app: R$ 500 por mês, 0,8% ao mês, 10 anos.
-// A taxa é só de exemplo: no app, quem informa é a pessoa.
+// Calculado com a mesma conta do app.
 const SIMULATION = simulate({ initial: 0, monthly: 500, rate: 0.8, rateUnit: 'month', months: 120 })
 const SIMULATION_TOTAL = SIMULATION.ok ? SIMULATION.total : 0
 const SIMULATION_CONTRIBUTED = SIMULATION.ok ? SIMULATION.contributed : 0
-// Pontos do gráfico (um por ano) numa caixa de 100 x 40, com o total mais alto no topo.
 const SIMULATION_LINES = SIMULATION.ok
   ? (['total', 'contributed'] as const).map((key) => SIMULATION.points
     .map((point, index) => `${(index / (SIMULATION.points.length - 1)) * 100},${40 - (point[key] / SIMULATION_TOTAL) * 36}`)
     .join(' '))
   : ['', '']
 
-// Recursos: a seção fica presa na tela e a trilha anda de lado com a rolagem (useLandingMotion).
-// No celular ou com movimento reduzido (data-static), vira uma lista com rolagem lateral comum.
+// Presa na tela, a trilha anda de lado com a rolagem; no celular ou com movimento reduzido, vira
+// uma rolagem lateral comum.
 export function FeatureTour({ tourRef, trackRef }: { tourRef: RefObject<HTMLElement | null>; trackRef: RefObject<HTMLDivElement | null> }) {
   const { t } = useTranslation(['landing', 'common'])
 

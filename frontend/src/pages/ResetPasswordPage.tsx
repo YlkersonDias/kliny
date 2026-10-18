@@ -5,7 +5,6 @@ import { useAuth } from '../auth/useAuth'
 import { TokenPasswordPage } from '../components/auth/TokenPasswordPage'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-// Troca de senha pelo link do e-mail de "Esqueci minha senha".
 export default function ResetPasswordPage() {
   const { t } = useTranslation('auth')
   usePageTitle(t('reset.title'))

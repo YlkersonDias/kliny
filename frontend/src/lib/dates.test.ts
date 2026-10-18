@@ -14,7 +14,6 @@ describe('fuso dos testes', () => {
 
 describe('today', () => {
   it('usa a data local, e não a UTC', () => {
-    // 23h30 de 31/01 no Brasil já é 01/02 em UTC.
     vi.useFakeTimers()
     vi.setSystemTime(new Date(2026, 0, 31, 23, 30))
     expect(new Date().toISOString().slice(0, 10)).toBe('2026-02-01')
@@ -95,7 +94,6 @@ describe('formatLongDate', () => {
 describe('formatTimestampDate', () => {
   it('converte o instante UTC para a data local (UTC-3)', () => {
     expect(formatTimestampDate('2026-10-05T17:57:31.792524Z')).toBe('05/10/2026')
-    // 01h30 de 06/10 em UTC ainda é 22h30 de 05/10 no Brasil.
     expect(formatTimestampDate('2026-10-06T01:30:00Z')).toBe('05/10/2026')
     expect(formatTimestampDate('2026-10-06T03:00:00Z')).toBe('06/10/2026')
   })

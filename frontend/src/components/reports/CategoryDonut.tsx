@@ -2,14 +2,10 @@ import { Cell, Pie, PieChart, ResponsiveContainer, type PieLabelRenderProps } fr
 import type { CategorySlice } from '../../lib/categoryChart'
 import { formatMoney } from '../../lib/money'
 
-// Carregado sob demanda (React.lazy). Só visual: o ChartFigure o esconde do leitor de tela.
-// As fatias se diferenciam pelo número (selo em surface com número foreground: 17:1 no claro,
-// 14:1 no escuro), pela ordem (horário a partir do topo, do maior para o menor) e pelo traço
-// surface entre elas; a cor
-// da escala só reforça a posição. "Outras" usa hachura neutra.
+// As fatias se diferenciam pelo número, pela ordem e pelo traço entre elas: a cor só reforça.
 
 const RADIAN = Math.PI / 180
-// Fatias menores que isso ficam sem selo (o número continua na legenda).
+// Abaixo disso, sem selo (o número continua na legenda).
 const MIN_BADGE_PERCENT = 0.05
 
 function Badge(props: PieLabelRenderProps) {
@@ -50,8 +46,7 @@ export default function CategoryDonut({ slices, total, totalLabel }: { slices: C
             stroke="var(--color-surface)"
             strokeWidth={2}
             isAnimationActive={false}
-            // O Pie vem com tabindex 0 mesmo com accessibilityLayer={false}: dentro do aria-hidden,
-            // o foco cairia num elemento que o leitor de tela não anuncia.
+            // O Pie vem com tabindex 0 mesmo sem accessibilityLayer: seria focável dentro do aria-hidden.
             rootTabIndex={-1}
             label={Badge}
             labelLine={false}

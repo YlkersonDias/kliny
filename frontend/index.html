@@ -8,7 +8,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <meta name="theme-color" content="#12132A" />
     <meta name="description" content="Organize receitas, gastos e cofres num lugar só. Grátis, sem anúncios e sem vender seus dados." />
-    <!-- Pré-visualização do link (WhatsApp e outras redes, 8.6). A imagem precisa de endereço completo. -->
+    <!-- A imagem do og:image precisa de endereço completo. -->
     <meta property="og:type" content="website" />
     <meta property="og:site_name" content="%APP_NAME%" />
     <meta property="og:url" content="https://kliny.app.br/" />
@@ -22,10 +22,8 @@
     <meta name="twitter:card" content="summary_large_image" />
     <title>%APP_NAME%</title>
     <script>
-      // Aplica o tema antes do React, para a tela não piscar no tema errado. Mesma regra e
-      // mesma chave de src/lib/theme.ts: mudou lá, mudar aqui.
+      // Aplica o tema antes do React, para a tela não piscar. Mesma regra de src/lib/theme.ts.
       (function () {
-        // Padrão: escuro (sem preferência guardada ou com localStorage bloqueado).
         var preference = 'dark'
         try {
           var stored = localStorage.getItem('ui.theme')
@@ -34,16 +32,13 @@
         var dark = preference === 'dark' ||
           (preference === 'system' && window.matchMedia('(prefers-color-scheme: dark)').matches)
         document.documentElement.dataset.theme = dark ? 'dark' : 'light'
-        // Cor da barra do navegador e do app instalado: THEME_COLORS de src/lib/theme.ts.
         var color = document.querySelector('meta[name="theme-color"]')
         if (color) color.setAttribute('content', dark ? '#12132A' : '#E0E0EE')
       })()
     </script>
     <script>
-      // Idioma da página antes do React (leitores de tela e hifenização). Mesma regra e mesma chave
-      // de src/lib/language.ts: mudou lá, mudar aqui. Padrão: português.
-      // Num <script> separado do tema: sem ponto e vírgula, duas funções "(function () {...})()"
-      // seguidas viram uma chamada só, e a segunda quebra.
+      // Mesma regra de src/lib/language.ts. Num <script> separado: duas "(function () {...})()"
+      // seguidas sem ponto e vírgula viram uma chamada só.
       (function () {
         var language = 'pt-BR'
         try {

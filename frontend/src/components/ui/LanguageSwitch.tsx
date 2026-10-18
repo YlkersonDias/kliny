@@ -3,10 +3,7 @@ import { useLanguage } from '../../language/useLanguage'
 
 const SWITCH_ID = 'trocar-idioma'
 
-// Botão do login e do cadastro que troca para o outro idioma. Mostra o nome do idioma de destino
-// escrito nele mesmo ("English" ou "Português", com lang), para quem não lê o atual. O nome
-// acessível é o próprio texto visível. Depois da troca a tela remonta e o foco volta para cá.
-// Mesma altura e cores do ThemeToggle com onSoft (foreground sobre o lilás).
+// O nome do idioma de destino escrito nele mesmo, para quem não lê o atual.
 export function LanguageSwitch({ className = '' }: { className?: string }) {
   const { language, setLanguage } = useLanguage()
   const target: Language = language === 'pt-BR' ? 'en-US' : 'pt-BR'

@@ -6,8 +6,7 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Importação de extrato (8.3). O usuário vem sempre do token. O corpo pode chegar a 1 MB
-// (1.000 linhas), acima dos 64 kB que o nginx aceita nos outros endereços.
+// O corpo pode chegar a 1 MB (1.000 linhas), acima dos 64 kB dos outros endereços no nginx.
 [ApiController]
 [Authorize]
 [Route("api/imports")]

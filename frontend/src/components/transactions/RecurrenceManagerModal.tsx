@@ -14,8 +14,7 @@ import { Spinner } from '../ui/Spinner'
 import { InstallmentSection } from './InstallmentSection'
 import { TransactionFormModal } from './TransactionFormModal'
 
-// Lançamentos recorrentes (8.5a: editar, pausar, retomar e apagar) e compras parceladas (8.5b:
-// apagar todas as parcelas ou só as futuras). Os já lançados ficam em Movimentações e se editam lá, um a um.
+// Os já lançados ficam em Movimentações e se editam lá, um a um.
 export function RecurrenceManagerModal({ onClose }: { onClose: () => void }) {
   const { t } = useTranslation(['transactions', 'common'])
   const recurrences = useRecurrences()

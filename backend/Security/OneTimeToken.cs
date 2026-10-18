@@ -3,8 +3,7 @@ using System.Text;
 
 namespace Backend.Security;
 
-// Token de link mandado por e-mail (troca de senha e confirmação de cadastro): 256 bits aleatórios
-// em Base64 URL (43 caracteres). O banco guarda só o SHA-256 em hex: quem lê o banco ou um backup
+// 256 bits aleatórios em Base64 URL. O banco guarda só o SHA-256: quem lê o banco ou um backup
 // não consegue usar o link.
 public static class OneTimeToken
 {

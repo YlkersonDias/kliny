@@ -6,10 +6,8 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// Regra 8 de "Segurança (obrigatória)": toda migration precisa de Down testado. Num banco
-// descartável, sobe as migrations uma a uma guardando o esquema depois de cada uma, desce uma a
-// uma (com dados nas tabelas) conferindo que o esquema volta ao de antes, e sobe tudo de novo.
-// Também confere que o modelo do EF não tem mudança sem migration.
+// Sobe as migrations uma a uma, desce todas com dados conferindo que o esquema volta ao de antes, e
+// confere que o modelo do EF não tem mudança sem migration.
 public class MigrationsTests : IAsyncLifetime
 {
     private static readonly MySqlServerVersion ServerVersion = new(new Version(8, 4, 0));
@@ -55,7 +53,6 @@ public class MigrationsTests : IAsyncLifetime
         var migrations = db.Database.GetMigrations().ToList();
         Assert.NotEmpty(migrations);
 
-        // Esquema antes de qualquer migration (o banco ainda nem existe) e depois de cada uma.
         var schemas = new List<string> { await SchemaAsync() };
         foreach (var migration in migrations)
         {
@@ -66,7 +63,6 @@ public class MigrationsTests : IAsyncLifetime
         Assert.False(db.Database.HasPendingModelChanges(), "O modelo do EF tem mudança sem migration.");
         await InsertSampleDataAsync();
 
-        // Desce uma por uma, com dados, e confere o esquema anterior a cada passo.
         for (var i = migrations.Count - 1; i >= 0; i--)
         {
             var target = i == 0 ? Migration.InitialDatabase : migrations[i - 1];
@@ -79,10 +75,10 @@ public class MigrationsTests : IAsyncLifetime
         Assert.Equal(migrations, await db.Database.GetAppliedMigrationsAsync(Ct));
     }
 
-    // Uma linha em cada tabela, para os Down rodarem com dados (como num banco de verdade).
+    // Uma linha em cada tabela, para os Down rodarem com dados.
     private async Task InsertSampleDataAsync()
     {
-        // AllowUserVariables: sem ele, o MySqlConnector leria @user como parâmetro.
+        // Sem AllowUserVariables, o MySqlConnector leria @user como parâmetro.
         var connectionString = new MySqlConnectionStringBuilder(_connectionString!) { AllowUserVariables = true }.ConnectionString;
         await using var connection = new MySqlConnection(connectionString);
         await connection.OpenAsync(Ct);
@@ -116,8 +112,6 @@ public class MigrationsTests : IAsyncLifetime
         await command.ExecuteNonQueryAsync(Ct);
     }
 
-    // Colunas, índices e chaves estrangeiras do banco de teste, em texto comparável. Só consultas
-    // parametrizadas ao information_schema; o histórico de migrations fica de fora.
     private async Task<string> SchemaAsync()
     {
         var server = new MySqlConnectionStringBuilder(_connectionString!) { Database = "" }.ConnectionString;

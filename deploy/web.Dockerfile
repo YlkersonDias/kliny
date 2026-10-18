@@ -1,5 +1,4 @@
-# Frontend do Kliny (S.7): o build do Vite servido pelo nginx, que também repassa /api para a
-# API. Contexto: a raiz do repositório. O nginx roda sem root (imagem nginx-unprivileged, porta 8080).
+# Contexto: a raiz do repositório. O nginx roda sem root (nginx-unprivileged, porta 8080).
 
 FROM node:24-alpine AS build
 WORKDIR /src

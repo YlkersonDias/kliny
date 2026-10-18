@@ -1,7 +1,5 @@
-// Chave Idempotency-Key do depósito e da retirada (regra 18 de "Segurança (obrigatória)"):
-// um UUID v4 por intenção de operação. Reenviar com a mesma chave não cria um segundo lançamento.
-// O crypto.randomUUID só existe em contexto seguro (HTTPS ou localhost); fora dele, o UUID é
-// montado com crypto.getRandomValues, que existe em todo lugar.
+// Um UUID v4 por intenção de operação. O crypto.randomUUID só existe em contexto seguro (HTTPS ou
+// localhost); fora dele, o UUID é montado com crypto.getRandomValues.
 export interface RandomSource {
   getRandomValues(array: Uint8Array<ArrayBuffer>): Uint8Array<ArrayBuffer>
   randomUUID?: () => string

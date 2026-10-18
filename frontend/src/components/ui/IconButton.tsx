@@ -2,15 +2,13 @@ import { Icon } from './Icon'
 
 interface IconButtonProps {
   icon: 'edit' | 'trash'
-  // Texto do leitor de tela e da dica ao passar o mouse; diz o que e de quem ("Apagar Mercado de 02/10/2026").
+  // Diz o que e de quem ("Apagar Mercado de 02/10/2026").
   label: string
   onClick: () => void
-  // Só posição e margem (o tamanho e as cores são fixos).
   className?: string
 }
 
-// Botão só com ícone. Alvo de toque de 44 px no celular (o recomendado, acima do mínimo de 24 px
-// do WCAG 2.2) e 32 px a partir do md, onde o ponteiro é mais preciso.
+// 44 px no celular e 32 px a partir do md, onde o ponteiro é mais preciso.
 export function IconButton({ icon, label, onClick, className = '' }: IconButtonProps) {
   return (
     <button

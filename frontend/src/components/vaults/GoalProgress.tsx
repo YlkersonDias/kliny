@@ -8,9 +8,7 @@ interface GoalProgressProps {
   className?: string
 }
 
-// Barra em âmbar (vault só em barras e ícones) e, embaixo, a meta e o percentual em muted. O valor
-// guardado não se repete aqui: nos três lugares (cartão, detalhe e Dashboard) ele já aparece em
-// destaque. A linha fica acessível (alguns leitores pulam a barra no modo de leitura).
+// O valor guardado não se repete: onde a barra aparece, ele já está em destaque.
 export function GoalProgress({ balance, goal, className = '' }: GoalProgressProps) {
   const { t } = useTranslation('vaults')
   if (goal === null) return <p className={`text-sm text-muted ${className}`}>{t('goal.none')}</p>
@@ -29,8 +27,7 @@ export function GoalProgress({ balance, goal, className = '' }: GoalProgressProp
           : t('goal.progressValue', { percent: progress.percent, goal: formatMoney(goal) })}
         className="h-2 overflow-hidden rounded-full bg-background"
       >
-        {/* Âmbar até atingir; verde (income) quando atinge. Exceção à regra do âmbar de cofre,
-            decidida pelo usuário (ver "Exceções de cor dos cofres" no CLAUDE.md). */}
+        {/* Âmbar até atingir; verde quando atinge. */}
         <div className={`h-full rounded-full ${progress.reached ? 'bg-income' : 'bg-vault'}`} style={{ width: `${progress.percent}%` }} />
       </div>
       <p className="mt-1.5 flex flex-wrap justify-between gap-x-3 text-sm text-muted tabular-nums">

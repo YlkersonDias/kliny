@@ -46,8 +46,7 @@ public class VaultService(AppDbContext db) : IVaultService
         if (await GetBalanceAsync(vault.Id) != 0)
             throw new ConflictException(Messages.VaultHasBalance);
 
-        // Com saldo zero, depósitos e retiradas se anulam e os relatórios já os ignoram,
-        // então apagá-los não muda os totais da conta. O histórico do cofre se perde.
+        // Com saldo zero, as operações se anulam: apagá-las não muda os totais da conta.
         await db.Transactions.Where(t => t.VaultId == vault.Id).ExecuteDeleteAsync();
         db.Vaults.Remove(vault);
         await db.SaveChangesAsync();
@@ -64,7 +63,7 @@ public class VaultService(AppDbContext db) : IVaultService
     private async Task<VaultOperationResult> OperateAsync(
         int userId, int id, VaultOperationRequest request, string? idempotencyKey, bool isWithdrawal)
     {
-        // Obrigatória: sem ela, um envio repetido (falha de rede, clique duplo) gravaria duas vezes.
+        // Obrigatória: sem ela, um envio repetido gravaria duas vezes.
         if (string.IsNullOrEmpty(idempotencyKey))
             throw new BusinessRuleException(Messages.IdempotencyKeyRequired);
         if (!IdempotencyKey.IsValid(idempotencyKey))
@@ -72,20 +71,17 @@ public class VaultService(AppDbContext db) : IVaultService
 
         var amount = request.Amount!.Value;
         var date = request.Date!.Value;
-        // Depósito é negativo (sai da conta); retirada é positiva (volta para a conta).
         var signedAmount = isWithdrawal ? amount : -amount;
 
         await using var dbTransaction = await db.Database.BeginTransactionAsync();
-        // Depósito: trava a conta (linha do usuário) antes do cofre, para dois depósitos ao mesmo
-        // tempo, mesmo em cofres diferentes, não passarem juntos pela checagem do saldo da conta.
-        // Só o depósito trava o usuário, e sempre antes do cofre: a ordem é sempre a mesma.
+        // Depósito trava a conta antes do cofre, para depósitos simultâneos (mesmo em cofres
+        // diferentes) não passarem juntos pela checagem de saldo. A ordem das travas é sempre a mesma.
         if (!isWithdrawal)
             await db.Database.ExecuteSqlAsync($"SELECT Id FROM Users WHERE Id = {userId} FOR UPDATE");
         var vault = await LockOwnedAsync(userId, id);
 
-        // Envio repetido: devolve o que já foi gravado, antes de conferir saldos (uma retirada que
-        // esvaziou o cofre seria recusada na repetição). A consulta vem depois das travas, então
-        // enxerga o que uma requisição simultânea com a mesma chave acabou de gravar.
+        // Repetição: devolve o que já foi gravado, antes de conferir saldos. Depois das travas, para
+        // enxergar o que uma requisição simultânea com a mesma chave acabou de gravar.
         if (await FindByKeyAsync(userId, idempotencyKey) is { } previous)
             return await ReplayAsync(previous, vault.Id, signedAmount, date);
 
@@ -97,8 +93,7 @@ public class VaultService(AppDbContext db) : IVaultService
 
         if (!isWithdrawal)
         {
-            // Só deposita o que a conta tem na data do depósito: soma de tudo desde o início da conta
-            // até essa data, inclusive operações de cofre (o depósito tira dinheiro da conta).
+            // Saldo da conta na data do depósito, inclusive operações de cofre.
             var available = await GetAccountBalanceAsync(userId, date);
             if (amount > available)
             {
@@ -110,8 +105,6 @@ public class VaultService(AppDbContext db) : IVaultService
             }
         }
 
-        // A descrição padrão sai no idioma da requisição e fica gravada assim: quem troca de idioma
-        // pode ter, no mesmo extrato, descrições nos dois idiomas.
         var description = string.IsNullOrWhiteSpace(request.Description)
             ? string.Format(isWithdrawal ? Messages.WithdrawalDescription : Messages.DepositDescription, vault.Name)
             : request.Description.Trim();
@@ -132,7 +125,7 @@ public class VaultService(AppDbContext db) : IVaultService
         }
         catch (DbUpdateException ex) when (ex.IsUniqueViolation())
         {
-            // A mesma chave chegou ao mesmo tempo por outro cofre (travas diferentes) e gravou antes.
+            // A mesma chave chegou ao mesmo tempo por outro cofre e gravou antes.
             await dbTransaction.RollbackAsync();
             db.ChangeTracker.Clear();
             var winner = await FindByKeyAsync(userId, idempotencyKey) ?? throw new InvalidOperationException(
@@ -150,9 +143,7 @@ public class VaultService(AppDbContext db) : IVaultService
         db.Transactions.AsNoTracking()
             .FirstOrDefaultAsync(t => t.UserId == userId && t.IdempotencyKey == idempotencyKey);
 
-    // A mesma chave só vale para a mesma operação: mesmo cofre, mesmo valor com o mesmo sinal
-    // (depósito ou retirada) e mesma data. A descrição não entra: a padrão depende do idioma.
-    // O saldo devolvido é o atual do cofre, que pode ter mudado desde o envio original.
+    // A chave só vale para a mesma operação (cofre, valor com sinal e data); a descrição não entra.
     private async Task<VaultOperationResult> ReplayAsync(
         Transaction previous, int vaultId, decimal signedAmount, DateOnly date)
     {
@@ -167,29 +158,23 @@ public class VaultService(AppDbContext db) : IVaultService
     private static TransactionResponse ToResponse(Transaction transaction) =>
         new(transaction.Id, transaction.Description, transaction.Amount, transaction.Date, null, null, transaction.VaultId, null, null);
 
-    // Trava a linha do cofre até o fim da transação de banco. Duas retiradas simultâneas
-    // passariam juntas pela checagem de saldo; com a trava, a segunda espera a primeira
-    // terminar e já enxerga o saldo atualizado.
-    // A consulta não pode ser composta (Where, FirstOrDefault...): o EF a colocaria numa
-    // subconsulta, e o FOR UPDATE precisa ficar no SELECT externo.
+    // Trava a linha do cofre até o fim da transação: sem ela, duas retiradas simultâneas passariam
+    // juntas pela checagem de saldo. Não pode ser composta: o FOR UPDATE precisa ficar no SELECT de fora.
     private async Task<Vault> LockOwnedAsync(int userId, int id)
     {
         var vaults = await db.Vaults
             .FromSql($"SELECT * FROM Vaults WHERE Id = {id} AND UserId = {userId} FOR UPDATE")
-            // O filtro global (S.6b) poria este SQL numa subconsulta e o FOR UPDATE deixaria de ficar no
-            // SELECT de fora. O dono já está filtrado no próprio SQL.
+            // O filtro global poria o SQL numa subconsulta; o dono já está filtrado no próprio SQL.
             .IgnoreQueryFilters()
             .ToListAsync();
 
         return vaults.SingleOrDefault() ?? throw new NotFoundException(Messages.VaultNotFound);
     }
 
-    // Saldo = soma dos valores do cofre com o sinal invertido.
     private async Task<decimal> GetBalanceAsync(int vaultId) =>
         -(await db.Transactions.Where(t => t.VaultId == vaultId).SumAsync(t => (decimal?)t.Amount) ?? 0m);
 
-    // Saldo da conta no fim do dia: soma de todos os valores até a data (cumulativo, não reseta
-    // por mês). É o mesmo cálculo do accountBalance do relatório de resumo.
+    // Saldo da conta no fim do dia: cumulativo, o mesmo cálculo do resumo dos relatórios.
     private async Task<decimal> GetAccountBalanceAsync(int userId, DateOnly date) =>
         await db.Transactions.Where(t => t.UserId == userId && t.Date <= date).SumAsync(t => (decimal?)t.Amount) ?? 0m;
 
@@ -201,7 +186,6 @@ public class VaultService(AppDbContext db) : IVaultService
 
     private async Task SaveAsync(int userId, Vault vault)
     {
-        // A comparação usa a collation do banco, a mesma do índice único.
         if (await db.Vaults.AnyAsync(v => v.UserId == userId && v.Name == vault.Name && v.Id != vault.Id))
             throw new ConflictException(Messages.VaultDuplicateName);
 

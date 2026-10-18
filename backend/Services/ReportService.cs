@@ -5,14 +5,13 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
-// No banco, gasto e depósito em cofre são negativos. Aqui eles são devolvidos positivos.
+// No banco, gasto e depósito em cofre são negativos; aqui saem positivos.
 public class ReportService(AppDbContext db) : IReportService
 {
     public async Task<SummaryResponse> GetSummaryAsync(int userId, ReportPeriodQuery query)
     {
         var (from, to) = (query.From!.Value, query.To!.Value);
 
-        // No máximo 4 linhas: (cofre ou não) x (positivo ou não).
         var periodTotals = await db.Transactions
             .Where(t => t.UserId == userId && t.Date >= from && t.Date <= to)
             .GroupBy(t => new { IsVault = t.VaultId != null, IsPositive = t.Amount > 0 })
@@ -26,14 +25,14 @@ public class ReportService(AppDbContext db) : IReportService
         var income = PeriodTotal(isVault: false, isPositive: true);
         var expense = -PeriodTotal(isVault: false, isPositive: false);
 
-        // Saldos no dia "to", somando desde o primeiro lançamento.
+        // Saldos no dia "to", desde o primeiro lançamento.
         var balanceTotals = await db.Transactions
             .Where(t => t.UserId == userId && t.Date <= to)
             .GroupBy(t => t.VaultId != null)
             .Select(g => new { IsVault = g.Key, Total = g.Sum(t => t.Amount) })
             .ToListAsync();
 
-        // O depósito tira dinheiro da conta, então o saldo da conta soma também as operações de cofre.
+        // O depósito tira dinheiro da conta: o saldo da conta soma também as operações de cofre.
         var accountBalance = balanceTotals.Sum(r => r.Total);
         var vaultsBalance = -balanceTotals.Where(r => r.IsVault).Sum(r => r.Total);
 
@@ -89,8 +88,7 @@ public class ReportService(AppDbContext db) : IReportService
     {
         var (from, to) = (query.From!.Value, query.To!.Value);
 
-        // O banco agrupa sempre por dia; os meses são montados aqui. Isso evita depender da
-        // tradução de DateOnly.Year/Month pelo Pomelo, e o volume é pequeno (até ~3.650 dias).
+        // O banco agrupa por dia e os meses saem daqui, sem depender da tradução de DateOnly.Month pelo Pomelo.
         var daily = await InPeriod(userId, query)
             .GroupBy(t => t.Date)
             .Select(g => new
@@ -112,8 +110,8 @@ public class ReportService(AppDbContext db) : IReportService
             .GroupBy(d => bucketOf(d.Date))
             .ToDictionary(g => g.Key, g => (Income: g.Sum(d => d.Income), Expense: g.Sum(d => d.Expense)));
 
-        // Todos os períodos entre from e to, inclusive os sem movimento, para o gráfico não pular pontos.
-        // Para no último período em vez de calcular o seguinte, que estouraria perto de DateOnly.MaxValue.
+        // Todos os períodos, inclusive os sem movimento. Para no último em vez de calcular o seguinte,
+        // que estouraria perto de DateOnly.MaxValue.
         var points = new List<TimelinePointResponse>();
         var last = bucketOf(to);
         for (var period = bucketOf(from); ; period = next(period))
@@ -127,7 +125,7 @@ public class ReportService(AppDbContext db) : IReportService
         return points;
     }
 
-    // Receitas e gastos do período: operações de cofre são transferências internas e ficam de fora.
+    // Operações de cofre são transferências internas e ficam de fora.
     private IQueryable<Transaction> InPeriod(int userId, ReportPeriodQuery query)
     {
         var (from, to) = (query.From!.Value, query.To!.Value);

@@ -3,11 +3,10 @@ import { currentLanguage } from '../i18n'
 import { formatDate, formatMonthYear } from './dates'
 import type { Language } from './language'
 
-// Linha do tempo dos Relatórios: expense já vem positivo (convenção dos relatórios).
+// expense já vem positivo (convenção dos relatórios).
 
 const toCents = (value: number) => Math.round(value * 100)
 
-// Rótulo completo do período ("05/10/2026" ou "Outubro de 2026"), para tabela e resumo.
 export function periodLabel(period: string, grouping: TimelineGrouping): string {
   return grouping === 'day' ? formatDate(period) : formatMonthYear(period)
 }
@@ -18,7 +17,6 @@ const SHORT_MONTHS: Record<Language, string[]> = {
   'en-US': ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'],
 }
 
-// Rótulo curto do eixo ("05/10" ou "out/26"; em inglês, "10/05" ou "Oct/26").
 export function axisLabel(period: string, grouping: TimelineGrouping, language: Language = currentLanguage()): string {
   const day = period.slice(8, 10)
   const month = period.slice(5, 7)
@@ -29,9 +27,8 @@ export function axisLabel(period: string, grouping: TimelineGrouping, language: 
 export interface TimelineSummary {
   income: number
   expense: number
-  // Período de maior gasto; null sem gasto. Empate: o primeiro.
+  // Empate: o primeiro.
   maxExpense: { label: string; expense: number } | null
-  // Períodos com algum movimento.
   activePeriods: number
 }
 

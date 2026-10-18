@@ -3,18 +3,16 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Recurrences;
 
-// Nova recorrência mensal (8.5a). O dia de todos os meses é o da StartDate.
+// O dia de todos os meses é o da StartDate.
 public class RecurrenceCreateRequest : IValidatableObject
 {
-    // A primeira ocorrência pode ser de até um ano atrás (o resto viria como um ano de lançamentos de
-    // uma vez) e de até um ano à frente.
+    // Até um ano atrás (senão viria uma enxurrada de lançamentos de uma vez) e um ano à frente.
     public const int MaxStartDistanceDays = 366;
 
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionRequired))]
     [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DescriptionMaxLength))]
     public string Description { get; set; } = string.Empty;
 
-    // Positivo = receita; negativo = gasto.
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.AmountRequired))]
     public decimal? Amount { get; set; }
 
@@ -37,7 +35,7 @@ public class RecurrenceCreateRequest : IValidatableObject
 
         if (StartDate is { } start)
         {
-            // O servidor não sabe o fuso de quem usa: a distância é contada da data UTC, com um dia de folga.
+            // O servidor não sabe o fuso de quem usa: conta da data UTC, com um dia de folga.
             var today = DateOnly.FromDateTime(DateTime.UtcNow);
             if (start < today.AddDays(-MaxStartDistanceDays - 1) || start > today.AddDays(MaxStartDistanceDays + 1))
                 yield return new ValidationResult(Messages.RecurrenceStartOutOfRange, [nameof(StartDate)]);

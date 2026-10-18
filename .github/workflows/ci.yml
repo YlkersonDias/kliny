@@ -1,7 +1,5 @@
-# Build e testes a cada push na main e em cada pull request.
 # As actions ficam fixadas pelo SHA do commit (a tag pode ser movida pelo dono); o Dependabot
-# (.github/dependabot.yml) abre um PR quando sai versão nova, com o número no comentário.
-# Localmente o Smart App Control bloqueia o Backend.dll recompilado; aqui ele não existe.
+# atualiza o SHA e a versão no comentário.
 name: CI
 
 on:
@@ -27,8 +25,7 @@ jobs:
         with:
           fetch-depth: 0
 
-      # Binário oficial do gitleaks, fixado pelo digest da imagem. A exceção dos falsos positivos
-      # (valores de exemplo e de teste) fica no .gitleaks.toml; qualquer outro achado quebra o CI.
+      # Imagem oficial do gitleaks, fixada pelo digest. Os falsos positivos ficam no .gitleaks.toml;
       # --redact: o valor achado nunca aparece no log.
       - name: Procurar segredos no histórico
         run: >-
@@ -40,8 +37,7 @@ jobs:
     name: Backend (build e testes)
     runs-on: ubuntu-latest
     timeout-minutes: 15
-    # MySQL descartável, só para os testes de dono do recurso e de cofre (backend.Tests/MySqlApi.cs).
-    # A senha vale só para este container, que some no fim do job: não é segredo.
+    # MySQL descartável para os testes: a senha vale só para este container.
     services:
       mysql:
         image: mysql:8.4
@@ -67,9 +63,8 @@ jobs:
       - name: Compilar
         run: dotnet build Kliny.sln --no-restore --configuration Release
 
-      # Sem user-secrets. Os testes com MySQL criam e apagam o próprio banco (kliny_test_<guid>) e um
-      # usuário só de DML para a API (o root daqui só roda as migrations e cria esse usuário);
-      # sem esta variável no CI eles falham, para não passarem pulados sem ninguém ver.
+      # Os testes com MySQL criam e apagam o próprio banco e um usuário só de DML para a API.
+      # Sem esta variável no CI eles falham, para não passarem pulados sem ninguém ver.
       - name: Testar
         run: dotnet test --solution Kliny.sln --no-build --configuration Release
         env:
@@ -103,7 +98,6 @@ jobs:
       - name: Compilar
         run: npm run build
 
-      # S.4: a <meta> da CSP vem antes dos scripts e tem os hashes certos dos scripts inline do build.
       - name: Conferir a CSP do build
         run: npm run check:csp
 
@@ -114,7 +108,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
-      # S.7: as imagens do deploy no PC (deploy/) continuam montando. Nada é publicado: só o build.
+      # Monta as imagens do deploy sem publicar nada.
       - name: Conferir o docker-compose.yml
         working-directory: deploy
         run: docker compose -f docker-compose.yml -f docker-compose.local.yml --profile migrate --profile tunnel config --quiet

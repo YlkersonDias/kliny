@@ -5,8 +5,7 @@ import { formatMoney, formatOutflow, formatSigned } from '../../lib/money'
 import { Icon } from '../ui/Icon'
 import { Mascot } from './Mascot'
 
-// Cartão "guardado" em volta da toca: a posição vem de fora; a flutuação fica num filho, para o
-// parallax (translate) e a flutuação (transform) não se anularem.
+// A flutuação fica num filho, para o parallax (translate) e a flutuação (transform) não se anularem.
 function Stash({ position, float, parallax, children }: { position: string; float: string; parallax: number; children: ReactNode }) {
   return (
     <div className={`absolute ${position}`} data-parallax={parallax}>
@@ -43,7 +42,6 @@ function Entry({ kind, title, sub, amount }: { kind: 'income' | 'expense'; title
   )
 }
 
-// Abertura: o título e, ao lado, a toca lilás com o hamster e os cartões que ele guarda.
 // Os cartões são exemplos visuais (aria-hidden): o texto da abertura já diz o que o app faz.
 export function HeroSection({ stageRef }: { stageRef: RefObject<HTMLDivElement | null> }) {
   const { t } = useTranslation('landing')

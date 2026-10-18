@@ -19,7 +19,7 @@ import { formatMoney } from '../lib/money'
 import { PAGE_SIZE, parsePage } from '../lib/transactionFilters'
 import { goalProgress } from '../lib/vaults'
 
-// Id da URL: inteiro positivo dentro do int do banco. Qualquer outra coisa é "não encontrado".
+// Inteiro positivo dentro do int do banco; qualquer outra coisa é "não encontrado".
 function parseId(value: string | undefined): number | null {
   if (!value || !/^[1-9]\d{0,9}$/.test(value)) return null
   const id = Number(value)
@@ -118,7 +118,6 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
             </span>
             <div className="min-w-0">
               <h1 className="break-words text-2xl font-semibold text-foreground">{vault.name}</h1>
-              {/* createdAt chega em UTC com "Z"; a data mostrada é a local. */}
               <p className="text-sm text-muted">{t('detail.createdAt', { date: formatTimestampDate(vault.createdAt) })}</p>
             </div>
           </div>
@@ -127,7 +126,6 @@ function VaultHeader({ vault, onDialog }: { vault: Vault; onDialog: (dialog: Vau
         </div>
         {reached && (
           <div className="flex items-center gap-3">
-            {/* Pequena e decorativa: aparece em toda visita a um cofre com a meta atingida. */}
             <picture className="shrink-0">
               <source srcSet="/mascote/kliny-meta-atingida-256.webp" type="image/webp" />
               <img

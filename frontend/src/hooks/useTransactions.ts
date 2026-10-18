@@ -12,12 +12,10 @@ export function useTransactions(query: TransactionQuery, { enabled = true }: { e
     queryKey: transactionKeys.list(query),
     queryFn: ({ signal }) => listTransactions(query, signal),
     enabled,
-    // Ao trocar de página ou filtro, a lista anterior fica na tela até a nova chegar.
     placeholderData: keepPreviousData,
   })
 }
 
-// Movimentações mudam também os relatórios (Dashboard e Relatórios).
 export function useInvalidateAfterChange() {
   const queryClient = useQueryClient()
   return () => Promise.all([

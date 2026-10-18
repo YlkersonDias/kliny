@@ -4,8 +4,7 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Dois usuários criados uma vez (o cadastro tem limite de 5 por hora por IP). Cada teste cria os
-// próprios cofres, para os saldos não se misturarem.
+// Usuários criados uma vez (o cadastro tem limite por IP); cada teste cria os próprios cofres.
 public sealed class IdempotencyFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -34,8 +33,6 @@ public sealed class IdempotencyFixture : IAsyncLifetime
     public ValueTask DisposeAsync() => Api.DisposeAsync();
 }
 
-// Regra 18 de "Segurança (obrigatória)": depósito e retirada repetidos com a mesma Idempotency-Key
-// geram um único lançamento.
 public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<IdempotencyFixture>
 {
     private const string Date = "2021-03-10";
@@ -61,7 +58,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
         {
             Content = JsonContent.Create(new { amount, date }),
         };
-        // Sem chave aqui, o cliente do MySqlApi põe uma nova (um envio, uma intenção).
+        // Sem chave aqui, o cliente do MySqlApi põe uma nova.
         if (key is not null)
             request.Headers.Add("Idempotency-Key", key);
         return await client.SendAsync(request, Ct);
@@ -107,7 +104,6 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
     [Fact]
     public async Task Retirada_repetida_depois_de_esvaziar_o_cofre_nao_e_recusada()
     {
-        // Sem conferir saldo na repetição: a primeira retirada levou tudo, e a repetição é a mesma.
         using var client = AsA();
         var vault = await CreateVaultAsync(client);
         (await Operate(client, vault, "deposit", 50m, null)).EnsureSuccessStatusCode();
@@ -141,7 +137,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
     [Fact]
     public async Task Mesma_chave_em_cofres_diferentes_ao_mesmo_tempo_grava_uma_vez()
     {
-        // Retiradas travam cofres diferentes, então correm juntas: quem perde esbarra no índice único.
+        // Cofres diferentes, travas diferentes: quem perde esbarra no índice único.
         using var client = AsA();
         for (var round = 0; round < 5; round++)
         {
@@ -219,7 +215,6 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
     [Fact]
     public async Task A_chave_de_outro_usuario_nao_devolve_o_lancamento_dele()
     {
-        // A chave é por usuário: B usando a chave de A cria o próprio lançamento, sem ver o de A.
         using var a = AsA();
         using var b = AsB();
         var vaultA = await CreateVaultAsync(a);
@@ -242,7 +237,7 @@ public class IdempotencyTests(IdempotencyFixture fixture) : IClassFixture<Idempo
     [InlineData("withdraw")]
     public async Task Sem_chave_responde_400_e_nao_grava(string operation)
     {
-        // A chave é obrigatória. Cliente sem o handler que põe uma chave nova em cada envio.
+        // Cliente sem o handler que põe uma chave em cada envio.
         using var client = AsA();
         using var withoutKeys = fixture.Api.Client(fixture.TokenA, idempotencyKeys: false);
         var vault = await CreateVaultAsync(client);

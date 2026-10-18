@@ -6,8 +6,6 @@ import { isGoogleEnabled } from '../lib/googleIdentity'
 
 const SECTIONS = ['use', 'browser', 'security', 'retention', 'rights', 'changes'] as const
 
-// Política de privacidade, pública (com e sem login). Descreve o que o Kliny faz de verdade; o
-// contato e o prazo das cópias de segurança vêm de PRIVACY (config/app.ts).
 export default function PrivacyPage() {
   const { t } = useTranslation('privacy')
   usePageTitle(t('title'))

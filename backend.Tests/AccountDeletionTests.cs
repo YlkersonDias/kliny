@@ -5,16 +5,12 @@ using MySqlConnector;
 
 namespace Backend.Tests;
 
-// Excluir a própria conta (POST /api/auth/delete-account): exige a senha atual, apaga todos os
-// dados da pessoa (inclusive cofres com histórico, que esbarrariam no RESTRICT da chave estrangeira)
-// e nada de outra pessoa. 4 cadastros nesta classe, dentro do limite de 5 por hora por IP.
 public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private const string Password = "senha12345";
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // Uma categoria com orçamento, uma recorrência já gerada, uma compra parcelada, uma regra de categoria, uma movimentação importada, uma receita com categoria, um cofre com depósito e retirada (histórico).
     private async Task<(string Token, int UserId)> SeedAsync(string email)
     {
         var token = await api.RegisterAsync(email);
@@ -24,7 +20,6 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
             new { description = "Salário", amount = 900m, date = "2021-05-01", categoryId = category }, Ct));
         using (var budget = await client.PutAsJsonAsync($"/api/budgets/{category}", new { amount = 500m }, Ct))
             budget.EnsureSuccessStatusCode();
-        // Recorrência com uma ocorrência já gerada (a movimentação aponta para a regra).
         var today = DateOnly.FromDateTime(DateTime.UtcNow);
         await IdOf(client.PostAsJsonAsync("/api/recurrences",
             new { description = "Aluguel", amount = -100m, startDate = today.ToString("yyyy-MM-dd"), categoryId = category }, Ct));
@@ -56,7 +51,7 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         return await client.PostAsJsonAsync("/api/auth/delete-account", new { password }, Ct);
     }
 
-    // Linhas da pessoa em cada tabela, lidas direto no banco (usuário só de DML da API, sem o filtro global).
+    // Direto no banco, sem o filtro global.
     private async Task<Dictionary<string, long>> RowsAsync(int userId)
     {
         await using var connection = new MySqlConnection(api.AppConnectionString);
@@ -86,7 +81,6 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         var (tokenB, userB) = await SeedAsync("excluir-b@kliny.test");
         var rowsOfB = await RowsAsync(userB);
 
-        // Senha errada: 400 e nada apagado.
         using (var wrong = await DeleteAsync(tokenA, "senha-errada"))
         {
             Assert.Equal(HttpStatusCode.BadRequest, wrong.StatusCode);
@@ -100,7 +94,6 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         Assert.All(await RowsAsync(userA), row => Assert.Equal(0, row.Value));
         Assert.Equal(rowsOfB, await RowsAsync(userB));
 
-        // O token de A deixa de valer, o de B continua.
         using (var clientA = api.Client(tokenA))
         using (var meA = await clientA.GetAsync("/api/auth/me", Ct))
             Assert.Equal(HttpStatusCode.Unauthorized, meA.StatusCode);
@@ -108,7 +101,6 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
         using (var meB = await clientB.GetAsync("/api/auth/me", Ct))
             Assert.Equal(HttpStatusCode.OK, meB.StatusCode);
 
-        // Login de A recusado, e o e-mail fica livre para um cadastro novo, vazio.
         using (var anonymous = api.Client())
         using (var login = await anonymous.PostAsJsonAsync("/api/auth/login", new { email = "excluir-a@kliny.test", password = Password }, Ct))
             Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
@@ -129,7 +121,6 @@ public class AccountDeletionTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.Equal(HttpStatusCode.BadRequest, wrong.StatusCode);
         }
 
-        // Bloqueado: nem a senha certa passa até o bloqueio acabar.
         using var blocked = await DeleteAsync(token, Password);
         Assert.Equal(HttpStatusCode.TooManyRequests, blocked.StatusCode);
         using var client = api.Client(token);

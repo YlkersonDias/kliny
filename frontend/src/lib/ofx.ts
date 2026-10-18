@@ -1,31 +1,25 @@
 import { isValidIsoDate } from './dates'
 import { MONEY_MAX } from './money'
 
-// Leitor de extrato OFX (8.3a), só no navegador: o arquivo nunca vai para a API, só as linhas
-// que a pessoa confirmar. Lê o OFX 1.x (SGML, em que as tags de valor não fecham) e o 2.x (XML),
-// de conta corrente e de cartão de crédito.
+// Leitor de extrato OFX 1.x (SGML) e 2.x (XML), só no navegador: o arquivo nunca vai para a API.
 
-// Mesmo limite da API (ImportRequest.MaxLines) e do corpo aceito pelo nginx (1 MB).
+// Mesmo limite da API e do corpo aceito pelo nginx.
 export const IMPORT_MAX_LINES = 1000
 export const OFX_MAX_BYTES = 1024 * 1024
 export const DESCRIPTION_MAX = 255
 
 export interface StatementLine {
-  // Banco e só os 4 últimos dígitos da conta ("341:4321"): separa contas sem guardar o número.
+  // Banco e só os 4 últimos dígitos da conta: separa contas sem guardar o número.
   source: string
-  // O FITID, identificador da transação no banco, quando existe.
   externalId: string | null
   date: string
-  // Com o sinal do banco: positivo entra, negativo sai.
   amount: number
   description: string
-  // Posição entre as linhas do arquivo com as mesmas partes da chave (1 na primeira).
   occurrence: number
 }
 
 export interface OfxResult {
   lines: StatementLine[]
-  // Linhas sem data ou valor válidos, ou com valor zero: ficam de fora.
   skipped: number
 }
 
@@ -39,8 +33,7 @@ export class OfxError extends Error {
   }
 }
 
-// Muitos bancos brasileiros gravam em Windows-1252 (às vezes dizendo outra coisa no cabeçalho).
-// Texto com acento em Windows-1252 quase nunca é UTF-8 válido, então tenta UTF-8 primeiro.
+// Muitos bancos gravam em Windows-1252, que quase nunca é UTF-8 válido: tenta UTF-8 primeiro.
 export function decodeStatement(bytes: Uint8Array): string {
   try {
     return new TextDecoder('utf-8', { fatal: true }).decode(bytes)
@@ -52,7 +45,6 @@ export function decodeStatement(bytes: Uint8Array): string {
 export function parseOfx(text: string): OfxResult {
   if (!/<OFX>/i.test(text)) throw new OfxError('notOfx')
 
-  // Cada extrato do arquivo (pode haver mais de uma conta); sem os blocos, o arquivo inteiro.
   const statements = [...text.matchAll(/<(CC)?STMTRS>([\s\S]*?)<\/(CC)?STMTRS>/gi)].map((m) => m[2])
   if (statements.length === 0) statements.push(text)
 
@@ -84,8 +76,7 @@ export function parseOfx(text: string): OfxResult {
   return { lines: withOccurrences(lines), skipped }
 }
 
-// A posição de cada linha entre as do arquivo com as mesmas partes da chave (ver ImportService.Key
-// na API): duas compras iguais no mesmo dia viram as linhas 1 e 2. Usada também pelo CSV.
+// Duas compras iguais no mesmo dia viram as linhas 1 e 2 (a mesma regra da chave na API).
 export function withOccurrences(lines: readonly Omit<StatementLine, 'occurrence'>[]): StatementLine[] {
   const seen = new Map<string, number>()
   return lines.map((line) => {
@@ -96,7 +87,6 @@ export function withOccurrences(lines: readonly Omit<StatementLine, 'occurrence'
   })
 }
 
-// "20261005", "20261005120000[-3:BRT]" e "2026-10-05" (alguns bancos fogem do padrão) viram "2026-10-05".
 export function parseOfxDate(raw: string): string | null {
   const digits = raw.trim().replace(/^(\d{4})-(\d{2})-(\d{2})/, '$1$2$3')
   const match = /^(\d{4})(\d{2})(\d{2})/.exec(digits)
@@ -105,8 +95,7 @@ export function parseOfxDate(raw: string): string | null {
   return isValidIsoDate(iso) ? iso : null
 }
 
-// O padrão é "-1234.56", mas há bancos que mandam "-1234,56" ou "1.234,56". Mais de duas casas só
-// se forem zeros ("-12.500" não é aceito; "-12.5000" é -12,50).
+// O padrão é "-1234.56", mas há bancos que mandam "-1234,56" ou "1.234,56".
 export function parseOfxAmount(raw: string): number | null {
   let text = raw.replace(/\s/g, '')
   if (text.includes(',')) {
@@ -132,7 +121,6 @@ function sourceOf(statement: string): string {
   return `${bank.slice(0, 20)}:${digits.slice(-4)}`
 }
 
-// MEMO e NAME juntos quando trazem coisas diferentes ("PIX ENVIADO - Fulano"); sem nenhum, o tipo.
 function describe(block: string): string {
   const name = clean(field(block, 'NAME') ?? '')
   const memo = clean(field(block, 'MEMO') ?? '')
@@ -147,7 +135,7 @@ function describe(block: string): string {
   return text.slice(0, DESCRIPTION_MAX).trim()
 }
 
-// O valor de uma tag: até o próximo "<" ou o fim da linha (no SGML a tag não fecha).
+// No SGML a tag de valor não fecha: o valor vai até o próximo "<" ou o fim da linha.
 function field(block: string, name: string): string | null {
   const match = new RegExp(`<${name}>([^<\\r\\n]*)`, 'i').exec(block)
   return match ? decodeEntities(match[1]).trim() : null

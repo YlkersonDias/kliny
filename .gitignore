@@ -10,7 +10,7 @@
 *.userosscache
 *.sln.docstates
 
-# --- Kliny: Ajustes para Frontend (Vite/React) ---
+# --- Kliny ---
 dist/
 dist-ssr/
 *.local
@@ -18,7 +18,7 @@ dist-ssr/
 .env.*
 !.env.example
 
-# Chaves dos backups (deploy/chave-backup): a pública fica só no PC; a privada nunca entra aqui.
+# Chaves dos backups: a privada nunca entra aqui.
 *.asc
 npm-debug.log*
 yarn-debug.log*
@@ -415,9 +415,7 @@ FodyWeavers.xsd
 *.sln.iml
 
 # Claude Code
-.claude/skills/
-.claude/settings.local.json
-# Claude Code: configurações e notas locais, nunca no Git.
+# Configurações e notas locais.
 .claude/
 CLAUDE.md
 CLAUDE.local.md

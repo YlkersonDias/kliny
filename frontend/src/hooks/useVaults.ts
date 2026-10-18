@@ -12,12 +12,11 @@ export const vaultKeys = {
   detail: (id: number) => ['vaults', 'detail', id] as const,
 }
 
-// A API ordena pela collation do banco; aqui a ordem segue o idioma da tela, como nas categorias.
+// A ordem segue o idioma da tela, e não a collation do banco.
 function sortByName(vaults: Vault[]): Vault[] {
   return [...vaults].sort((a, b) => a.name.localeCompare(b.name, currentLanguage()))
 }
 
-// Sem paginação: o GET /api/vaults traz todos os cofres do usuário.
 export function useVaults() {
   return useQuery({
     queryKey: vaultKeys.list,
@@ -42,7 +41,6 @@ export function useCreateVault() {
   })
 }
 
-// Renomear muda a descrição padrão só das próximas operações; as gravadas ficam como estão.
 export function useUpdateVault() {
   const queryClient = useQueryClient()
   return useMutation({
@@ -51,7 +49,6 @@ export function useUpdateVault() {
   })
 }
 
-// Depósito e retirada mudam o saldo do cofre, o da conta, o extrato e os relatórios.
 function useInvalidateAfterOperation() {
   const queryClient = useQueryClient()
   return () => Promise.all([
@@ -87,8 +84,7 @@ export function useDeleteVault() {
   const queryClient = useQueryClient()
   return useMutation({
     mutationFn: (id: number) => deleteVault(id),
-    // O detalhe é removido, e não invalidado: refazer a busca daria 404 na página que ainda está aberta.
-    // As invalidações não são esperadas, para quem chamou sair da página do cofre na mesma hora.
+    // Removido, e não invalidado: refazer a busca daria 404 na página que ainda está aberta.
     onSuccess: (_, id) => {
       queryClient.removeQueries({ queryKey: vaultKeys.detail(id) })
       void queryClient.invalidateQueries({ queryKey: vaultKeys.list })

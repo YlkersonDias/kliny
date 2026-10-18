@@ -1,7 +1,5 @@
-# Kliny em produção num PC com Docker (S.7). Comandos e passo a passo em deploy/README.md.
-# Nenhuma porta é publicada no PC: o único caminho de fora é o túnel da Cloudflare (cloudflared),
-# que conecta para fora e entrega os pedidos ao nginx (web) pela rede interna.
-# Os segredos vêm do deploy/.env (fora do Git), criado pelo deploy/criar-segredos.ps1.
+# Nenhuma porta é publicada: o único caminho de fora é o túnel da Cloudflare, que conecta para fora
+# e entrega os pedidos ao nginx pela rede interna. Os segredos vêm do deploy/.env (fora do Git).
 name: kliny
 
 x-hardening: &hardening
@@ -26,12 +24,11 @@ services:
       - ./mysql-init:/docker-entrypoint-initdb.d:ro
       - ${BACKUP_DIR:?defina no deploy/.env}:/backups
       - ./mysql-backup.sh:/kliny/backup.sh:ro
-      # Só a chave pública dos backups (cifra, mas não abre). A privada fica fora do PC.
+      # Só a chave pública dos backups: cifra, mas não abre.
       - ./chave-backup:/kliny/chave:ro
     networks: [kliny]
     healthcheck:
       # Pela rede (127.0.0.1), para não dar "pronto" durante a inicialização, que roda sem rede.
-      # O ping responde mesmo sem login.
       test: ["CMD", "mysqladmin", "ping", "-h", "127.0.0.1", "--silent"]
       interval: 5s
       timeout: 5s
@@ -47,8 +44,7 @@ services:
     security_opt:
       - no-new-privileges:true
     environment:
-      # SslMode=Required: a conexão com o MySQL é sempre cifrada (o MySQL 8.4 gera o certificado
-      # sozinho). Não confere o certificado: o MySQL só é alcançável pela rede interna do Docker.
+      # Sempre com TLS. O certificado não é conferido: o MySQL só é alcançável pela rede interna.
       MIGRATOR_CONNECTION: Server=mysql;Port=3306;Database=kliny;User=kliny_migrator;Password=${KLINY_MIGRATOR_PASSWORD};SslMode=Required;AllowPublicKeyRetrieval=true
     depends_on:
       mysql:
@@ -66,11 +62,10 @@ services:
       ASPNETCORE_ENVIRONMENT: Production
       ConnectionStrings__DefaultConnection: Server=mysql;Port=3306;Database=kliny;User=kliny_app;Password=${KLINY_APP_PASSWORD};SslMode=Required;AllowPublicKeyRetrieval=true
       Jwt__Key: ${JWT_KEY:?defina no deploy/.env}
-      # Só o nginx, nesta rede, pode informar o IP real e o HTTPS (ForwardedHeaders).
+      # Só o nginx, nesta rede, pode informar o IP real e o HTTPS.
       ForwardedHeaders__KnownNetworks__0: 172.30.0.0/24
       AllowedHosts: kliny.app.br;www.kliny.app.br;localhost
-      # Recuperação de senha: o link do e-mail aponta para o site (nunca para o Host da requisição).
-      # Sem RESEND_API_KEY no .env, nenhum e-mail é enviado.
+      # O link do e-mail aponta para o site, nunca para o Host da requisição.
       Email__AppUrl: https://kliny.app.br
       Email__ApiKey: ${RESEND_API_KEY:-}
     depends_on:
@@ -87,7 +82,7 @@ services:
     depends_on: [api]
     networks: [kliny]
 
-  # Só com o perfil "tunnel" (precisa do TUNNEL_TOKEN): docker compose --profile tunnel up -d
+  # Só com o perfil "tunnel": docker compose --profile tunnel up -d
   cloudflared:
     <<: *hardening
     image: cloudflare/cloudflared:2026.10.0

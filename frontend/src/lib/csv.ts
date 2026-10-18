@@ -2,28 +2,24 @@ import { normalizeForMatch } from './categoryRules'
 import { isValidIsoDate } from './dates'
 import { DESCRIPTION_MAX, parseOfxAmount, withOccurrences, type StatementLine } from './ofx'
 
-// Leitor de extrato CSV (8.3b), só no navegador. Cada banco monta o arquivo de um jeito, então a
-// pessoa diz qual coluna é o quê (CsvMapping); as colunas de layouts conhecidos vêm sugeridas
-// pelo nome do cabeçalho (guessMapping) e a escolha fica guardada por layout (csvMappingStore).
+// Leitor de extrato CSV, só no navegador. A pessoa diz qual coluna é o quê; as de layouts
+// conhecidos vêm sugeridas pelo cabeçalho.
 
 export type DateFormat = 'dmy' | 'mdy' | 'ymd'
 
 export interface CsvMapping {
-  // Índice da linha do cabeçalho (ou da primeira linha de dados, sem cabeçalho).
   headerRow: number
   hasHeader: boolean
   date: number
   dateFormat: DateFormat
   description: number
-  // Complemento opcional, juntado à descrição ("Pix enviado - Maria").
   description2: number | null
-  // Uma coluna com sinal, ou duas (crédito e débito), como alguns bancos exportam.
+  // Uma coluna com sinal, ou duas (crédito e débito).
   amount: number | null
   credit: number | null
   debit: number | null
-  // Identificador da movimentação no banco, quando o arquivo tem (o da conta Nubank tem).
   id: number | null
-  // Extrato de cartão costuma trazer a compra positiva: inverter deixa a compra como gasto.
+  // Extrato de cartão costuma trazer a compra positiva.
   invert: boolean
 }
 
@@ -34,7 +30,7 @@ export interface CsvTable {
 
 const DELIMITERS = [';', ',', '\t'] as const
 
-// RFC 4180: aspas em volta do campo, "" dentro delas, quebra de linha dentro das aspas.
+// RFC 4180: aspas em volta do campo, "" dentro delas e quebra de linha dentro das aspas.
 export function parseCsv(text: string): CsvTable {
   const clean = text.replace(/^\uFEFF/, '')
   const delimiter = detectDelimiter(clean)
@@ -76,7 +72,6 @@ export function parseCsv(text: string): CsvTable {
   return { rows, delimiter }
 }
 
-// O separador que aparece o mesmo número de vezes (e mais de zero) no maior número de linhas.
 function detectDelimiter(text: string): string {
   const lines = text.split(/\r?\n/).filter((line) => line.trim() !== '').slice(0, 30)
   let best: string = ';'
@@ -105,8 +100,8 @@ function countOutsideQuotes(line: string, delimiter: string): number {
   return count
 }
 
-// Alguns bancos põem antes da tabela linhas soltas ("Extrato Conta Corrente", "Período ;..."): o
-// cabeçalho é a primeira linha com o número de colunas mais comum no arquivo.
+// Alguns bancos põem linhas soltas antes da tabela: o cabeçalho é a primeira linha com o número
+// de colunas mais comum.
 export function findHeaderRow(rows: readonly string[][]): number {
   const frequency = new Map<number, number>()
   for (const row of rows) frequency.set(row.length, (frequency.get(row.length) ?? 0) + 1)
@@ -136,7 +131,6 @@ const HEADER_PATTERNS = {
   id: /^(identificador|id|codigo|fitid)\b/,
 }
 
-// Sugestão de colunas: pelo nome do cabeçalho e, sem cabeçalho, pelo conteúdo das primeiras linhas.
 export function guessMapping(rows: readonly string[][]): CsvMapping {
   const headerRow = findHeaderRow(rows)
   const header = rows[headerRow] ?? []
@@ -155,7 +149,7 @@ export function guessMapping(rows: readonly string[][]): CsvMapping {
     date = index >= 0 ? index : 0
   }
 
-  // Inter: "Histórico" (Pix enviado) e "Descrição" (Maria); juntos dizem mais.
+  // Inter: "Histórico" (Pix enviado) e "Descrição" (Maria) dizem mais juntos.
   const history = find(HEADER_PATTERNS.history, [date])
   let description = find(HEADER_PATTERNS.description, [date])
   let description2: number | null = null
@@ -175,7 +169,6 @@ export function guessMapping(rows: readonly string[][]): CsvMapping {
     amount = index >= 0 ? index : null
   }
   if (description === null) {
-    // A coluna com o texto mais longo, fora as já escolhidas.
     let longest = -1
     header.forEach((_, i) => {
       if ([...taken, amount].includes(i)) return
@@ -200,8 +193,7 @@ export function guessMapping(rows: readonly string[][]): CsvMapping {
   }
 }
 
-// "aaaa-mm-dd" é ymd; com "/" ou "-" e o ano no fim, dmy, a menos que o segundo número passe de
-// 12 em alguma linha (mdy). Padrão do Brasil: dmy.
+// Com o ano no fim, dmy, a menos que o segundo número passe de 12 em alguma linha (mdy).
 export function detectDateFormat(values: readonly string[]): DateFormat | null {
   const filled = values.map((value) => value.trim()).filter(Boolean)
   if (filled.length === 0) return null
@@ -230,7 +222,7 @@ export function parseCsvDate(raw: string, format: DateFormat): string | null {
   return isValidIsoDate(iso) ? iso : null
 }
 
-// Além do que o OFX aceita: "R$", parênteses de valor negativo ("(12,34)") e o sinal no fim ("12,34-").
+// Além do que o OFX aceita: "R$", parênteses ("(12,34)") e o sinal no fim ("12,34-").
 export function parseCsvAmount(raw: string): number | null {
   let text = raw.replace(/R\$/gi, '').replace(/\s/g, '')
   let negative = false
@@ -286,7 +278,6 @@ export function mapRow(row: readonly string[], mapping: CsvMapping, source = 'cs
   return { source, externalId: id ? id.slice(0, 255) : null, date, amount, description }
 }
 
-// Célula vazia conta como zero; texto que não é valor invalida a linha.
 function cellAmount(row: readonly string[], index: number | null): number | null {
   if (index === null) return 0
   const value = (row[index] ?? '').trim()
@@ -297,14 +288,13 @@ function clean(text: string): string {
   return text.replace(/\s+/g, ' ').trim()
 }
 
-// O CSV não diz a conta. O cabeçalho separa layouts (Nubank conta, Inter...), para linhas iguais
-// de bancos diferentes não se confundirem; sem cabeçalho, só "csv".
+// O CSV não diz a conta: o cabeçalho separa os layouts, para linhas iguais de bancos diferentes
+// não se confundirem.
 export function csvSource(rows: readonly string[][], mapping: CsvMapping): string {
   if (!mapping.hasHeader) return 'csv'
   return `csv:${layoutKey(rows[mapping.headerRow] ?? [])}`
 }
 
-// Identifica o layout pelo cabeçalho (FNV-1a de 32 bits em hex): igual nos arquivos do mesmo banco.
 export function layoutKey(header: readonly string[]): string {
   let hash = 0x811c9dc5
   for (const char of header.map((cell) => normalizeForMatch(cell).trim()).join('|')) {

@@ -3,8 +3,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Reports;
 
-// Período obrigatório: o servidor não decide que dia é "hoje", porque o fuso dele
-// pode não ser o do usuário. O frontend calcula o período e envia as datas.
+// Obrigatório: o fuso do servidor pode não ser o do usuário, então o frontend envia as datas.
 public class ReportPeriodQuery : IValidatableObject
 {
     public const int MaxYears = 10;

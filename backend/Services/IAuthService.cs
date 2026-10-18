@@ -10,25 +10,15 @@ public interface IAuthService
 
     Task<UserResponse?> GetUserAsync(int userId);
 
-    /// <summary>
-    /// "Sair de todos os dispositivos": incrementa a versão de token do usuário, e todo token
-    /// emitido antes (em qualquer aparelho) passa a responder 401.
-    /// </summary>
+    /// <summary>"Sair de todos os dispositivos": todo token emitido antes passa a responder 401.</summary>
     Task RevokeAllTokensAsync(int userId);
 
-    /// <summary>
-    /// Exclui a conta e todos os dados do usuário (movimentações, cofres e categorias). Irreversível.
-    /// Conta com senha confirma com a senha; conta só do Google, com um comprovante novo da mesma
-    /// conta do Google. As falhas contam no bloqueio por e-mail do login (S.1).
-    /// </summary>
+    /// <summary>Exclui a conta e todos os dados. Confirma com a senha ou, sem senha, com o Google.</summary>
     /// <exception cref="Exceptions.BusinessRuleException">Senha ou comprovante ausente ou incorreto.</exception>
     /// <exception cref="Exceptions.TooManyRequestsException">E-mail bloqueado por falhas seguidas.</exception>
     Task DeleteAccountAsync(int userId, string? password, string? googleCredential);
 
-    /// <summary>
-    /// Login com o Google: entra pela conta vinculada; senão, só com e-mail em que o Google é a
-    /// autoridade, vincula a conta com esse e-mail ou cria uma nova, sem senha.
-    /// </summary>
+    /// <summary>Entra pela conta vinculada ou, com e-mail em que o Google é autoridade, vincula ou cria.</summary>
     /// <returns>A resposta com o token, ou null se não for possível entrar (sempre a mesma recusa).</returns>
     Task<AuthResponse?> GoogleSignInAsync(string credential);
 

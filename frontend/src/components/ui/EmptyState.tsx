@@ -1,6 +1,6 @@
 import type { ReactNode } from 'react'
 
-// Ilustrações em public/mascote/, cada uma em WebP com PNG de reserva.
+// Em public/mascote/, cada uma em WebP com PNG de reserva.
 export type EmptyStateImage = 'sem-resultados' | 'erro' | 'cofre-vazio' | 'sem-dados'
 
 interface EmptyStateProps {
@@ -8,14 +8,12 @@ interface EmptyStateProps {
   title: string
   description?: ReactNode
   action?: ReactNode
-  // role="alert" no erro, para o leitor de tela anunciar.
   role?: 'alert' | 'status'
 }
 
 export function EmptyState({ image, title, description, action, role }: EmptyStateProps) {
   return (
     <div role={role} className="flex flex-col items-center px-4 py-10 text-center">
-      {/* Decorativa: o título já diz tudo. */}
       <picture>
         <source srcSet={`/mascote/kliny-${image}-512.webp`} type="image/webp" />
         <img

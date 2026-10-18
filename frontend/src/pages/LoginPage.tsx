@@ -19,7 +19,6 @@ export default function LoginPage() {
   usePageTitle(t('login.title'))
   const { signIn, notice } = useAuth()
   const location = useLocation()
-  // Vindo da troca de senha pelo link do e-mail.
   const passwordReset = (location.state as { passwordReset?: boolean } | null)?.passwordReset === true
   const [values, setValues] = useState<Record<Field, string>>({ email: '', password: '' })
   const [errors, setErrors] = useState<FieldErrors<Field>>({})
@@ -51,7 +50,7 @@ export default function LoginPage() {
     showErrors(fieldErrors)
     if (firstInvalidField(fieldErrors, FIELDS)) return
 
-    // Depois do login, o PublicOnlyRoute leva para a página que o usuário tentou abrir.
+    // O PublicOnlyRoute leva para a página que o usuário tentou abrir.
     mutation.mutate({ email, password: values.password }, {
       onError: (error) => {
         const result = splitApiError(error, FIELDS)

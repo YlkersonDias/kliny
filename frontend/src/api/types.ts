@@ -5,8 +5,7 @@ export interface User {
   name: string
   email: string
   createdAt: string
-  // Opcionais: sessões guardadas antes do login com o Google não têm os dois (o /me completa).
-  // false só em conta criada pelo Google, que não tem senha.
+  // Opcionais em sessões antigas; o /me completa. false só em conta criada pelo Google.
   hasPassword?: boolean
   googleLinked?: boolean
 }
@@ -22,7 +21,6 @@ export interface LoginRequest {
   password: string
 }
 
-// Só nome e e-mail: a senha é escolhida no link do e-mail (completeRegistration).
 export interface RegisterRequest {
   name: string
   email: string
@@ -35,7 +33,6 @@ export interface PagedResponse<T> {
   totalCount: number
 }
 
-// color e icon: chaves de lib/categoryAppearance.ts; nulas, cor neutra e etiqueta.
 export interface Category {
   id: number
   name: string
@@ -45,13 +42,11 @@ export interface Category {
 
 export interface CategoryRequest {
   name: string
-  // O PUT grava o que vier: quem edita manda os três campos.
   color?: string | null
   icon?: string | null
 }
 
-// amount com o sinal do banco: positivo = receita, negativo = gasto.
-// Com vaultId, é uma operação de cofre (depósito negativo, retirada positiva).
+// amount com o sinal da conta: receita positiva, gasto negativo; com vaultId, operação de cofre.
 export interface Transaction {
   id: number
   description: string
@@ -60,9 +55,7 @@ export interface Transaction {
   categoryId: number | null
   categoryName: string | null
   vaultId: number | null
-  // Gerada por um lançamento recorrente (8.5a); nula se não for, ou se a regra foi apagada.
   recurrenceId: number | null
-  // Parcela de uma compra parcelada (8.5b); nula se não for, ou se a compra foi apagada.
   installmentPlanId: number | null
 }
 
@@ -75,8 +68,6 @@ export interface TransactionRequest {
 
 export type TransactionType = 'income' | 'expense' | 'vault'
 
-// Regra de categoria (8.4): "descrição contém pattern → categoria". Só sugere no formulário, ou é
-// aplicada às movimentações existentes quando a pessoa pede.
 export interface CategoryRule {
   id: number
   pattern: string
@@ -89,7 +80,6 @@ export interface CategoryRuleRequest {
   categoryId: number
 }
 
-// Importação de extrato (8.3). A linha vai como o leitor do arquivo a montou (sinal do banco).
 export interface ImportLine {
   source: string
   externalId: string | null
@@ -111,8 +101,7 @@ export interface ImportResponse {
   skipped: number
 }
 
-// Lançamento recorrente (8.5a): todo mês no dia de startDate (31 cai no último dia dos meses curtos).
-// amount com o sinal da movimentação; nextDate é a próxima ocorrência ainda não lançada.
+// Todo mês no dia de startDate (31 cai no último dia dos meses curtos).
 export interface Recurrence {
   id: number
   description: string
@@ -134,7 +123,6 @@ export interface RecurrenceCreateRequest {
   categoryId: number | null
 }
 
-// Compra parcelada (8.5b): total positivo, sempre gasto. remaining: parcelas depois de hoje.
 export interface InstallmentPlan {
   id: number
   description: string
@@ -167,18 +155,15 @@ export interface TransactionQuery {
   from?: string
   to?: string
   categoryId?: number
-  // Só receitas e gastos sem categoria. Não combina com categoryId, vaultId nem type=vault.
   uncategorized?: boolean
   vaultId?: number
   type?: TransactionType
-  // Texto procurado na descrição (8.1); a API ignora maiúsculas e acentos.
   search?: string
   sort?: TransactionSort
   page?: number
   pageSize?: number
 }
 
-// Orçamento por categoria (8.2): limite mensal e o gasto do mês pedido (positivo, sem operações de cofre).
 export interface Budget {
   categoryId: number
   categoryName: string
@@ -186,10 +171,8 @@ export interface Budget {
   spent: number
 }
 
-// Lista fechada aceita pela API; ausente = mais recentes primeiro.
 export type TransactionSort = 'date-desc' | 'date-asc' | 'amount-desc' | 'amount-asc'
 
-// balance é calculado pela API (soma das movimentações do cofre com o sinal invertido).
 export interface Vault {
   id: number
   name: string
@@ -203,7 +186,7 @@ export interface VaultRequest {
   goal: number | null
 }
 
-// Depósito e retirada: amount sempre positivo; o endpoint define o sinal gravado.
+// amount sempre positivo: o endpoint define o sinal gravado.
 export interface VaultOperationRequest {
   amount: number
   date: string
@@ -215,8 +198,7 @@ export interface VaultOperationResponse {
   balance: number
 }
 
-// Relatórios: expense e vaultDeposits vêm POSITIVOS (ao contrário do banco) e net = income - expense.
-// Exibir como vieram; nunca inverter o expense de novo.
+// Relatórios: expense e vaultDeposits vêm POSITIVOS, ao contrário do banco. Nunca inverter de novo.
 export interface ReportPeriod {
   from: string
   to: string
@@ -225,20 +207,18 @@ export interface ReportPeriod {
 export interface SummaryResponse {
   from: string
   to: string
-  // Movimento do período, sem operações de cofre.
   income: number
   expense: number
   net: number
   vaultDeposits: number
   vaultWithdrawals: number
-  // Posição no dia `to`, somando tudo desde o primeiro lançamento.
+  // Saldos no dia `to`, desde o primeiro lançamento.
   accountBalance: number
   vaultsBalance: number
 }
 
 export type TimelineGrouping = 'day' | 'month'
 
-// period: o dia, ou o primeiro dia do mês. Sem movimento, os valores vêm zerados.
 export interface TimelinePoint {
   period: string
   income: number
@@ -248,8 +228,7 @@ export interface TimelinePoint {
 
 export type CategoryReportType = 'expense' | 'income'
 
-// categoryId e categoryName nulos = sem categoria (o texto fica no frontend). total sempre
-// positivo, também para gastos; percentage com 2 casas (a soma pode não dar 100).
+// categoryId nulo = sem categoria. total sempre positivo; a soma dos percentuais pode não dar 100.
 export interface CategoryTotal {
   categoryId: number | null
   categoryName: string | null
@@ -258,7 +237,6 @@ export interface CategoryTotal {
   percentage: number
 }
 
-// Formato de erro do ASP.NET Core. `errors` só vem nas falhas de validação.
 export interface ProblemDetails {
   type?: string
   title?: string

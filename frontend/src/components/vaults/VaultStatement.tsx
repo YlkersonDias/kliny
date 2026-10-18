@@ -5,12 +5,8 @@ import { formatSigned } from '../../lib/money'
 import { vaultAmount } from '../../lib/vaults'
 import { Icon } from '../ui/Icon'
 
-// Extrato do ponto de vista do cofre: depósito positivo (entra no cofre) e retirada
-// negativa, sempre com o rótulo ao lado. Em Movimentações o sinal é o da conta (o inverso).
-// Cores: depósito em income e retirada em expense (ícone, valor e rótulo), como as linhas de
-// Movimentações. É uma exceção ao âmbar de cofre, decidida pelo usuário: aqui a cor segue o saldo
-// do cofre, e em Movimentações as operações de cofre continuam em âmbar (ver "Exceções de cor
-// dos cofres" no CLAUDE.md).
+// Do ponto de vista do cofre: depósito positivo e retirada negativa, sempre com o rótulo ao lado.
+// A cor segue o saldo do cofre (depósito em income, retirada em expense), e não o âmbar de cofre.
 function StatementRow({ transaction }: { transaction: Transaction }) {
   const { t } = useTranslation('vaults')
   const amount = vaultAmount(transaction.amount)

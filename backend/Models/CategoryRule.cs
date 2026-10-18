@@ -1,8 +1,6 @@
 namespace Backend.Models;
 
-// Regra de categoria (8.4): "descrição contém Pattern → categoria". Só sugere no formulário (o
-// frontend preenche a categoria, e a pessoa pode trocar) ou é aplicada às movimentações existentes
-// quando a pessoa pede. Um texto por usuário; apagar a categoria apaga as regras dela.
+// "Descrição contém Pattern → categoria": só sugere, ou é aplicada quando a pessoa pede.
 public class CategoryRule
 {
     public int Id { get; set; }

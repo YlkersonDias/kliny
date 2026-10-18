@@ -6,7 +6,6 @@ import { Button } from '../ui/Button'
 import { Input } from '../ui/Input'
 import { Select } from '../ui/Select'
 
-// Espera parar de digitar antes de consultar a API.
 const SEARCH_DELAY_MS = 300
 
 interface TransactionFiltersBarProps {
@@ -22,8 +21,7 @@ export function TransactionFiltersBar({ filters, categories, rangeError, canClea
   const { t } = useTranslation(['transactions', 'common'])
   const isVault = filters.type === 'cofres'
 
-  // A busca digitada fica aqui e só vai para a URL (e para a API) depois da pausa. Se a URL
-  // mudar por fora (Limpar filtros, voltar no navegador), o campo acompanha.
+  // A busca só vai para a URL depois da pausa. Se a URL mudar por fora, o campo acompanha.
   const [draft, setDraft] = useState(filters.search)
   const [committed, setCommitted] = useState(filters.search)
   if (filters.search !== committed) {
@@ -94,7 +92,6 @@ export function TransactionFiltersBar({ filters, categories, rangeError, canClea
             placeholder={t('filters.searchPlaceholder')}
             value={draft}
             onChange={(event) => setDraft(event.target.value)}
-            // Enter consulta na hora, sem esperar a pausa.
             onKeyDown={(event) => { if (event.key === 'Enter' && draft !== filters.search) onChange({ search: draft }) }}
           />
         </div>

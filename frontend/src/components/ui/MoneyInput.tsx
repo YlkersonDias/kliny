@@ -10,13 +10,9 @@ interface MoneyInputProps extends Omit<ComponentProps<typeof Input>, 'value' | '
 
 const GROUP = { 'pt-BR': '.', 'en-US': ',' } as const
 
-// Valor em reais no formato do idioma da tela (1.234,56 ou 1,234.56). Os pontos de milhar aparecem
-// enquanto a pessoa digita, e a vírgula dos centavos é ela quem digita (formatMoneyTyping); ao sair
-// do campo, um valor válido ganha os centavos ("1.234" vira "1.234,00"). A conversão para número
-// fica com parseMoneyInput, no envio do formulário.
+// Os pontos de milhar entram enquanto a pessoa digita; a vírgula dos centavos é ela quem digita.
 export function MoneyInput({ value, onChange, onBlur, onKeyDown, ref, ...props }: MoneyInputProps) {
   const inputRef = useRef<HTMLInputElement | null>(null)
-  // Onde o cursor deve ficar depois que o valor formatado voltar do componente pai.
   const pendingCaret = useRef<number | null>(null)
 
   useLayoutEffect(() => {
@@ -48,8 +44,7 @@ export function MoneyInput({ value, onChange, onBlur, onKeyDown, ref, ...props }
         const formatted = formatMoneyTyping(raw, language)
         const caret = caretAfterTyping(raw, event.target.selectionStart ?? raw.length, formatted, language)
         if (formatted === value) {
-          // Tecla ignorada (como um segundo separador): o valor não muda, o React devolve o texto
-          // anterior ao campo, e o cursor é recolocado depois disso.
+          // Tecla ignorada: o React devolve o texto anterior, e o cursor é recolocado depois disso.
           const input = event.target
           setTimeout(() => input.setSelectionRange(caret, caret))
           return
@@ -58,8 +53,7 @@ export function MoneyInput({ value, onChange, onBlur, onKeyDown, ref, ...props }
         onChange(formatted)
       }}
       onKeyDown={(event) => {
-        // Apagar um ponto de milhar não faz nada (ele volta na formatação): o cursor pula o ponto e
-        // apaga o dígito ao lado.
+        // O ponto de milhar voltaria na formatação: apaga o dígito ao lado.
         const input = event.currentTarget
         const start = input.selectionStart
         if (start !== null && start === input.selectionEnd) {

@@ -12,14 +12,11 @@ namespace Backend.Services;
 
 public interface IExportService
 {
-    // O .zip com os dados da pessoa: kliny-dados.json (tudo) e kliny-movimentacoes.csv.
     Task<byte[]> BuildAsync(int userId);
 }
 
-// Exportação dos dados (LGPD, portabilidade). Leva tudo o que é da pessoa e nada interno: sem hash
-// de senha, identificador do Google, versão do token, chaves de importação e de idempotência, nem os
-// Ids do banco (as ligações vão pelos nomes, únicos por usuário). Toda consulta filtra o UserId do
-// token, além do filtro global do AppDbContext (regra 2).
+// Tudo o que é da pessoa e nada interno: sem hash de senha, identificador do Google, chaves nem
+// Ids do banco (as ligações vão pelos nomes, únicos por usuário).
 public class ExportService(AppDbContext db) : IExportService
 {
     public const string JsonFileName = "kliny-dados.json";
@@ -29,7 +26,7 @@ public class ExportService(AppDbContext db) : IExportService
     {
         PropertyNamingPolicy = JsonNamingPolicy.CamelCase,
         WriteIndented = true,
-        // Acentos legíveis no arquivo; o JSON vai num arquivo, nunca numa página.
+        // Acentos legíveis: o JSON vai num arquivo, nunca numa página.
         Encoder = System.Text.Encodings.Web.JavaScriptEncoder.UnsafeRelaxedJsonEscaping,
         DefaultIgnoreCondition = JsonIgnoreCondition.Never,
     };
@@ -102,8 +99,7 @@ public class ExportService(AppDbContext db) : IExportService
         await stream.WriteAsync(content);
     }
 
-    // CSV para abrir no Excel: em português, ";" e "1234,56" (o Excel brasileiro usa a vírgula como
-    // decimal); em inglês, "," e "1234.56". Com BOM, para o Excel ler os acentos em UTF-8.
+    // Para o Excel: em português, ";" e vírgula decimal; com BOM, para os acentos.
     internal static byte[] BuildCsv(IReadOnlyList<ExportTransaction> transactions)
     {
         var english = AppCultures.IsEnglish;
@@ -139,12 +135,10 @@ public class ExportService(AppDbContext db) : IExportService
         _ => Messages.ExportKindVaultWithdrawal,
     };
 
-    // Texto digitado pela pessoa: começando com = + - @ (ou tab e retorno), o Excel o executaria como
-    // fórmula (injeção de fórmula). O apóstrofo na frente faz o Excel tratá-lo como texto.
+    // Texto começando com = + - @ seria executado como fórmula pelo Excel: o apóstrofo o deixa como texto.
     internal static string Text(string value) =>
         value.Length > 0 && value[0] is '=' or '+' or '-' or '@' or '\t' or '\r' ? "'" + value : value;
 
-    // Entre aspas quando tem o separador, aspas ou quebra de linha (RFC 4180).
     private static string Quote(string value, char separator) =>
         value.IndexOfAny([separator, '"', '\n', '\r']) >= 0 ? "\"" + value.Replace("\"", "\"\"") + "\"" : value;
 }
@@ -159,7 +153,6 @@ public record ExportData(
 public record ExportAccount(string Name, string Email, DateTime CreatedAt, bool HasPassword, bool GoogleLinked);
 public record ExportCategory(string Name, string? Color, string? Icon);
 public record ExportVault(string Name, decimal? Goal, decimal Balance, DateTime CreatedAt);
-// Kind: income, expense, vault-deposit ou vault-withdrawal. Amount com o sinal da conta.
 public record ExportTransaction(
     DateOnly Date, string Description, decimal Amount, string Kind, string? Category, string? Vault,
     bool Recurring, bool Installment, bool Imported);

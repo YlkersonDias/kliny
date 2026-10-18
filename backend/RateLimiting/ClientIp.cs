@@ -5,10 +5,8 @@ namespace Backend.RateLimiting;
 
 public static class ClientIp
 {
-    // Chave do limite por IP. IPv6 conta pelo prefixo /64, porque cada cliente costuma ter um /64
-    // inteiro e poderia trocar de endereço a cada tentativa. IPv4 escrito como IPv6 (::ffff:1.2.3.4)
-    // conta como o IPv4.
-    // Atrás de um proxy reverso (deploy), o RemoteIpAddress é o do proxy: ver a parte S.7.
+    // IPv6 conta pelo prefixo /64: cada cliente costuma ter um /64 inteiro e poderia trocar de
+    // endereço a cada tentativa. ::ffff:1.2.3.4 conta como o IPv4.
     public static string PartitionKey(IPAddress? address)
     {
         if (address is null)

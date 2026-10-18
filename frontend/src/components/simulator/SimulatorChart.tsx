@@ -3,9 +3,7 @@ import { Area, AreaChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis } f
 import { formatMoney } from '../../lib/money'
 import type { SimulationPoint } from '../../lib/simulator'
 
-// Carregado sob demanda (React.lazy). Só visual: o ChartFigure o esconde do leitor de tela.
-// O total simulado na cor principal; o aportado em âmbar (a cor do dinheiro guardado, como nos
-// cofres), com a borda tracejada: as duas séries não dependem só da cor.
+// O aportado tem a borda tracejada: as duas séries não dependem só da cor.
 
 export default function SimulatorChart({ points, label }: { points: SimulationPoint[]; label: (month: number) => string }) {
   const { t } = useTranslation('simulator')
@@ -40,7 +38,7 @@ export default function SimulatorChart({ points, label }: { points: SimulationPo
             fillOpacity={0.3}
             isAnimationActive={false}
           />
-          {/* Depois do total, para a faixa do aportado ficar por cima, embaixo da do total. */}
+          {/* Depois do total, para a faixa do aportado ficar por cima. */}
           <Area
             type="monotone"
             dataKey="contributed"

@@ -2,17 +2,16 @@ import { keepPreviousData, useQuery } from '@tanstack/react-query'
 import { getByCategory, getSummary, getTimeline } from '../api/reports'
 import type { CategoryReportType, ReportPeriod, TimelineGrouping } from '../api/types'
 
-// Todas as chaves começam com 'reports': as mutações de movimentação e de cofre já as invalidam.
+// Todas começam com 'reports': as mutações de movimentação e de cofre já as invalidam.
 export const reportKeys = {
   summary: (period: ReportPeriod) => ['reports', 'summary', period.from, period.to] as const,
   byCategory: (period: ReportPeriod, type: CategoryReportType) => ['reports', 'by-category', period.from, period.to, type] as const,
   timeline: (period: ReportPeriod, groupBy: TimelineGrouping) => ['reports', 'timeline', period.from, period.to, groupBy] as const,
 }
 
-// enabled: false enquanto o período escolhido é inválido (a API recusaria).
 interface Options {
   enabled?: boolean
-  // Ao trocar de período, o resultado anterior fica na tela até o novo chegar.
+  // O resultado anterior fica na tela até o novo chegar.
   keepPrevious?: boolean
 }
 

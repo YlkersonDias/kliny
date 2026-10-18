@@ -1,7 +1,6 @@
 import { apiRequest } from './client'
 import type { PagedResponse, Transaction, TransactionQuery, TransactionRequest } from './types'
 
-// Só os filtros preenchidos vão para a URL.
 function toQueryString(query: TransactionQuery): string {
   const params = new URLSearchParams()
   for (const [key, value] of Object.entries(query)) {

@@ -5,14 +5,14 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// S.6: limites de tamanho no login e senha medida em bytes (o BCrypt só usa os primeiros 72).
+// O BCrypt só usa os primeiros 72 bytes da senha.
 public class AuthInputLimitsTests
 {
     private const string TooLong = "A senha é longa demais: com acentos ou emojis, o limite de 72 caracteres fica menor.";
 
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
 
-    // 37 "é" = 37 caracteres (passa no limite de caracteres) e 74 bytes (passa do limite do BCrypt).
+    // 37 caracteres, mas 74 bytes.
     private static readonly string AccentedPassword = new('é', 37);
 
     private static async Task<(HttpStatusCode Status, List<string> Messages)> PostAsync(string path, object body)
@@ -38,7 +38,7 @@ public class AuthInputLimitsTests
         Assert.Equal(74, Encoding.UTF8.GetByteCount(AccentedPassword));
     }
 
-    // Documenta por que o limite em bytes existe: o que passa de 72 bytes não muda o resultado.
+    // O motivo do limite em bytes: o que passa de 72 bytes não muda o resultado.
     [Fact]
     public void Bcrypt_ignora_o_que_passa_de_72_bytes()
     {
@@ -91,7 +91,7 @@ public class AuthInputLimitsTests
     [Fact]
     public async Task Login_dentro_dos_limites_segue_para_a_conferencia_da_senha()
     {
-        // O IAuthService falso responde 401 (senha errada): a validação deixou passar.
+        // O IAuthService falso responde 401: a validação deixou passar.
         var (status, _) = await PostAsync("/api/auth/login",
             new { email = new string('a', 244) + "@kliny.test", password = new string('é', 36) });
 

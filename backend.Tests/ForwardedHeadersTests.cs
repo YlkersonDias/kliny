@@ -4,9 +4,8 @@ using Microsoft.AspNetCore.Mvc.Testing;
 
 namespace Backend.Tests;
 
-// S.7: atrás do nginx do deploy, o IP de quem acessa chega no X-Forwarded-For e o HTTPS no
-// X-Forwarded-Proto. Só valem vindos de um proxy das redes de ForwardedHeaders:KnownNetworks;
-// de qualquer outro endereço são ignorados, senão qualquer um fugiria do limite por IP.
+// X-Forwarded-For e X-Forwarded-Proto só valem vindos de um proxy das redes confiáveis: senão
+// qualquer um fugiria do limite por IP.
 public class ForwardedHeadersTests
 {
     private const string Proxy = "172.30.0.10";
@@ -47,7 +46,6 @@ public class ForwardedHeadersTests
         for (var i = 0; i < 10; i++)
             Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, Login(Proxy, "203.0.113.7")));
 
-        // O visitante que esgotou o limite é barrado; outro, pelo mesmo proxy, não.
         Assert.Equal(HttpStatusCode.TooManyRequests, await StatusAsync(client, Login(Proxy, "203.0.113.7")));
         Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, Login(Proxy, "198.51.100.20")));
     }
@@ -58,7 +56,6 @@ public class ForwardedHeadersTests
         using var app = App();
         var client = app.CreateClient();
 
-        // Quem tenta trocar de "IP" a cada pedido continua contando no próprio endereço.
         for (var i = 0; i < 10; i++)
             Assert.Equal(HttpStatusCode.Unauthorized, await StatusAsync(client, Login("192.0.2.50", $"203.0.113.{i}")));
 
@@ -77,8 +74,7 @@ public class ForwardedHeadersTests
         Assert.Equal(HttpStatusCode.TooManyRequests, await StatusAsync(client, Login(Proxy, "203.0.113.99")));
     }
 
-    // O nginx recebe HTTPS da Cloudflare pelo túnel e repassa em HTTP: o HSTS só sai porque o
-    // X-Forwarded-Proto do proxy confiável diz que o pedido original era HTTPS.
+    // O nginx repassa em HTTP: o HSTS só sai pelo X-Forwarded-Proto do proxy confiável.
     [Theory]
     [InlineData(Proxy, true)]
     [InlineData("192.0.2.50", false)]

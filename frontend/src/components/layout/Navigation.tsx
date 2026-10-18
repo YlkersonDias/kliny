@@ -17,7 +17,6 @@ export function NavIcon({ path }: { path: string }) {
   )
 }
 
-// Menu lateral no desktop e barra inferior no celular.
 export function Navigation({ variant }: { variant: 'sidebar' | 'bar' }) {
   const { t } = useTranslation('layout')
   const isBar = variant === 'bar'
@@ -32,8 +31,7 @@ export function Navigation({ variant }: { variant: 'sidebar' | 'bar' }) {
               end={item.to === '/'}
               className={({ isActive }) => {
                 const base = 'flex items-center rounded-lg font-medium transition-colors focus-visible:outline-2 focus-visible:outline-primary'
-                // Na barra, cinco itens dividem a largura do celular: fonte de 11 px e pouco espaço dos
-                // lados, para "Movimentações" caber até em telas de 320 px.
+                // Cinco itens na barra: fonte de 11 px para "Movimentações" caber até em 320 px.
                 const layout = isBar
                   ? 'flex-col gap-1 px-0.5 py-2 text-[0.6875rem] tracking-tight'
                   : 'gap-3 px-3 py-2.5 text-sm'

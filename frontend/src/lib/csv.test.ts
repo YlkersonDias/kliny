@@ -5,8 +5,7 @@ import {
 } from './csv'
 import { restoreMapping, saveMapping } from './csvMappingStore'
 
-// Extratos de exemplo com dados inventados, no jeito de layouts conhecidos (conta e cartão do
-// Nubank, conta do Inter) e de extratos com colunas de crédito e débito. São modelos, não arquivos reais.
+// Extratos de exemplo com dados inventados, no jeito de layouts conhecidos.
 
 const NUBANK_CONTA = `Data,Valor,Identificador,Descrição
 01/10/2026,3500.00,6512a1b2-0001-4000-8000-000000000001,Transferência recebida pelo Pix - EMPRESA EXEMPLO LTDA
@@ -185,7 +184,6 @@ describe('csvMappingStore', () => {
     saveMapping('abc', { ...base, invert: true, description: 2, amount: 1 })
     expect(restoreMapping('abc', base, 3)).toMatchObject({ invert: true, description: 2, amount: 1 })
     expect(restoreMapping('outro', base, 3)).toBe(base)
-    // Coluna que não existe mais no arquivo: fica a sugestão.
     expect(restoreMapping('abc', base, 2)).toBe(base)
     expect(store.get('import.csvLayouts')).not.toContain('Streaming')
   })

@@ -3,8 +3,7 @@ using MsOptions = Microsoft.Extensions.Options.Options;
 
 namespace Backend.Tests;
 
-// O validador de verdade (sem rede: só casos recusados antes de buscar as chaves do Google) e a
-// regra de quando o Google é a autoridade sobre o e-mail.
+// Sem rede: só casos recusados antes de buscar as chaves do Google.
 public class GoogleTokenValidatorTests
 {
     private static GoogleTokenValidator Validator(string? clientId) =>

@@ -2,19 +2,15 @@ import type { ReportPeriod, TimelineGrouping } from '../api/types'
 import i18n from '../i18n'
 import { currentMonthRange, isValidIsoDate, toIsoDate } from './dates'
 
-// Período dos Relatórios, guardado na URL:
-// ?periodo=este-mes|mes-passado|este-ano|personalizado&de=&ate=&agrupar=dia|mes&tipo=gastos|receitas
-// Datas como texto YYYY-MM-DD; os atalhos usam a data local do navegador.
+// Período dos Relatórios, guardado na URL (?periodo=&de=&ate=&agrupar=&tipo=).
 
 export type PeriodPreset = 'este-mes' | 'mes-passado' | 'este-ano' | 'personalizado'
 
-// Na ordem da tela; o rótulo vem do i18n (reports:period.presets).
 export const PRESETS: PeriodPreset[] = ['este-mes', 'mes-passado', 'este-ano', 'personalizado']
 
-// Mesmos limites da API (ReportPeriodQuery e TimelineQuery).
+// Mesmos limites da API.
 export const MAX_YEARS = 10
 export const MAX_DAYS_BY_DAY = 366
-// Até aqui o agrupamento automático é por dia; acima, por mês.
 export const AUTO_DAY_LIMIT = 62
 
 const pad = (value: number, length = 2) => String(value).padStart(length, '0')
@@ -35,7 +31,7 @@ export function addYears(iso: string, years: number): string {
   return `${pad(target, 4)}-${pad(month)}-${pad(fixedDay)}`
 }
 
-// Número do dia (como o DayNumber do .NET), sem o problema de anos 0 a 99 do Date.
+// Como o DayNumber do .NET, sem o problema de anos 0 a 99 do Date.
 function dayNumber(iso: string): number {
   const [year, month, day] = parts(iso)
   const date = new Date(Date.UTC(2000, month - 1, day))
@@ -43,7 +39,6 @@ function dayNumber(iso: string): number {
   return Math.round(date.getTime() / 86_400_000)
 }
 
-// Dias do período, contando o primeiro e o último.
 export function daysInclusive({ from, to }: ReportPeriod): number {
   return dayNumber(to) - dayNumber(from) + 1
 }
@@ -55,7 +50,7 @@ export function presetRange(preset: Exclude<PeriodPreset, 'personalizado'>, now:
   return { from: `${year}-01-01`, to: `${year}-12-31` }
 }
 
-// Erro de período, na ordem em que a API confere. undefined = válido.
+// Na ordem em que a API confere. undefined = válido.
 export function periodError({ from, to }: ReportPeriod): string | undefined {
   if (!from || !to) return i18n.t('reports:period.bothDates')
   if (!isValidIsoDate(from) || !isValidIsoDate(to)) return i18n.t('validation.dateInvalid')
@@ -67,7 +62,6 @@ export function periodError({ from, to }: ReportPeriod): string | undefined {
   return undefined
 }
 
-// "Por dia" só até 366 dias (limite da API); sem escolha, automático pelo tamanho.
 export function resolveGrouping(period: ReportPeriod, chosen: TimelineGrouping | null): {
   grouping: TimelineGrouping
   dayAllowed: boolean
@@ -102,7 +96,6 @@ export function parseReportFilters(params: URLSearchParams, now: Date = new Date
   }
 }
 
-// Só o que difere do padrão vai para a URL.
 export function reportFiltersToParams(filters: ReportFilters): URLSearchParams {
   const params = new URLSearchParams()
   if (filters.preset !== 'este-mes') params.set('periodo', filters.preset)

@@ -4,11 +4,9 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Idioma das mensagens da API (7.3): o Accept-Language escolhe pt-BR ou en-US; sem o cabeçalho,
-// ou com outro idioma, vale o português. Cada caso roda nos quatro cenários de Languages.
 public static class Localization
 {
-    // Accept-Language enviado (null = sem o cabeçalho) e se a resposta deve vir em inglês.
+    // null = sem o cabeçalho.
     public static TheoryData<string?, bool> Languages => new()
     {
         { null, false },
@@ -27,8 +25,7 @@ public static class Localization
         return request;
     }
 
-    // O "detail" e todas as mensagens de "errors" do ProblemDetails, com o espaço não separável
-    // (que o .NET usa em "R$ 100,00") trocado por espaço comum.
+    // O .NET usa espaço não separável em "R$ 100,00": trocado por espaço comum.
     public static async Task<List<string>> MessagesOf(HttpResponseMessage response)
     {
         var body = await response.Content.ReadFromJsonAsync<JsonElement>(TestContext.Current.CancellationToken);
@@ -44,9 +41,7 @@ public static class Localization
     public static string Normalize(string text) => text.Replace(' ', ' ').Replace(' ', ' ');
 }
 
-// Usuário com R$ 1.000,00 de receita em 01/03/2021, a categoria "Mercado" e o cofre "Reserva"
-// com R$ 100,00 (depósito em 10/03/2021). Criado uma vez: o cadastro tem limite de 5 por hora por IP,
-// e esta classe usa 3 (este e os dois do e-mail repetido).
+// Criado uma vez: o cadastro tem limite por IP.
 public sealed class LocalizationFixture : IAsyncLifetime
 {
     public const string Email = "idiomas@kliny.test";
@@ -85,7 +80,6 @@ public sealed class LocalizationFixture : IAsyncLifetime
     }
 }
 
-// Mensagens que passam pelos services de verdade (MySQL no CI).
 public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<LocalizationFixture>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -127,7 +121,6 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
     [Theory]
     [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]
     public async Task Categoria_repetida(string? language, bool english) =>
-        // Sem acento e em minúsculas: a collation conta como o mesmo nome.
         AssertMessage(await Send(HttpMethod.Post, "/api/categories", language, new { name = "mercado" }),
             HttpStatusCode.Conflict, english,
             "Já existe uma categoria com esse nome.", "A category with this name already exists.");
@@ -172,7 +165,6 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
     [Theory]
     [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]
     public async Task Deposito_acima_do_saldo_da_conta(string? language, bool english) =>
-        // R$ 1.000,00 de receita menos R$ 100,00 já depositados.
         AssertMessage(await Send(HttpMethod.Post, VaultUrl("deposit"), language, new { amount = 5000m, date = "2021-03-10" }),
             HttpStatusCode.BadRequest, english,
             "Saldo insuficiente na conta. Disponível em 10/03/2021: R$ 900,00.",
@@ -220,7 +212,7 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
     [MemberData(nameof(Localization.Languages), MemberType = typeof(Localization))]
     public async Task Descricao_padrao_do_deposito_e_da_retirada(string? language, bool english)
     {
-        // Depósito e retirada do mesmo valor: o saldo do cofre volta a R$ 100,00 para os outros testes.
+        // Depósito e retirada do mesmo valor: o saldo do cofre volta ao de antes para os outros testes.
         Assert.Equal(english ? "Deposit to vault Reserva" : "Depósito no cofre Reserva",
             await DescriptionOf("deposit", language));
         Assert.Equal(english ? "Withdrawal from vault Reserva" : "Retirada do cofre Reserva",
@@ -238,7 +230,6 @@ public class LocalizationTests(LocalizationFixture fixture) : IClassFixture<Loca
     }
 }
 
-// Validação do cadastro, sem MySQL: o modelo é validado antes de chegar ao service.
 public class RegisterLocalizationTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;

@@ -15,7 +15,6 @@ import { firstInvalidField, splitApiError, type FieldErrors } from '../lib/forms
 const FIELDS = ['name', 'email'] as const
 type Field = (typeof FIELDS)[number]
 
-// Mesmas regras do RegisterRequest da API.
 const NAME_MAX = 100
 const EMAIL_MAX = 255
 
@@ -34,8 +33,7 @@ function validate(values: Record<Field, string>, t: TFunction<'auth'>): FieldErr
   return errors
 }
 
-// Cadastro: só nome e e-mail. A resposta é sempre a mesma, tenha o e-mail conta ou não (regra 4);
-// a senha é escolhida no link do e-mail (/criar-conta), por quem o recebeu.
+// A resposta é sempre a mesma, tenha o e-mail conta ou não; a senha é escolhida no link do e-mail.
 export default function RegisterPage() {
   const { t } = useTranslation('auth')
   usePageTitle(t('register.title'))

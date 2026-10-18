@@ -1,6 +1,5 @@
-// Confere a CSP do build (dist/index.html), no CI: a <meta> existe, vem antes do primeiro <script>
-// e o script-src tem exatamente os hashes dos scripts inline do HTML final.
-// Uso: npm run check:csp (depois do npm run build).
+// Confere, no build, que a <meta> da CSP vem antes do primeiro <script> e que o script-src tem
+// exatamente os hashes dos scripts inline. Uso: npm run check:csp (depois do npm run build).
 import { readFileSync } from 'node:fs'
 import { CSP_META, inlineScriptHashes } from '../csp.ts'
 

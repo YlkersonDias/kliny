@@ -6,7 +6,6 @@ using Microsoft.AspNetCore.Mvc;
 
 namespace Backend.Controllers;
 
-// Lançamentos recorrentes (8.5a). O usuário vem sempre do token.
 [ApiController]
 [Authorize]
 [Route("api/recurrences")]
@@ -42,7 +41,6 @@ public class RecurrencesController(IRecurrenceService recurrenceService) : Contr
         return NoContent();
     }
 
-    // Chamado pelo app ao abrir e depois de criar ou mudar uma recorrência.
     [HttpPost("sync")]
     [ProducesResponseType<RecurrenceSyncResponse>(StatusCodes.Status200OK)]
     [ProducesResponseType(StatusCodes.Status400BadRequest)]

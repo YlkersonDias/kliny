@@ -4,7 +4,6 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Regras de categoria (8.4), contra o MySQL. Cada teste usa textos próprios, para não depender da ordem.
 public sealed class CategoryRuleFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -157,7 +156,6 @@ public class CategoryRuleTests(CategoryRuleFixture fixture) : IClassFixture<Cate
         Assert.Equal(fixture.Home, await CategoryOfAsync(categorized));
         Assert.Null(await CategoryOfAsync(other));
 
-        // Com a opção, troca também a que já tinha outra categoria; as que já estão certas não contam.
         Assert.Equal(1, await ApplyAsync(rule, "preview=true&includeCategorized=true"));
         Assert.Equal(1, await ApplyAsync(rule, "includeCategorized=true"));
         Assert.Equal(fixture.Food, await CategoryOfAsync(categorized));

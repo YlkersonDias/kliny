@@ -3,11 +3,8 @@ import { Bar, BarChart, Cell, ReferenceLine, ResponsiveContainer, Tooltip, XAxis
 import type { DaySpending } from '../../lib/dashboard'
 import { formatMoney } from '../../lib/money'
 
-// Carregado sob demanda (React.lazy): o Recharts fica fora do bundle inicial.
-// Só visual: o ChartFigure o esconde do leitor de tela e oferece o resumo e a tabela.
-// Cores pelos tokens (CSS), para o modo noturno só redefinir as variáveis.
+// Carregado sob demanda: o Recharts fica fora do bundle inicial.
 
-// Rótulo "hoje" da linha tracejada (o texto vem do i18n).
 const TODAY_LABEL = { position: 'top', fill: 'var(--color-primary)', fontSize: 12, fontWeight: 600 } as const
 
 interface SpendingChartProps {
@@ -49,7 +46,7 @@ export default function SpendingChart({ days, todayDay }: SpendingChartProps) {
             {days.map((day) => (
               <Cell
                 key={day.date}
-                // Gasto até hoje em expense; já lançado para depois de hoje, ou dia sem gasto, em cinza.
+                // Dia futuro ou sem gasto em cinza.
                 fill={day.expense > 0 && !day.isFuture ? 'var(--color-expense)' : 'var(--color-border)'}
               />
             ))}

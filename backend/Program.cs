@@ -17,18 +17,16 @@ using Microsoft.IdentityModel.Tokens;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// A senha do banco vem do user-secrets (ConnectionStrings:DefaultConnection).
 var connectionString = builder.Configuration.GetConnectionString("DefaultConnection")
     ?? throw new InvalidOperationException("Connection string 'DefaultConnection' not configured.");
 
-// Usuário logado para o filtro global do AppDbContext (S.6b).
+// Usuário do token, para o filtro global do AppDbContext.
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddScoped<ICurrentUser, HttpCurrentUser>();
 
 builder.Services.AddDbContext<AppDbContext>(options =>
     options.UseMySql(connectionString, new MySqlServerVersion(new Version(8, 4, 0))));
 
-// A chave vem do user-secrets (Jwt:Key). Sem ela, a aplicação não sobe.
 builder.Services.AddOptions<JwtOptions>()
     .Bind(builder.Configuration.GetSection(JwtOptions.SectionName))
     .ValidateDataAnnotations()
@@ -40,7 +38,7 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
     {
         var jwt = jwtOptions.Value;
 
-        // Mantém os nomes originais das claims ("sub", "email", "name").
+        // Claims com o nome original (sub, email, name).
         options.MapInboundClaims = false;
         options.TokenValidationParameters = new TokenValidationParameters
         {
@@ -51,30 +49,24 @@ builder.Services.AddOptions<JwtBearerOptions>(JwtBearerDefaults.AuthenticationSc
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt.Key)),
-            // S.6: só HS256, o algoritmo com que a API assina. Qualquer outro (inclusive "none") é recusado,
-            // mesmo que o padrão da biblioteca mude.
+            // Só HS256: qualquer outro algoritmo, inclusive "none", é recusado.
             ValidAlgorithms = [SecurityAlgorithms.HmacSha256],
             ClockSkew = TimeSpan.FromSeconds(30),
             NameClaimType = JwtRegisteredClaimNames.Name,
         };
-        // S.5: confere a versão do token com a do usuário no banco (revogação).
+        // Revogação: a versão do token precisa bater com a do usuário no banco.
         options.Events = new JwtBearerEvents { OnTokenValidated = TokenVersionValidation.ValidateAsync };
     });
 
-// Todo endpoint exige login, salvo os marcados com [AllowAnonymous]: login (com senha e com o Google),
-// cadastro (register e register/complete) e recuperação de senha (forgot-password e reset-password),
-// conferidos na lista PublicEndpoints do AuthorizationTests. Um controller novo sem [Authorize]
-// continua protegido. O OpenAPI também exige login.
+// Todo endpoint exige login, salvo os com [AllowAnonymous] (conferidos no AuthorizationTests).
 builder.Services.AddAuthorization(options => options.FallbackPolicy = options.DefaultPolicy);
 
-// Limites por IP no login, no cadastro, na recuperação de senha e na exportação dos dados (seção
-// RateLimits do appsettings.json).
 builder.Services.AddAppRateLimiting(builder.Configuration);
 
 builder.Services.AddScoped<ITokenService, TokenService>();
 builder.Services.AddScoped<IAuthService, AuthService>();
 
-// Login com o Google (seção Google do appsettings.json). Sem ClientId, as rotas respondem 404.
+// Sem Google:ClientId, as rotas do Google respondem 404.
 builder.Services.Configure<GoogleOptions>(builder.Configuration.GetSection(GoogleOptions.SectionName));
 builder.Services.AddSingleton<IGoogleTokenValidator, GoogleTokenValidator>();
 builder.Services.AddScoped<ICategoryService, CategoryService>();
@@ -88,8 +80,7 @@ builder.Services.AddScoped<ICategoryRuleService, CategoryRuleService>();
 builder.Services.AddScoped<IImportService, ImportService>();
 builder.Services.AddScoped<IExportService, ExportService>();
 
-// Recuperação de senha e envio de e-mail (seção Email; a chave só no deploy/.env). O e-mail sai em
-// segundo plano (EmailWorker), para a resposta não demorar mais quando a conta existe.
+// O e-mail sai em segundo plano, para a resposta não demorar mais quando a conta existe.
 builder.Services.AddOptions<EmailOptions>()
     .Bind(builder.Configuration.GetSection(EmailOptions.SectionName))
     .ValidateDataAnnotations()
@@ -107,32 +98,24 @@ builder.Services.AddScoped<IPasswordResetService, PasswordResetService>();
 builder.Services.AddSingleton<RegistrationEmailThrottle>();
 builder.Services.AddScoped<IRegistrationService, RegistrationService>();
 
-// Converte as exceções de domínio (Exceptions/) em respostas ProblemDetails.
 builder.Services.AddProblemDetails();
 builder.Services.AddExceptionHandler<ApiExceptionHandler>();
 
 builder.Services.AddControllers();
 
-// Idioma das mensagens pelo Accept-Language; sem ele, ou com idioma não suportado, português.
 builder.Services.Configure<RequestLocalizationOptions>(options =>
 {
     options.SetDefaultCulture(AppCultures.Portuguese)
         .AddSupportedCultures(AppCultures.Supported)
         .AddSupportedUICultures(AppCultures.Supported);
-    // Só o cabeçalho escolhe o idioma (sem ?culture= nem cookie).
     options.RequestCultureProviders = [new AcceptLanguageHeaderRequestCultureProvider()];
 });
 
-// Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 
-// Sem o cabeçalho "Server: Kestrel": não informa o servidor a quem não precisa saber (S.4).
 builder.WebHost.ConfigureKestrel(options => options.AddServerHeader = false);
 
-// HSTS (S.4), só fora de Development. Começa curto (Hsts:MaxAgeDays, 30 dias) e sem
-// includeSubDomains nem preload: se o HTTPS do servidor quebrar, os navegadores recusam o site
-// pelo tempo inteiro do HSTS. Aumentar depois que o deploy estiver estável (S.7). O UseHsts só
-// manda o cabeçalho em requisição HTTPS: atrás de um proxy reverso, só depois do ForwardedHeaders (S.7).
+// HSTS curto de propósito: se o HTTPS quebrar, os navegadores recusam o site pelo tempo inteiro dele.
 var hstsMaxAgeDays = builder.Configuration.GetValue("Hsts:MaxAgeDays", 30);
 if (hstsMaxAgeDays is < 1 or > 730)
     throw new InvalidOperationException("Hsts:MaxAgeDays deve ficar entre 1 e 730.");
@@ -143,15 +126,11 @@ builder.Services.AddHsts(options =>
     options.Preload = false;
 });
 
-// S.7: atrás do proxy (o nginx do deploy), o IP de quem acessa e o HTTPS chegam nos cabeçalhos
-// X-Forwarded-For e X-Forwarded-Proto. Só são aceitos de um proxy das redes de
-// ForwardedHeaders:KnownNetworks (a rede interna do Docker); de qualquer outro endereço, são
-// ignorados, senão qualquer um escolheria o próprio IP e fugiria do limite de tentativas.
-// Sem redes configuradas, vale só o loopback (o padrão do ASP.NET Core).
+// X-Forwarded-* só valem vindos das redes confiáveis (a rede interna do Docker): senão qualquer um
+// escolheria o próprio IP e fugiria do limite de tentativas.
 builder.Services.Configure<ForwardedHeadersOptions>(options =>
 {
     options.ForwardedHeaders = ForwardedHeaders.XForwardedFor | ForwardedHeaders.XForwardedProto;
-    // Só o último salto: o nginx põe o IP real (que ele recebeu da Cloudflare) no X-Forwarded-For.
     options.ForwardLimit = 1;
     var networks = builder.Configuration.GetSection("ForwardedHeaders:KnownNetworks").Get<string[]>() ?? [];
     if (networks.Length > 0)
@@ -165,17 +144,15 @@ builder.Services.Configure<ForwardedHeadersOptions>(options =>
 
 var app = builder.Build();
 
-// Antes de tudo: o IP e o esquema reais valem para o limite de tentativas, o HSTS e os logs.
+// Primeiro: o IP real vale para o limite de tentativas e o HSTS.
 app.UseForwardedHeaders();
 
-// Os cabeçalhos de segurança saem em toda resposta, inclusive nos erros.
 app.UseSecurityHeaders();
 
-// Antes do resto: as mensagens de erro do ApiExceptionHandler também saem no idioma pedido.
+// Antes do tratamento de erros, para as mensagens saírem no idioma pedido.
 app.UseRequestLocalization();
 app.UseExceptionHandler();
 
-// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.MapOpenApi();
@@ -187,8 +164,7 @@ else
 
 app.UseHttpsRedirection();
 
-// Depois do UseRequestLocalization (mensagem do 429 no idioma pedido) e antes da autenticação:
-// a tentativa recusada não chega a validar token nem a rodar o BCrypt.
+// Antes da autenticação: a tentativa recusada não chega a rodar o BCrypt.
 app.UseRateLimiter();
 
 app.UseAuthentication();

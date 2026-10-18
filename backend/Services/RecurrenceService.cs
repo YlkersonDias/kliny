@@ -7,17 +7,14 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Services;
 
-// Lançamentos recorrentes (8.5a). Toda consulta filtra pelo usuário do token (regra 2), além do
-// filtro global do AppDbContext.
 public class RecurrenceService(AppDbContext db) : IRecurrenceService
 {
-    // Por usuário: o bastante para aluguel, contas e assinaturas, e um teto para a sincronização.
     public const int MaxPerUser = 50;
 
-    // Teto de ocorrências geradas por regra numa sincronização; o resto vem na próxima.
+    // O resto vem na próxima sincronização.
     public const int MaxCreatedPerSync = 120;
 
-    // Teto de datas puladas numa regra pausada (100 anos), só para o laço nunca ser infinito.
+    // Só para o laço de uma regra pausada nunca ser infinito.
     private const int MaxSkippedPerSync = 1200;
 
     private const int SyncAttempts = 3;
@@ -60,7 +57,7 @@ public class RecurrenceService(AppDbContext db) : IRecurrenceService
         if (request.EndDate is { } end && end < start)
             throw new BusinessRuleException(Messages.RecurrenceEndBeforeStart);
 
-        // Um UPDATE só, sem tocar na NextDate: não esbarra numa sincronização que esteja gerando agora.
+        // Um UPDATE só, sem tocar na NextDate: não esbarra numa sincronização em andamento.
         var description = request.Description.Trim();
         var amount = request.Amount!.Value;
         var updated = await db.Recurrences
@@ -79,7 +76,6 @@ public class RecurrenceService(AppDbContext db) : IRecurrenceService
 
     public async Task DeleteAsync(int userId, int id)
     {
-        // O banco tira o vínculo das movimentações já geradas (SET NULL); elas ficam.
         var deleted = await db.Recurrences
             .Where(r => r.Id == id && r.UserId == userId)
             .ExecuteDeleteAsync();
@@ -89,8 +85,8 @@ public class RecurrenceService(AppDbContext db) : IRecurrenceService
 
     public async Task<RecurrenceSyncResponse> SyncAsync(int userId, DateOnly today)
     {
-        // Duas sincronizações ao mesmo tempo (duas abas): a NextDate é o controle de concorrência, e a
-        // que chegar depois desfaz tudo o que ia gravar e tenta de novo, já vendo o que a outra gerou.
+        // Sincronizações simultâneas: a NextDate é o controle de concorrência, e a que chega depois
+        // desfaz tudo e tenta de novo, já vendo o que a outra gerou.
         for (var attempt = 1; ; attempt++)
         {
             try
@@ -124,7 +120,7 @@ public class RecurrenceService(AppDbContext db) : IRecurrenceService
         {
             if (recurrence.Paused)
             {
-                // As datas que passaram durante a pausa não são lançadas: ao retomar, segue de hoje em diante.
+                // As datas da pausa não são lançadas: ao retomar, segue de hoje em diante.
                 for (var i = 0; i < MaxSkippedPerSync && recurrence.NextDate < today; i++)
                     recurrence.NextDate = RecurrenceSchedule.Next(recurrence.NextDate, recurrence.DayOfMonth);
                 continue;
@@ -146,11 +142,8 @@ public class RecurrenceService(AppDbContext db) : IRecurrenceService
             }
         }
 
-        // Primeiro reserva as regras (UPDATE ... WHERE NextDate = a lida), depois grava as movimentações,
-        // tudo na mesma transação. Nessa ordem, a segunda sincronização espera a trava da primeira e,
-        // ao conseguir, não acha mais a NextDate antiga: o EF lança DbUpdateConcurrencyException, e nada
-        // dela é gravado. Gravar as movimentações antes travaria as regras para leitura (chave
-        // estrangeira) nas duas, e uma esperaria a outra para sempre.
+        // Primeiro reserva as regras (UPDATE ... WHERE NextDate = a lida), depois grava as movimentações.
+        // Na ordem inversa, as duas travariam as regras para leitura e uma esperaria a outra para sempre.
         await db.SaveChangesAsync();
         db.Transactions.AddRange(generated);
         await db.SaveChangesAsync();

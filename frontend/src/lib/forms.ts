@@ -3,7 +3,6 @@ import i18n from '../i18n'
 
 export type FieldErrors<F extends string> = Partial<Record<F, string>>
 
-// Separa o erro da API em erros por campo (só os campos do formulário) e uma mensagem geral.
 export function splitApiError<F extends string>(
   error: unknown,
   fields: readonly F[],
@@ -24,7 +23,7 @@ export function splitApiError<F extends string>(
   return { fieldErrors, formError: allShown ? null : error.detail }
 }
 
-// Primeiro campo com erro, na ordem em que aparece na tela.
+// Na ordem em que aparece na tela.
 export function firstInvalidField<F extends string>(errors: FieldErrors<F>, fields: readonly F[]): F | undefined {
   return fields.find((field) => errors[field])
 }

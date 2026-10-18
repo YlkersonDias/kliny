@@ -1,5 +1,4 @@
-# Auto detect text files and perform LF normalization
 * text=auto
 
-# Scripts de shell sempre com LF: com CRLF o sh quebra (scripts/backend-tests-docker.sh).
+# Com CRLF, o sh quebra.
 *.sh text eol=lf

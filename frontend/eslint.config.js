@@ -22,8 +22,7 @@ export default defineConfig([
     },
   },
   {
-    // Texto da interface só pelo i18n (src/locales): acusa texto escrito direto no JSX e nas
-    // props que viram texto na tela ou no leitor de tela.
+    // Texto da interface só pelo i18n: acusa texto direto no JSX e nas props que viram texto.
     files: ['src/**/*.tsx'],
     plugins: { i18next },
     rules: {
@@ -36,9 +35,8 @@ export default defineConfig([
           ],
         },
         // Opções substituem o padrão do plugin (não somam): as listas abaixo repetem o padrão.
-        // Palavras: números, pontuação e símbolos soltos (" · ", "−", "404") e CONSTANTES.
         words: { exclude: ['[0-9!-/:-@[-`{-~\\s·−]+', '[A-Z_-]+'] },
-        // Funções chamadas dentro do JSX com argumentos que não são texto (classes CSS, chaves).
+        // Funções chamadas no JSX com argumentos que não são texto (classes CSS, chaves).
         callees: {
           exclude: [
             'i18n(ext)?', 't', 'require', 'addEventListener', 'removeEventListener', 'postMessage',

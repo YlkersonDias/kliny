@@ -5,10 +5,8 @@ using Microsoft.IdentityModel.JsonWebTokens;
 
 namespace Backend.Security;
 
-// Revogação de token (S.5). O JWT leva a versão de token do usuário (claim "tv"); a cada
-// requisição, a versão é conferida com a gravada no banco. "Sair de todos os dispositivos"
-// incrementa a versão, e todo token emitido antes passa a responder 401 na hora.
-// Sem cache de propósito: com cache, um token revogado ainda valeria até o cache vencer.
+// A versão de token (claim "tv") é conferida com a do banco a cada requisição. Sem cache, de
+// propósito: com cache, um token revogado ainda valeria até o cache vencer.
 public static class TokenVersionValidation
 {
     public const string ClaimType = "tv";
@@ -19,7 +17,6 @@ public static class TokenVersionValidation
         if (!int.TryParse(principal?.FindFirst(JwtRegisteredClaimNames.Sub)?.Value, out var userId)
             || !int.TryParse(principal.FindFirst(ClaimType)?.Value, out var tokenVersion))
         {
-            // Token sem a versão (emitido antes da S.5) ou malformado.
             context.Fail("Token sem versão.");
             return;
         }

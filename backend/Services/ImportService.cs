@@ -21,16 +21,13 @@ public interface IImportService
     Task<ImportResponse> ImportAsync(int userId, IReadOnlyList<ImportLine> lines);
 }
 
-// Importação de extrato (8.3). O arquivo é lido no navegador; aqui chegam só as linhas. Cada uma
-// vira uma movimentação comum com a chave de importação, única por usuário: importar o mesmo
-// arquivo de novo não duplica nada. Toda consulta filtra pelo usuário do token (regra 2), além
-// do filtro global do AppDbContext.
+// O arquivo é lido no navegador; aqui chegam só as linhas. A chave de importação, única por
+// usuário, impede que a mesma linha entre duas vezes.
 public class ImportService(AppDbContext db) : IImportService
 {
     private const int ImportAttempts = 3;
 
-    // SHA-256 em hex (64 caracteres) das partes que identificam a linha no banco de origem. Sem o
-    // FITID, a descrição entra no lugar dele. O "v1" deixa mudar a fórmula sem confundir chaves antigas.
+    // SHA-256 das partes que identificam a linha no banco de origem. O "v1" deixa mudar a fórmula.
     public static string Key(ImportLine line)
     {
         var parts = string.Join('\n',
@@ -49,8 +46,7 @@ public class ImportService(AppDbContext db) : IImportService
         var keys = KeysOf(lines);
         var imported = await ExistingKeysAsync(userId, keys);
 
-        // Lançamentos com a mesma data e o mesmo valor, sem contar operações de cofre: podem ser a
-        // mesma movimentação lançada à mão (ou importada de outro arquivo).
+        // Mesma data e mesmo valor, fora as operações de cofre: pode ser a mesma movimentação lançada à mão.
         var from = lines.Min(l => l.Date!.Value);
         var to = lines.Max(l => l.Date!.Value);
         var existing = await db.Transactions.AsNoTracking()
@@ -75,9 +71,7 @@ public class ImportService(AppDbContext db) : IImportService
             && await db.Categories.CountAsync(c => c.UserId == userId && categoryIds.Contains(c.Id)) != categoryIds.Count)
             throw new BusinessRuleException(Messages.CategoryNotFound);
 
-        // Duas importações do mesmo arquivo ao mesmo tempo (duas abas) passam uma de cada vez pela
-        // trava do usuário (InsertAsync). O índice único continua garantindo que cada linha entra
-        // uma vez só; se mesmo assim houver colisão ou deadlock, desfaz tudo e tenta de novo.
+        // O índice único garante que cada linha entra uma vez só; em colisão ou deadlock, tenta de novo.
         for (var attempt = 1; ; attempt++)
         {
             try
@@ -94,10 +88,8 @@ public class ImportService(AppDbContext db) : IImportService
     private async Task<ImportResponse> InsertAsync(int userId, IReadOnlyList<ImportLine> lines, string[] keys)
     {
         await using var dbTransaction = await db.Database.BeginTransactionAsync();
-        // Trava a linha do usuário, como o depósito do VaultService: a segunda importação simultânea
-        // espera a primeira terminar. Sem a trava, as duas leem as chaves antes de qualquer uma
-        // gravar, colidem no índice único e, repetindo na hora, podem esgotar as tentativas. A leitura
-        // das chaves vem depois da trava, então enxerga o que a anterior gravou e só pula.
+        // Trava a linha do usuário, como o depósito: importações simultâneas passam uma de cada vez,
+        // e a leitura das chaves, depois da trava, enxerga o que a anterior gravou.
         await db.Database.ExecuteSqlAsync($"SELECT Id FROM Users WHERE Id = {userId} FOR UPDATE");
         var imported = await ExistingKeysAsync(userId, keys);
 
@@ -132,7 +124,7 @@ public class ImportService(AppDbContext db) : IImportService
         return keys;
     }
 
-    // Lista, e não array: no .NET 10 o Contains de um array vira o de ReadOnlySpan, que o EF 9 não traduz.
+    // Lista, e não array: no .NET 10 o Contains de array vira o de ReadOnlySpan, que o EF 9 não traduz.
     private async Task<HashSet<string>> ExistingKeysAsync(int userId, string[] keys)
     {
         var list = keys.ToList();

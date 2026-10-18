@@ -1,7 +1,6 @@
-﻿# Cria, uma vez só, o par de chaves que cifra os backups do banco (ver deploy/README.md, "Chave dos
-# backups"). A chave pública fica em deploy\chave-backup\publica.asc (fora do Git) e só cifra; a
-# privada, protegida por uma frase-senha, vai para a pasta indicada, que precisa estar em outro disco
-# (o pen drive), e é a única forma de abrir os backups.
+﻿# Cria, uma vez só, o par de chaves que cifra os backups (deploy/README.md, "Chave dos backups").
+# A pública fica em deploy\chave-backup\publica.asc; a privada, protegida por uma frase-senha, vai
+# para uma pasta em outro disco e é a única forma de abrir os backups.
 #   powershell -ExecutionPolicy Bypass -File deploy\criar-chave-backup.ps1 -Pasta D:\Kliny-chave
 param(
     [Parameter(Mandatory = $true)][string]$Pasta
@@ -14,14 +13,13 @@ $publica = Join-Path $saida 'publica.asc'
 try {
     $Pasta = [System.IO.Path]::GetFullPath($Pasta)
     $root = [System.IO.Path]::GetPathRoot($Pasta)
-    # Pen drive desconectado ou ainda trancado pelo BitLocker.
     if (-not (Test-Path $root)) { throw "o disco $root não está disponível: conecte o pen drive e, se ele tiver BitLocker, destranque (dois cliques nele no Explorador)" }
     # A privada no mesmo disco do Kliny não protege nada: quem levasse o disco levaria as duas.
     if ($root -eq [System.IO.Path]::GetPathRoot($PSScriptRoot)) {
         throw "a chave privada precisa ficar em outro disco (o pen drive), e não em $root"
     }
     $privada = Join-Path $Pasta 'kliny-backup-chave-privada.asc'
-    # Trocar a chave deixaria os backups antigos só com a privada antiga: nunca por cima, sem querer.
+    # Trocar a chave deixaria os backups antigos só com a privada antiga.
     if (Test-Path $publica) { throw "já existe uma chave em $publica. Para trocar, veja deploy/README.md." }
     if (Test-Path $privada) { throw "já existe $privada" }
     New-Item -ItemType Directory -Force -Path $Pasta | Out-Null
@@ -32,9 +30,7 @@ try {
     if ($frase -ne [System.Net.NetworkCredential]::new('', $segunda).Password) { throw 'as duas frases-senha não são iguais' }
     if ($frase.Length -lt 12) { throw 'a frase-senha precisa ter pelo menos 12 caracteres' }
 
-    # A frase vai pela entrada padrão do container, em UTF-8 sem BOM (o padrão do PowerShell 5.1
-    # trocaria acentos por "?"). A chave privada volta pela saída padrão (ver chave-backup.sh): o
-    # pen drive não é montado no container, porque o Docker Desktop pode não enxergá-lo.
+    # UTF-8 sem BOM: o padrão do PowerShell 5.1 trocaria acentos por "?".
     $OutputEncoding = New-Object System.Text.UTF8Encoding $false
     $linhas = @($frase | & docker run --rm -i --network none `
         -v "${PSScriptRoot}\chave-backup.sh:/kliny/chave-backup.sh:ro" `
@@ -45,7 +41,7 @@ try {
     $chave = ($linhas -join "`n") + "`n"
     Remove-Variable linhas
     if ($code -ne 0 -or $chave -notmatch '-----BEGIN PGP PRIVATE KEY BLOCK-----' -or $chave -notmatch '-----END PGP PRIVATE KEY BLOCK-----') {
-        # Sem a privada, a pública não serve: os backups ficariam sem forma de abrir.
+        # Sem a privada, a pública não serve.
         Remove-Item $publica -ErrorAction SilentlyContinue
         throw 'a criação da chave falhou'
     }

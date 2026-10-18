@@ -6,7 +6,6 @@ import { ThemeToggle } from '../ui/ThemeToggle'
 
 const navLink = 'rounded-full px-3.5 py-2 text-sm font-medium text-muted transition-colors duration-200 hover:bg-background hover:text-foreground focus-visible:outline-2 focus-visible:outline-primary'
 
-// Menu fixo em pílula, translúcido. No celular, só a marca, tema, idioma e os dois botões de conta.
 export function LandingHeader() {
   const { t } = useTranslation(['landing', 'layout'])
 

@@ -1,11 +1,7 @@
 #!/bin/sh
-# Roda num container descartável da imagem mysql:8.4, chamado pelo deploy/restaurar-backup.ps1.
-# Abre um backup cifrado com a chave privada e a frase-senha, confere o conteúdo e, no modo
-# "importar", põe no banco com o kliny_migrator. Uso:
+# Chamado pelo deploy/restaurar-backup.ps1, num container descartável:
 #   restaurar-backup.sh conferir|importar <backup em /backups>
-# Pela entrada padrão chegam a frase-senha (primeira linha) e, depois, a chave privada: o pen drive
-# não é montado no container, porque o Docker Desktop pode não enxergá-lo (ver chave-backup.sh).
-# O conteúdo aberto fica só no /tmp deste container, que some no fim.
+# Pela entrada padrão chegam a frase-senha (primeira linha) e a chave privada (ver chave-backup.sh).
 set -eu
 mode="$1"
 backup="/backups/$2"

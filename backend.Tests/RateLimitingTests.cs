@@ -4,7 +4,6 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Limites por IP (AddRateLimiter) de ponta a ponta: 10 logins por minuto e 5 cadastros por hora.
 public class RateLimitingTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -88,7 +87,6 @@ public class RateLimitingTests
         Assert.Equal("Muitas tentativas. Tente novamente em 60 minutos.", await Detail(response));
     }
 
-    // "Esqueci minha senha" e a troca pelo link dividem o limite: 10 por hora por IP.
     [Fact]
     public async Task Recuperacao_de_senha_tem_limite_por_ip()
     {
@@ -122,7 +120,7 @@ public class RateLimitingTests
     [Fact]
     public async Task Exportacao_tem_limite_por_ip()
     {
-        // O limite vem antes do login: sem token, as 5 primeiras respondem 401 e a 6ª, 429.
+        // O limite vem antes da autenticação: sem token, as 5 primeiras respondem 401 e a 6ª, 429.
         using var app = new TestApp();
         var client = app.CreateClient();
         for (var i = 0; i < 5; i++)

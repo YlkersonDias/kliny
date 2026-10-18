@@ -10,17 +10,16 @@ import { StatItem } from '../ui/StatItem'
 interface MonthSummaryCardProps {
   month: ReportPeriod
   today: string
-  // Movimento do mês inteiro (inclui lançamentos com data depois de hoje).
+  // O mês inteiro, inclusive lançamentos com data depois de hoje.
   monthSummary: SummaryResponse
   // Saldos de hoje: "Na conta" não conta o que ainda não aconteceu.
   todaySummary: SummaryResponse
-  // Para saber se há receita ou gasto com data futura; vazio enquanto a timeline carrega.
+  // Vazio enquanto a timeline carrega.
   points: TimelinePoint[]
   vaultCount?: number
   children?: ReactNode
 }
 
-// Saldo negativo com o "−" tipográfico, igual aos outros valores.
 function formatBalance(value: number): string {
   return value < 0 ? formatSigned(value) : formatMoney(value)
 }
@@ -40,7 +39,6 @@ export function MonthSummaryCard({
       </p>
       {(todaySummary.vaultsBalance !== 0 || (vaultCount ?? 0) > 0) && (
         <p className="mt-2 flex flex-wrap items-center gap-2 text-sm text-muted">
-          {/* Âmbar só no ícone. */}
           <Icon name="vault" className="size-4 text-vault" />
           <span>
             <Trans
@@ -56,7 +54,7 @@ export function MonthSummaryCard({
       <div className="my-6 h-px bg-border" />
 
       <h2 className="text-lg font-semibold text-foreground">{t('month.thisMonth')}</h2>
-      {/* Convenção dos relatórios: expense já vem positivo; formatOutflow só põe o "−". */}
+      {/* expense já vem positivo; formatOutflow só põe o "−". */}
       <dl className="mt-3 grid grid-cols-1 gap-4 lg:grid-cols-3">
         <StatItem label={t('month.in')} value={formatSigned(monthSummary.income)} valueClass="text-income" icon={{ name: 'income', className: 'text-income' }} />
         <StatItem label={t('month.out')} value={formatOutflow(monthSummary.expense)} valueClass="text-expense" icon={{ name: 'expense', className: 'text-expense' }} />

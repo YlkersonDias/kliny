@@ -4,8 +4,6 @@ import { useAuth } from '../auth/useAuth'
 import { TokenPasswordPage } from '../components/auth/TokenPasswordPage'
 import { usePageTitle } from '../hooks/usePageTitle'
 
-// Fim do cadastro pelo link do e-mail: quem recebeu o link escolhe a senha, a conta é criada e a
-// pessoa já entra.
 export default function CreateAccountPage() {
   const { t } = useTranslation('auth')
   usePageTitle(t('createAccount.title'))

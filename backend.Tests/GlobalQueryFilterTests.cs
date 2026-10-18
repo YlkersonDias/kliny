@@ -5,8 +5,6 @@ using Microsoft.EntityFrameworkCore;
 
 namespace Backend.Tests;
 
-// S.6b: o filtro global do AppDbContext mostra categorias, cofres e movimentações só do usuário
-// logado, mesmo numa consulta sem Where(UserId), e nada sem usuário.
 public sealed class GlobalQueryFilterFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -25,7 +23,6 @@ public sealed class GlobalQueryFilterFixture : IAsyncLifetime
         UserB = await SeedAsync("filtro-b@kliny.test");
     }
 
-    // Uma categoria, uma receita e um cofre com depósito para cada usuário.
     private async Task<int> SeedAsync(string email)
     {
         using var client = Api.Client(await Api.RegisterAsync(email));
@@ -59,7 +56,7 @@ public class GlobalQueryFilterTests(GlobalQueryFilterFixture fixture) : IClassFi
         public int? UserId => userId;
     }
 
-    // Conecta com o usuário só de DML da API, como um service faria.
+    // Com o usuário só de DML da API.
     private AppDbContext Context(int? userId) =>
         new(new DbContextOptionsBuilder<AppDbContext>().UseMySql(fixture.Api.AppConnectionString, ServerVersion).Options,
             new FixedUser(userId));
@@ -69,7 +66,7 @@ public class GlobalQueryFilterTests(GlobalQueryFilterFixture fixture) : IClassFi
     {
         await using var asA = Context(fixture.UserA);
 
-        // Nenhum Where(UserId) aqui: só o filtro global protege.
+        // Sem Where(UserId): só o filtro global protege.
         var categories = await asA.Categories.ToListAsync(Ct);
         var vaults = await asA.Vaults.ToListAsync(Ct);
         var transactions = await asA.Transactions.ToListAsync(Ct);
@@ -128,8 +125,7 @@ public class GlobalQueryFilterTests(GlobalQueryFilterFixture fixture) : IClassFi
         Assert.Contains(fixture.UserB, owners);
     }
 
-    // O SQL da trava do cofre (VaultService.LockOwnedAsync) precisa sair como foi escrito: com o
-    // filtro, o EF o poria numa subconsulta e o FOR UPDATE deixaria de ficar no SELECT de fora.
+    // Com o filtro, o EF poria o FromSql numa subconsulta e o FOR UPDATE sairia do SELECT de fora.
     [Fact]
     public void Trava_do_cofre_continua_com_o_FOR_UPDATE_no_SELECT_de_fora()
     {

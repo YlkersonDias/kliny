@@ -2,7 +2,6 @@ import type { ReactNode } from 'react'
 import type { Category } from '../../api/types'
 import { categoryColorVar, categoryLook, type CategoryColor, type CategoryIconName } from '../../lib/categoryAppearance'
 
-// Desenhos dos ícones de categoria, no traço dos ícones do app (24 x 24, contorno de 1,8).
 const GLYPHS: Record<CategoryIconName, ReactNode> = {
   cart: <><path d="M3 4h2l2.4 11.2a1 1 0 0 0 1 .8h8.9a1 1 0 0 0 1-.8L20 8H6.2" /><circle cx="9" cy="20" r="1.3" /><circle cx="17" cy="20" r="1.3" /></>,
   home: <path d="M3 10.5 12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z" />,
@@ -39,16 +38,14 @@ export function CategoryGlyph({ icon, className = 'size-5' }: { icon: CategoryIc
 }
 
 interface CategoryIconProps {
-  // A categoria (cor e ícone dela), ou nula para "Sem categoria" (cinza, com a etiqueta).
+  // Nula para "Sem categoria" (cinza, com a etiqueta).
   category?: Pick<Category, 'color' | 'icon'> | null
-  // Para mostrar uma escolha ainda não salva (no formulário da categoria).
+  // Uma escolha ainda não salva, no formulário da categoria.
   look?: { color: CategoryColor; icon: CategoryIconName }
-  // Classe de tamanho do círculo, como "size-9".
   size?: string
 }
 
-// O ícone da categoria num círculo com a cor dela a 16%. Decorativo: o nome da categoria sempre
-// aparece ao lado, e a cor nunca é a única pista (nem substitui o sinal de receita e gasto).
+// Decorativo: o nome da categoria sempre aparece ao lado, e a cor nunca é a única pista.
 export function CategoryIcon({ category, look, size = 'size-9' }: CategoryIconProps) {
   const { color, icon } = look ?? categoryLook(category)
   const value = categoryColorVar(color)

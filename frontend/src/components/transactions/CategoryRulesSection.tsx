@@ -19,14 +19,13 @@ import { Spinner } from '../ui/Spinner'
 
 type RuleField = 'pattern' | 'categoryId'
 
-// Erro de salvar uma regra: o 409 (texto repetido) vem só em detail, mas pertence ao campo do texto.
+// O 409 (texto repetido) vem só em detail, mas pertence ao campo do texto.
 function ruleErrors(error: unknown): { pattern?: string; categoryId?: string; form: string | null } {
   if (error instanceof ApiError && error.status === 409) return { pattern: error.detail, form: null }
   const { fieldErrors, formError } = splitApiError<RuleField>(error, ['pattern', 'categoryId'])
   return { ...fieldErrors, form: formError }
 }
 
-// Texto e categoria de uma regra, para criar ou editar. Valida o mesmo que a API.
 function RuleForm({ rule, categories, onDone, submitLabel }: {
   rule?: CategoryRule
   categories: Category[]
@@ -94,7 +93,7 @@ function RuleForm({ rule, categories, onDone, submitLabel }: {
   )
 }
 
-// Aplicar a regra às movimentações que já existem: mostra quantas mudam antes de confirmar.
+// Mostra quantas movimentações mudam antes de confirmar.
 function ApplyRuleDialog({ rule, onClose, onApplied }: { rule: CategoryRule; onClose: () => void; onApplied: (count: number) => void }) {
   const { t } = useTranslation('categories')
   const [includeCategorized, setIncludeCategorized] = useState(false)
@@ -135,7 +134,6 @@ function ApplyRuleDialog({ rule, onClose, onApplied }: { rule: CategoryRule; onC
   )
 }
 
-// Regras de categoria (8.4), dentro de "Gerenciar categorias".
 export function CategoryRulesSection() {
   const { t } = useTranslation(['categories', 'common'])
   const rules = useCategoryRules()

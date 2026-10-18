@@ -4,8 +4,8 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Dados de A e B criados uma vez por execução (o cadastro tem limite de 5 por hora por IP).
-// Datas no passado: depósito e retirada não aceitam data futura.
+// Dados criados uma vez por execução: o cadastro tem limite por IP. Datas no passado, porque
+// depósito e retirada não aceitam data futura.
 public sealed class OwnershipFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -55,7 +55,6 @@ public sealed class OwnershipFixture : IAsyncLifetime
     }
 }
 
-// B tentando ler, alterar ou apagar o que é de A, endpoint por endpoint, contra o MySQL.
 public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipFixture>
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -63,7 +62,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
     private HttpClient AsA() => fixture.Api.Client(fixture.TokenA);
     private HttpClient AsB() => fixture.Api.Client(fixture.TokenB);
 
-    // {category}, {transaction}, {vault} e {vaultTransaction} viram os Ids de A.
     public static TheoryData<string, string, string?> EndpointsWithIdOfA => new()
     {
         { "GET", "/api/categories/{category}", null },
@@ -153,7 +151,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         var byCategory = await Json(b.GetAsync($"/api/reports/by-category?{period}&type=income", Ct));
         var timeline = await Json(b.GetAsync($"/api/reports/timeline?{period}&groupBy=month", Ct));
 
-        // Só a receita de 200 de B; A tem 1000 de receita e 100 no cofre no mesmo mês.
         Assert.Equal(200m, summary.GetProperty("income").GetDecimal());
         Assert.Equal(0m, summary.GetProperty("vaultDeposits").GetDecimal());
         Assert.Equal(200m, summary.GetProperty("accountBalance").GetDecimal());
@@ -163,7 +160,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Equal(200m, Assert.Single(timeline.EnumerateArray()).GetProperty("income").GetDecimal());
     }
 
-    // Orçamento (8.2): B não cria orçamento na categoria de A, não vê, não altera nem apaga o de A.
     [Fact]
     public async Task B_nao_mexe_no_orcamento_de_A()
     {
@@ -192,8 +188,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
-    // Recorrência (8.5a): B não vê, não altera, não pausa nem apaga a de A, não usa a categoria de A
-    // numa recorrência, e a sincronização de B não gera nada para A.
     [Fact]
     public async Task B_nao_mexe_na_recorrencia_de_A()
     {
@@ -238,7 +232,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
-    // Compra parcelada (8.5b): B não vê nem apaga a de A e não usa a categoria de A numa compra.
     [Fact]
     public async Task B_nao_mexe_na_compra_parcelada_de_A()
     {
@@ -278,8 +271,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
-    // Regras de categoria (8.4): B não vê, não edita, não apaga nem aplica a regra de A, não usa a
-    // categoria de A numa regra, e aplicar a regra de B nunca muda movimentação de A.
     [Fact]
     public async Task B_nao_mexe_nas_regras_de_categoria_de_A()
     {
@@ -303,7 +294,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
             Assert.Equal(HttpStatusCode.BadRequest, withCategoryOfA.StatusCode);
             Assert.Empty((await Json(b.GetAsync("/api/category-rules", Ct))).EnumerateArray());
 
-            // Regra de B com um texto que também está na movimentação de A: só as de B mudam.
             int categoryB;
             using (var created = await b.PostAsJsonAsync("/api/categories", new { name = "Renda B" }, Ct))
                 categoryB = (await created.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("id").GetInt32();
@@ -328,8 +318,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
-    // Importação (8.3): a chave de importação é por usuário. A mesma linha que A importou é nova
-    // para B (nem "já importada" nem "parecida"), e a importação de B não toca em nada de A.
     [Fact]
     public async Task B_nao_enxerga_nem_bloqueia_a_importacao_de_A()
     {
@@ -364,7 +352,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         await AssertDataOfAUnchanged();
     }
 
-    // Busca (8.1): B procurando pela descrição de A não acha nada de A, só o que é dele.
     [Fact]
     public async Task Busca_de_B_nunca_encontra_movimentacao_de_A()
     {
@@ -378,8 +365,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Equal(fixture.TransactionB, only.GetProperty("id").GetInt32());
     }
 
-    // Vínculo com o Google: B não toma a conta Google de A, e o que B faz no próprio vínculo não
-    // mexe no de A (as rotas não recebem Id: o usuário vem sempre do token).
     [Fact]
     public async Task B_nao_vincula_o_Google_de_A_nem_mexe_no_vinculo_dela()
     {
@@ -402,7 +387,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
             var me = await Json(a.GetAsync("/api/auth/me", Ct));
             Assert.True(me.GetProperty("googleLinked").GetBoolean());
 
-            // Entrar com o Google de A continua levando a A.
             using var anonymous = fixture.Api.Client();
             var signIn = await Json(anonymous.PostAsJsonAsync("/api/auth/google", new { credential = googleOfA }, Ct));
             Assert.Equal(me.GetProperty("id").GetInt32(), signIn.GetProperty("user").GetProperty("id").GetInt32());
@@ -429,7 +413,6 @@ public class OwnershipTests(OwnershipFixture fixture) : IClassFixture<OwnershipF
         Assert.Contains("Salário B", csv);
     }
 
-    // A, vista por ela mesma, continua como o fixture criou.
     private async Task AssertDataOfAUnchanged()
     {
         using var a = AsA();

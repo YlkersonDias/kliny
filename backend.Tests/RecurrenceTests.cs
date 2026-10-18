@@ -4,9 +4,7 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Lançamentos recorrentes (8.5a), contra o MySQL. As datas partem de hoje (UTC), porque a
-// sincronização só aceita a data de hoje. Os testes de uma classe rodam um de cada vez: cada um cria
-// as próprias regras, com descrição própria, e as dos testes anteriores já estão em dia.
+// As datas partem de hoje (UTC), porque a sincronização só aceita a data de hoje.
 public sealed class RecurrenceFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -39,7 +37,6 @@ public class RecurrenceTests(RecurrenceFixture fixture) : IClassFixture<Recurren
 
     private static DateOnly Today => DateOnly.FromDateTime(DateTime.UtcNow);
 
-    // Primeiro dia do mês, "months" meses a partir do atual (negativo = para trás).
     private static DateOnly MonthStart(int months) => new DateOnly(Today.Year, Today.Month, 1).AddMonths(months);
 
     private static string Iso(DateOnly date) => date.ToString("yyyy-MM-dd");
@@ -62,7 +59,6 @@ public class RecurrenceTests(RecurrenceFixture fixture) : IClassFixture<Recurren
         return (await response.Content.ReadFromJsonAsync<JsonElement>(Ct)).GetProperty("created").GetInt32();
     }
 
-    // As movimentações com essa descrição, da mais antiga para a mais nova.
     private async Task<JsonElement[]> TransactionsAsync(string description)
     {
         using var client = Client();
@@ -137,11 +133,9 @@ public class RecurrenceTests(RecurrenceFixture fixture) : IClassFixture<Recurren
         Assert.Empty(await TransactionsAsync("Streaming pausado"));
         var paused = await GetAsync(id);
         Assert.True(paused.GetProperty("paused").GetBoolean());
-        // A próxima é a primeira a partir de hoje: hoje, se for dia 1, ou o dia 1 do mês que vem.
         var next = Today.Day == 1 ? Today : MonthStart(1);
         Assert.Equal(Iso(next), paused.GetProperty("nextDate").GetString());
 
-        // Ao retomar, segue dali: os meses da pausa não aparecem.
         await UpdateAsync(id, new { description = "Streaming pausado", amount = -39.90m, paused = false });
         Assert.Equal(Today.Day == 1 ? 1 : 0, await SyncAsync());
     }
@@ -213,7 +207,6 @@ public class RecurrenceTests(RecurrenceFixture fixture) : IClassFixture<Recurren
         Assert.Equal(JsonValueKind.Null, (await GetAsync(rule.GetProperty("id").GetInt32())).GetProperty("categoryId").ValueKind);
     }
 
-    // Duas abas sincronizando juntas: cada mês é gerado uma vez só.
     [Fact]
     public async Task Sincronizacoes_simultaneas_nao_duplicam()
     {

@@ -4,9 +4,7 @@ using System.Text.Json;
 
 namespace Backend.Tests;
 
-// Busca na descrição e ordenação do extrato (8.1), contra o MySQL: a busca ignora maiúsculas e
-// acentos pela collation do banco, e a ordem só aceita a lista fechada (regra 6).
-// Os dados são criados uma vez por classe (o cadastro tem limite por IP).
+// Dados criados uma vez por classe (o cadastro tem limite por IP).
 public sealed class TransactionSearchFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -73,7 +71,6 @@ public class TransactionSearchTests(TransactionSearchFixture fixture) : IClassFi
         var (first, total) = await ListAsync("search=a&type=expense&pageSize=2&page=1");
         var (second, _) = await ListAsync("search=a&type=expense&pageSize=2&page=2");
 
-        // Todos os gastos têm "a"; a receita "Salário" fica de fora pelo tipo.
         Assert.Equal(4, total);
         Assert.Equal(["ALIMENTACAO restaurante", "Padaria"], first);
         Assert.Equal(["Aluguel", "Mercado Alimentação"], second);

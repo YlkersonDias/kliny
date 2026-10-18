@@ -3,18 +3,16 @@ interface ChoiceChipProps {
   value: string
   checked: boolean
   disabled?: boolean
-  // Altura menor, para ficar ao lado de um título (Gastos/Receitas nos Relatórios).
   compact?: boolean
   label: string
-  // Idioma do rótulo, quando difere do da página (nomes de idioma em Configurações).
+  // Quando difere do da página (nomes de idioma em Configurações).
   lang?: string
-  // Id do <input>, para devolver o foco a ele (troca de idioma).
+  // Para devolver o foco ao <input> depois da troca de idioma.
   id?: string
   onChange: () => void
 }
 
-// Opção de radio com aparência de botão: o <input> é de verdade (sr-only), a <label> é o alvo.
-// Radios com o mesmo name formam um grupo, e as setas trocam a opção.
+// O <input> é de verdade (sr-only) e a <label> é o alvo: as setas trocam a opção do grupo.
 export function ChoiceChip({ name, value, checked, disabled = false, compact = false, label, lang, id, onChange }: ChoiceChipProps) {
   return (
     <label

@@ -3,7 +3,7 @@ using Backend.Services.Email;
 
 namespace Backend.Tests;
 
-// Guarda os e-mails em vez de enviá-los: os testes nunca falam com o Resend.
+// Os testes nunca falam com o Resend.
 public sealed class FakeEmailSender : IEmailSender
 {
     private readonly ConcurrentQueue<EmailMessage> _sent = new();
@@ -16,7 +16,7 @@ public sealed class FakeEmailSender : IEmailSender
         return Task.CompletedTask;
     }
 
-    // O envio é em segundo plano (EmailWorker): espera a mensagem para o endereço chegar.
+    // O envio é em segundo plano: espera a mensagem chegar.
     public async Task<EmailMessage> WaitForAsync(string to, int alreadySeen, CancellationToken cancellationToken)
     {
         for (var i = 0; i < 100; i++)
@@ -31,8 +31,7 @@ public sealed class FakeEmailSender : IEmailSender
 
     public int CountFor(string to) => Sent.Count(m => m.To == to);
 
-    // Como o WaitForAsync, mas só um e-mail novo que passe no filtro: um aviso de segurança que chegue
-    // atrasado não é confundido com o e-mail do link.
+    // Um aviso de segurança que chegue atrasado não é confundido com o e-mail do link.
     public async Task<EmailMessage> WaitForAsync(string to, int alreadySeen, Func<EmailMessage, bool> match, CancellationToken cancellationToken)
     {
         for (var i = 0; i < 100; i++)

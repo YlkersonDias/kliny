@@ -3,7 +3,6 @@ import { DeleteVaultDialog } from './DeleteVaultDialog'
 import { VaultFormModal } from './VaultFormModal'
 import { VaultOperationModal, type VaultOperation } from './VaultOperationModal'
 
-// Qual modal de cofre está aberto (no máximo um), usado na lista e no detalhe.
 export type VaultDialog =
   | { kind: 'form'; vault?: Vault }
   | { kind: 'operation'; vault: Vault; operation: VaultOperation; initialAmount?: number }

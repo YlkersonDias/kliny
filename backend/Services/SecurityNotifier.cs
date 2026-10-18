@@ -7,9 +7,7 @@ using Microsoft.Extensions.Options;
 namespace Backend.Services;
 
 /// <summary>
-/// Avisa a dona da conta, por e-mail, quando o acesso a ela muda (senha trocada, conta Google
-/// vinculada ou desvinculada), para ela reagir se não foi ela. Vai só para o e-mail da própria
-/// conta, com o nome dela, e não muda nenhuma resposta da API (regra 4).
+/// Avisa a dona da conta, por e-mail, quando o acesso a ela muda, para ela reagir se não foi ela.
 /// </summary>
 public interface ISecurityNotifier
 {
@@ -18,8 +16,7 @@ public interface ISecurityNotifier
     void GoogleUnlinked(User user);
 }
 
-// O envio é pela mesma fila em segundo plano dos outros e-mails: uma falha no envio não desfaz a
-// ação, e o log não leva destinatário nem texto (regra 16).
+// Pela fila em segundo plano: uma falha no envio não desfaz a ação.
 public sealed class SecurityNotifier(IEmailQueue emailQueue, IOptions<EmailOptions> emailOptions, ILogger<SecurityNotifier> logger)
     : ISecurityNotifier
 {

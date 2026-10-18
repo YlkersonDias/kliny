@@ -3,8 +3,7 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Recurrences;
 
-// A data de hoje no navegador de quem usa: o servidor não sabe o fuso. Só é aceita a um dia, no
-// máximo, da data UTC (os fusos vão de UTC-12 a UTC+14).
+// O servidor não sabe o fuso: aceita só a um dia da data UTC (os fusos vão de UTC-12 a UTC+14).
 public class RecurrenceSyncRequest : IValidatableObject
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.DateRequired))]

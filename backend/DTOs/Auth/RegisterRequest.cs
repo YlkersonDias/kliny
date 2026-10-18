@@ -15,9 +15,7 @@ public class RegisterRequest
     public string Email { get; set; } = string.Empty;
 }
 
-// Fim do cadastro, pelo link do e-mail: a senha é escolhida aqui, por quem recebeu o link (e não
-// no formulário de cadastro). De 8 a 72 caracteres e no máximo 72 bytes em UTF-8 (S.6): o BCrypt
-// só usa os primeiros 72 bytes.
+// A senha é escolhida no link, por quem o recebeu, e não no formulário de cadastro.
 public class CompleteRegistrationRequest
 {
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.RegistrationTokenInvalid))]

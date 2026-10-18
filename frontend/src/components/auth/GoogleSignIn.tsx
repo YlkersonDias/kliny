@@ -8,12 +8,11 @@ import { GoogleButton } from '../ui/GoogleButton'
 
 interface GoogleSignInProps {
   text: 'signin_with' | 'signup_with'
-  // No login: avisa que o primeiro acesso cria a conta (o cadastro já tem o próprio aviso).
+  // No login: avisa que o primeiro acesso cria a conta.
   showPrivacyNotice?: boolean
 }
 
-// "ou" e o botão do Google, no login e no cadastro. Os dois entram pelo mesmo endpoint: a API
-// entra na conta vinculada, vincula ou cria. Depois, o PublicOnlyRoute leva para onde a pessoa ia.
+// O login e o cadastro usam o mesmo endpoint: a API entra na conta vinculada, vincula ou cria.
 export function GoogleSignIn({ text, showPrivacyNotice = false }: GoogleSignInProps) {
   const { t } = useTranslation('auth')
   const { signInWithGoogle } = useAuth()

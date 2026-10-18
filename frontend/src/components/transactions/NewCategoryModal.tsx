@@ -13,8 +13,7 @@ interface NewCategoryModalProps {
   onClose: () => void
 }
 
-// Atalho do formulário de movimentação: abre por cima dele, sem desmontá-lo,
-// então o que já foi digitado lá continua no lugar.
+// Abre por cima do formulário de movimentação, sem desmontá-lo: o que foi digitado lá continua.
 export function NewCategoryModal({ onCreated, onClose }: NewCategoryModalProps) {
   const { t } = useTranslation(['categories', 'common'])
   const [name, setName] = useState('')

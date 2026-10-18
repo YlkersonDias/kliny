@@ -3,9 +3,8 @@ using Backend.Resources;
 
 namespace Backend.DTOs.Auth;
 
-// Excluir a própria conta exige provar de novo quem é: a senha atual, ou, em conta só do Google,
-// um comprovante novo do Google da mesma conta. Um token roubado sozinho não apaga a conta.
-// Qual dos dois vale depende da conta; quem decide é o AuthService.
+// A senha atual ou, em conta só do Google, um comprovante novo do Google: um token roubado sozinho
+// não apaga a conta. O AuthService decide qual dos dois vale.
 public class DeleteAccountRequest
 {
     [MaxUtf8Bytes(PasswordRules.MaxBytes, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.PasswordTooLong))]

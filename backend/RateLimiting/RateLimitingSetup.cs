@@ -7,8 +7,7 @@ using Microsoft.Extensions.Options;
 
 namespace Backend.RateLimiting;
 
-// Limite por IP no login, no cadastro, na recuperação de senha e na exportação (AddRateLimiter nativo). O limite por e-mail do login
-// fica no LoginThrottle, porque o rate limiter decide antes de ler o corpo da requisição.
+// O limite por e-mail do login fica no LoginThrottle: o rate limiter decide antes de ler o corpo.
 public static class RateLimitingSetup
 {
     public const string LoginPolicy = "login";
@@ -16,7 +15,7 @@ public static class RateLimitingSetup
     public const string PasswordResetPolicy = "password-reset";
     public const string ExportPolicy = "export";
 
-    // A janela deslizante anda em 6 pedaços: na de 1 minuto, a cada 10 segundos.
+    // Na janela de 1 minuto, a cada 10 segundos.
     private const int SegmentsPerWindow = 6;
 
     public static IServiceCollection AddAppRateLimiting(this IServiceCollection services, IConfiguration configuration)
@@ -52,7 +51,6 @@ public static class RateLimitingSetup
                 PermitLimit = limit.PermitLimit,
                 Window = limit.Window,
                 SegmentsPerWindow = SegmentsPerWindow,
-                // Acima do limite, recusa na hora, sem fila.
                 QueueLimit = 0,
             });
     }
@@ -60,8 +58,7 @@ public static class RateLimitingSetup
     private static SlidingWindowLimit Limit(HttpContext context, Func<RateLimitOptions, SlidingWindowLimit> select) =>
         select(context.RequestServices.GetRequiredService<IOptions<RateLimitOptions>>().Value);
 
-    // 429 em ProblemDetails, como os outros erros, com a mensagem no idioma da requisição
-    // (o UseRateLimiter vem depois do UseRequestLocalization).
+    // A mensagem sai no idioma da requisição: o UseRateLimiter vem depois do UseRequestLocalization.
     private static async ValueTask OnRejectedAsync(OnRejectedContext rejected, CancellationToken cancellationToken)
     {
         var context = rejected.HttpContext;

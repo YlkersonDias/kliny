@@ -1,5 +1,4 @@
-// Imagem do mascote em WebP, com PNG de reserva. Decorativa (alt vazio): o texto ao lado dá o sentido.
-// "large": a versão de 1024 px também entra no srcset, para telas de alta densidade.
+// Decorativa (alt vazio): o texto ao lado dá o sentido. "large" põe a versão de 1024 px no srcset.
 export function Mascot({ name, sizes, large = false, className = '', lazy = false }: {
   name: string
   sizes: string

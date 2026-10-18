@@ -5,8 +5,7 @@ namespace Backend.DTOs.Auth;
 
 public class LoginRequest
 {
-    // S.6: os mesmos limites do cadastro. Acima deles nenhuma conta pode existir, e o 400 de
-    // validação não revela nada sobre a conta (vale para qualquer e-mail).
+    // Os mesmos limites do cadastro: o 400 de validação não revela nada sobre a conta.
     [Required(ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailRequired))]
     [StringLength(255, ErrorMessageResourceType = typeof(Messages), ErrorMessageResourceName = nameof(Messages.EmailMaxLength))]
     public string Email { get; set; } = string.Empty;

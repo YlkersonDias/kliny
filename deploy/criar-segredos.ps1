@@ -1,6 +1,5 @@
-﻿# Cria o deploy/.env com senhas e chave do JWT aleatórias (S.7). Não mostra nenhum valor na tela.
-# Se o .env já existir, não faz nada: trocar a senha de um usuário do MySQL depois que o banco foi
-# criado exige mudar no MySQL também (ver deploy/README.md).
+﻿# Cria o deploy/.env com senhas e chave do JWT aleatórias, sem mostrar nenhum valor na tela. Se o
+# .env já existir, não faz nada: trocar uma senha do MySQL exige mudar no MySQL também.
 #   powershell -ExecutionPolicy Bypass -File deploy\criar-segredos.ps1
 $ErrorActionPreference = 'Stop'
 $envFile = Join-Path $PSScriptRoot '.env'
@@ -12,7 +11,7 @@ if (Test-Path $envFile) {
 function New-Secret([int] $bytes) {
     $buffer = New-Object byte[] $bytes
     [System.Security.Cryptography.RandomNumberGenerator]::Create().GetBytes($buffer)
-    # Hex: só letras e números, sem caracteres que quebrem a connection string.
+    # Hex: sem caracteres que quebrem a connection string.
     return -join ($buffer | ForEach-Object { $_.ToString('x2') })
 }
 
@@ -31,7 +30,6 @@ $lines = @(
 # UTF-8 sem BOM: o Docker Compose lê o arquivo como texto puro.
 [System.IO.File]::WriteAllLines($envFile, $lines, (New-Object System.Text.UTF8Encoding $false))
 
-# Só o usuário atual lê o arquivo.
 icacls $envFile /inheritance:r /grant:r "$($env:USERNAME):(R,W)" | Out-Null
 Write-Host "Criado $envFile (só o seu usuário do Windows tem acesso)."
 Write-Host "Backups em $backupDir. Falta colar o TUNNEL_TOKEN, quando criar o túnel."

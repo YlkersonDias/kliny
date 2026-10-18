@@ -8,7 +8,6 @@ using Microsoft.Extensions.DependencyInjection;
 
 namespace Backend.Tests;
 
-// S.4: cabeçalhos de segurança em toda resposta da API, inclusive erros, e HSTS fora de Development.
 public partial class SecurityHeadersTests
 {
     private static CancellationToken Ct => TestContext.Current.CancellationToken;
@@ -92,7 +91,7 @@ public partial class SecurityHeadersTests
         last.Dispose();
     }
 
-    // O UseHsts só manda o cabeçalho em HTTPS e fora de localhost; por isso o endereço https://kliny.test.
+    // O UseHsts só manda o cabeçalho em HTTPS e fora de localhost.
     [Theory]
     [InlineData("Production", true)]
     [InlineData("Development", false)]

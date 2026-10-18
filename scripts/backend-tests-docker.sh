@@ -1,16 +1,11 @@
 #!/bin/sh
 # Roda os testes do backend num container do SDK do .NET, com um MySQL 8.4 descartável, como no CI.
-# Existe porque o Smart App Control do Windows bloqueia o Backend.dll recompilado na máquina de
-# desenvolvimento; dentro do container Linux ele não age.
 #
-# Uso (Git Bash, na raiz do repositório):
 #   scripts/backend-tests-docker.sh                                # todos os testes
 #   scripts/backend-tests-docker.sh Backend.Tests.MigrationsTests  # só uma classe
 #   scripts/backend-tests-docker.sh --down                         # apaga os containers e a rede
 #
-# Os containers (kliny-test-mysql e kliny-test-sdk) ficam ligados entre uma execução e outra, para
-# a próxima ser rápida. A senha do MySQL é gerada na primeira execução e só existe dentro deles;
-# nada é gravado no disco. O repositório entra só para leitura e é copiado a cada execução.
+# Os containers ficam ligados entre uma execução e outra. A senha do MySQL só existe dentro deles.
 set -e
 
 NETWORK=kliny-test

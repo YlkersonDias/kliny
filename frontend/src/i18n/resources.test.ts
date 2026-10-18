@@ -1,7 +1,6 @@
 import { describe, expect, it } from 'vitest'
 import { resources } from './resources'
 
-// Achata { a: { b: 'x' } } em { 'a.b': 'x' }.
 function flatten(value: unknown, prefix = ''): Record<string, string> {
   if (typeof value === 'string') return { [prefix]: value }
   const out: Record<string, string> = {}
@@ -11,7 +10,7 @@ function flatten(value: unknown, prefix = ''): Record<string, string> {
   return out
 }
 
-// Variáveis ({{name}}) e marcações do <Trans> (<name/>, <strong>) de um texto, em ordem alfabética.
+// Variáveis ({{name}}) e marcações do <Trans> (<name/>, <strong>), em ordem alfabética.
 function placeholders(text: string): string[] {
   const vars = [...text.matchAll(/\{\{\s*(\w+)\s*\}\}/g)].map((m) => `{{${m[1]}}}`)
   const tags = [...text.matchAll(/<\/?(\w+)\s*\/?>/g)].map((m) => m[0])

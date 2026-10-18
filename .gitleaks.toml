@@ -1,5 +1,4 @@
-# Configuração do gitleaks (job "Segredos" do CI): as regras padrão e só as exceções abaixo, cada
-# uma presa ao arquivo e ao valor exatos (condition = "AND"). Valor novo precisa de revisão.
+# Cada exceção fica presa ao arquivo e ao valor exatos (condition = "AND").
 
 [extend]
 useDefault = true

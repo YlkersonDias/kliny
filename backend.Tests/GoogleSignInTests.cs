@@ -6,9 +6,7 @@ using static Backend.Tests.FakeGoogleTokenValidator;
 
 namespace Backend.Tests;
 
-// Entrar com o Google (POST /api/auth/google), contra o MySQL, com o validador do Google falso.
-// O Google só decide pelo e-mail (vincular ou criar conta) quando é a autoridade sobre ele, e toda
-// recusa responde igual, sem revelar se o e-mail tem conta. 2 cadastros nesta classe.
+// Com o validador do Google falso.
 public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>
 {
     private const string SignInFailed =
@@ -43,7 +41,7 @@ public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>
         return await client.PostAsJsonAsync("/api/auth/login", new { email, password }, Ct);
     }
 
-    // Lido direto no banco: a API não tem como dizer se um e-mail tem conta (regra 4).
+    // Direto no banco: a API não tem como dizer se um e-mail tem conta.
     private async Task<long> UsersWithEmailAsync(string email)
     {
         await using var connection = new MySqlConnection(api.AppConnectionString);
@@ -70,7 +68,6 @@ public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>
         using (var again = await GoogleAsync(Credential("g-nova", "nova.pessoa@gmail.com")))
             Assert.Equal(id, (await UserOf(again)).GetProperty("id").GetInt32());
 
-        // A conta não tem senha: o login com senha nunca entra nela.
         using var login = await LoginAsync("nova.pessoa@gmail.com", "qualquer-senha");
         Assert.Equal(HttpStatusCode.Unauthorized, login.StatusCode);
         Assert.Equal(1, await UsersWithEmailAsync("nova.pessoa@gmail.com"));
@@ -111,7 +108,6 @@ public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>
             Assert.True(user.GetProperty("googleLinked").GetBoolean());
         }
 
-        // A senha continua valendo, e não surgiu outra conta.
         using var login = await LoginAsync("vincular@gmail.com", "senha12345");
         Assert.Equal(HttpStatusCode.OK, login.StatusCode);
         Assert.Equal(1, await UsersWithEmailAsync("vincular@gmail.com"));
@@ -125,7 +121,6 @@ public class GoogleSignInTests(MySqlApi api) : IClassFixture<MySqlApi>
         using var existing = await GoogleAsync(Credential("g-intruso", "outra@kliny.test"));
         using var missing = await GoogleAsync(Credential("g-ninguem", "ninguem@kliny.test"));
 
-        // Mesma resposta com e sem conta: quem tenta não descobre se o e-mail está cadastrado.
         Assert.Equal(HttpStatusCode.Unauthorized, existing.StatusCode);
         Assert.Equal(HttpStatusCode.Unauthorized, missing.StatusCode);
         Assert.Equal(SignInFailed, await DetailOf(existing));

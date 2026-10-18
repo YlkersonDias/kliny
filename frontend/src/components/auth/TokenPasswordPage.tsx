@@ -13,8 +13,8 @@ import { Input } from '../ui/Input'
 const FIELDS = ['password', 'confirmPassword'] as const
 type Field = (typeof FIELDS)[number]
 
-// O token chega depois do "#" (o navegador não o manda a servidor nenhum): lido uma vez e tirado
-// da barra de endereço, para não ficar no histórico nem aparecer num print da tela.
+// O token vem depois do "#" (o navegador não o manda ao servidor) e sai da barra de endereço,
+// para não ficar no histórico nem aparecer num print.
 function readToken(): string {
   return decodeURIComponent(window.location.hash.replace(/^#/, ''))
 }
@@ -25,17 +25,14 @@ interface TokenPasswordPageProps {
   passwordLabel: string
   submitLabel: string
   submittingLabel: string
-  // Sem token no endereço.
   missingText: string
-  // Link para pedir outro (link vencido ou já usado).
   askAgainTo: string
   askAgainLabel: string
   submit: (token: string, password: string) => Promise<unknown>
   onSuccess: () => void
 }
 
-// Página aberta pelo link de um e-mail: senha nova e confirmação, com o token do link. Usada para
-// trocar a senha (/redefinir-senha) e para terminar o cadastro (/criar-conta).
+// Usada por /redefinir-senha e /criar-conta.
 export function TokenPasswordPage({
   title, subtitle, passwordLabel, submitLabel, submittingLabel, missingText, askAgainTo, askAgainLabel, submit, onSuccess,
 }: TokenPasswordPageProps) {
@@ -48,8 +45,7 @@ export function TokenPasswordPage({
   const confirmRef = useRef<HTMLInputElement>(null)
   const mutation = useMutation({ mutationFn: (password: string) => submit(token, password) })
 
-  // Tira o token da barra de endereço. Um link aberto com a página já aberta só muda o "#", sem
-  // recarregar: o hashchange pega o token novo.
+  // Um link aberto com a página já aberta só muda o "#": o hashchange pega o token novo.
   useEffect(() => {
     function takeToken() {
       if (!window.location.hash) return

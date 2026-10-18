@@ -9,7 +9,7 @@ import { clearSimulatorForm } from '../lib/simulatorStore'
 import { AuthContext, type AuthContextValue } from './AuthContext'
 import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
 
-// setTimeout aceita no máximo ~24,8 dias; acima disso o temporizador dispara na hora.
+// setTimeout aceita no máximo ~24,8 dias; acima disso dispara na hora.
 const MAX_TIMEOUT = 2_147_483_647
 
 export function AuthProvider({ children }: { children: ReactNode }) {
@@ -25,19 +25,17 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     disableGoogleAutoSelect()
     // O próximo usuário do navegador não pode ver os dados do anterior.
     queryClient.clear()
-    // Nem a simulação dele (sair, sair de todos os dispositivos, sessão expirada, conta excluída).
     clearSimulatorForm()
   }, [queryClient])
 
   const expire = useCallback(() => endSession(i18n.t('errors:sessionExpired')), [endSession])
 
-  // Registrado antes da validação abaixo, para o 401 do /me já encerrar a sessão.
+  // Antes da validação abaixo, para o 401 do /me já encerrar a sessão.
   useEffect(() => {
     setUnauthorizedHandler(expire)
     return () => setUnauthorizedHandler(null)
   }, [expire])
 
-  // Ao abrir o app, confirma com a API que o token guardado ainda vale.
   useEffect(() => {
     if (!isValidating) return
     const controller = new AbortController()
@@ -49,7 +47,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
         saveSession(updated)
         setSession(updated)
       })
-      // 401 já foi tratado pelo handler. Sem conexão, mantém a sessão: as próximas chamadas mostram o erro.
+      // Sem conexão, mantém a sessão: as próximas chamadas mostram o erro.
       .catch(() => {})
       .finally(() => {
         if (!controller.signal.aborted) setIsValidating(false)
@@ -57,7 +55,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     return () => controller.abort()
   }, [isValidating])
 
-  // Encerra a sessão quando o token vence.
   useEffect(() => {
     if (session === null) return
     const delay = Math.min(Math.max(Date.parse(session.expiresAt) - Date.now(), 0), MAX_TIMEOUT)
@@ -94,14 +91,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
 
   const signOut = useCallback(() => endSession(null), [endSession])
 
-  // Só encerra a sessão local depois que a API confirmou: se falhar, os outros aparelhos
-  // continuariam entrando, e a tela precisa mostrar o erro.
+  // A sessão local só termina depois que a API confirma: se falhar, os outros aparelhos continuariam entrando.
   const signOutEverywhere = useCallback(async () => {
     await authApi.logoutAll()
     endSession(i18n.t('auth:signedOutEverywhere'))
   }, [endSession])
 
-  // Como no signOutEverywhere: a sessão local só termina depois que a API confirmou.
   const deleteAccount = useCallback(async (confirmation: authApi.DeleteAccountConfirmation) => {
     await authApi.deleteAccount(confirmation)
     endSession(i18n.t('auth:accountDeleted'))

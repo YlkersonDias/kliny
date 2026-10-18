@@ -1,11 +1,10 @@
-// Aparência dos botões, também usada em links com cara de botão (navegação continua sendo <a>).
+// Também usada em links com cara de botão (a navegação continua sendo <a>).
 export type Variant = 'primary' | 'secondary' | 'ghost' | 'danger'
 
 export const variants: Record<Variant, string> = {
   primary: 'bg-primary text-on-primary hover:bg-primary-hover',
   secondary: 'border border-border bg-surface text-foreground hover:bg-background',
   ghost: 'text-muted hover:bg-background hover:text-foreground',
-  // on-danger: branco no claro (4,8:1), marinho no escuro (6,6:1); o hover só aumenta o contraste.
   danger: 'bg-danger text-on-danger hover:bg-danger-hover',
 }
 

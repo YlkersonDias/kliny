@@ -2,8 +2,7 @@ import { describe, expect, it } from 'vitest'
 import i18n from './index'
 import { resources } from './resources'
 
-// O português trata 0 como singular (Intl.PluralRules dá "one"), então sem a forma _zero
-// "0 cofres" sairia "0 cofre". Ver resources.ts.
+// O português trata 0 como singular: sem a forma _zero, "0 cofres" sairia "0 cofre".
 
 describe('plural com contagem 0', () => {
   it('o pt-BR põe 0 na categoria one, não na other', () => {
@@ -17,7 +16,6 @@ describe('plural com contagem 0', () => {
   })
 })
 
-// Caminhos ("ns:a.b.chave") de todas as chaves terminadas em _one.
 function oneKeys(node: unknown, path: string): string[] {
   if (typeof node !== 'object' || node === null) return []
   return Object.entries(node).flatMap(([key, value]) => {

@@ -2,23 +2,20 @@ import { currentLanguage } from '../i18n'
 import type { Language } from './language'
 import { MONEY_MAX, parseMoneyInput } from './money'
 
-// Simulador de aportes: só uma conta com os valores que a pessoa digita. Nada é sugerido, guardado
-// ou enviado à API. O saldo rende a taxa do mês e, no fim do mês, recebe o aporte, o mesmo que
-// M = P·(1 + r)^n + A·((1 + r)^n − 1) / r.
+// Só uma conta com os valores digitados: o saldo rende a taxa do mês e recebe o aporte no fim dele,
+// o mesmo que M = P·(1 + r)^n + A·((1 + r)^n − 1) / r.
 
 export type RateUnit = 'month' | 'year'
 export type TermUnit = 'month' | 'year'
 
-// Limites para a conta continuar fazendo sentido (e caber no number do JavaScript).
 export const SIMULATOR_MAX_MONTHS = 600
 export const SIMULATOR_MAX_RATE: Record<RateUnit, number> = { month: 20, year: 500 }
-// Até 24 meses, um ponto por mês; acima, um por ano (e o último mês, se o prazo não fecha um ano).
+// Até 24 meses, um ponto por mês; acima, um por ano.
 const MONTHLY_POINTS_UP_TO = 24
 
 export interface SimulatorInput {
   initial: number
   monthly: number
-  // Em %, na unidade de rateUnit.
   rate: number
   rateUnit: RateUnit
   months: number
@@ -34,7 +31,7 @@ export type SimulationResult =
   | { ok: true; points: SimulationPoint[]; byMonth: boolean; total: number; contributed: number; growth: number }
   | { ok: false; reason: 'tooLarge' }
 
-// Taxa mensal em decimal. Ao ano, a equivalente composta: (1 + a)^(1/12) − 1.
+// Ao ano, a taxa mensal equivalente composta: (1 + a)^(1/12) − 1.
 export function monthlyRate(rate: number, unit: RateUnit): number {
   const decimal = rate / 100
   return unit === 'month' ? decimal : (1 + decimal) ** (1 / 12) - 1
@@ -60,7 +57,6 @@ const PERCENT_PATTERN: Record<Language, RegExp> = {
   'en-US': /^(\d{1,3})(?:\.(\d{1,4}))?$/,
 }
 
-// "0,9" (ou "0.9" em inglês), com ou sem "%". Até 4 casas. Devolve null se não for uma taxa.
 export function parsePercentInput(text: string, language: Language = currentLanguage()): number | null {
   const match = PERCENT_PATTERN[language].exec(text.trim().replace(/\s*%$/, ''))
   if (!match) return null
@@ -81,12 +77,10 @@ export type SimulatorError = 'invalidMoney' | 'invalidRate' | 'rateTooHigh' | 'i
 
 export type SimulatorParse =
   | { status: 'ready'; input: SimulatorInput }
-  // Falta a taxa, o prazo, ou algum valor (capital ou aporte): nada a mostrar ainda.
   | { status: 'incomplete'; errors: Partial<Record<SimulatorField, SimulatorError>> }
   | { status: 'invalid'; errors: Partial<Record<SimulatorField, SimulatorError>> }
 
-// Campos vazios não são erro: o capital e o aporte vazios valem zero, e sem taxa ou prazo a tela só
-// espera. Erro é texto que não é valor, taxa acima do limite ou prazo fora de 1 a 50 anos.
+// Campos vazios não são erro: a tela só espera.
 export function parseSimulatorForm(form: SimulatorForm, language: Language = currentLanguage()): SimulatorParse {
   const errors: Partial<Record<SimulatorField, SimulatorError>> = {}
 

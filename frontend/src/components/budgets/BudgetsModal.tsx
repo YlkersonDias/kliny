@@ -16,8 +16,7 @@ interface BudgetsModalProps {
   onClose: () => void
 }
 
-// "Definir orçamentos" (8.2): um campo de limite mensal por categoria. Campo vazio = sem orçamento.
-// Só o que mudou vai para a API.
+// Campo vazio = sem orçamento. Só o que mudou vai para a API.
 export function BudgetsModal({ budgets, onClose }: BudgetsModalProps) {
   const { t } = useTranslation(['dashboard', 'common'])
   const categories = useCategories()

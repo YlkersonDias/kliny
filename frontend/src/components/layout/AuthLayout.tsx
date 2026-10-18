@@ -8,28 +8,21 @@ import { ThemeToggle } from '../ui/ThemeToggle'
 interface AuthLayoutProps {
   title: string
   subtitle: string
-  // Mascote apoiado na borda superior do cartão (só na tela de login).
   mascot?: boolean
   children: ReactNode
 }
 
-// Login e cadastro: cartão branco sobre o fundo lilás (o texto fica todo no cartão).
 export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLayoutProps) {
   const { t } = useTranslation('privacy')
 
   return (
     <div className="relative flex min-h-dvh flex-col items-center justify-center bg-surface-soft px-4 py-10">
-      {/* Antes de entrar já dá para trocar o idioma e o tema (os padrões são português e escuro). */}
       <div className="absolute right-3 top-3 flex items-center gap-1">
         <LanguageSwitch />
         <ThemeToggle onSoft />
       </div>
       <div className="w-full max-w-sm">
-        {/*
-          O mascote fica fora do fluxo, então a margem reserva o espaço dele acima do cartão.
-          Percentuais de margem são relativos à largura do cartão: a imagem (440x239) ocupa
-          91,7% da largura, ou seja 49,8% de altura, menos os 3,54% que descem sobre a borda.
-        */}
+        {/* O mascote fica fora do fluxo: a margem (relativa à largura do cartão) reserva o espaço dele. */}
         <main className={`relative rounded-2xl bg-surface p-6 shadow-lg shadow-primary/10 sm:p-8 ${mascot ? 'mt-[46.3%]' : ''}`}>
           {mascot && (
             <img
@@ -47,7 +40,7 @@ export function AuthLayout({ title, subtitle, mascot = false, children }: AuthLa
           <p className="mt-1 text-sm text-muted">{subtitle}</p>
           <div className="mt-6">{children}</div>
         </main>
-        {/* Sobre o lilás só o foreground passa de 4,5:1 (ver a paleta no CLAUDE.md). */}
+        {/* Sobre o lilás só o foreground passa de 4,5:1. */}
         <p className="mt-4 text-center text-sm">
           <Link to="/privacidade" className="text-foreground underline underline-offset-2">
             {t('footerLink')}

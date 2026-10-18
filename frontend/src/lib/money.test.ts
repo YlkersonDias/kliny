@@ -155,23 +155,17 @@ describe('formatMoneyTyping', () => {
 
 describe('caretAfterTyping', () => {
   it('no fim, continua no fim mesmo com um ponto novo', () => {
-    // "1.234" + "5" no fim: "1.2345" vira "12.345".
     expect(caretAfterTyping('1.2345', 6, '12.345', 'pt-BR')).toBe(6)
   })
 
   it('no meio, fica depois do dígito digitado', () => {
-    // "1.234" com "9" depois do 1: "19.234" vira "19.234", cursor depois do 9.
     expect(caretAfterTyping('19.234', 2, '19.234', 'pt-BR')).toBe(2)
-    // "12.345" com "6" depois do 2: "126.345" vira "126.345".
     expect(caretAfterTyping('126.345', 3, '126.345', 'pt-BR')).toBe(3)
-    // "999" com "1" no começo: "1999" vira "1.999", cursor depois do 1.
     expect(caretAfterTyping('1999', 1, '1.999', 'pt-BR')).toBe(1)
   })
 
   it('apagando, o ponto que sobra não prende o cursor', () => {
-    // "12.345" apagando o "2": "1.345" vira "1.345", cursor depois do 1.
     expect(caretAfterTyping('1.345', 1, '1.345', 'pt-BR')).toBe(1)
-    // "1.234" apagando o "1": ".234" vira "234", cursor no começo.
     expect(caretAfterTyping('.234', 0, '234', 'pt-BR')).toBe(0)
   })
 

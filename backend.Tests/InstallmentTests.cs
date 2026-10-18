@@ -5,7 +5,6 @@ using Backend.Services;
 
 namespace Backend.Tests;
 
-// Divisão e datas das parcelas (8.5b), sem banco.
 public class InstallmentSplitTests
 {
     [Theory]
@@ -46,7 +45,7 @@ public class InstallmentSplitTests
     }
 }
 
-// Compras parceladas (8.5b), contra o MySQL. Datas a partir de hoje (UTC), que a API aceita como "hoje".
+// Datas a partir de hoje (UTC), que a API aceita como "hoje".
 public sealed class InstallmentFixture : IAsyncLifetime
 {
     public MySqlApi Api { get; } = new();
@@ -142,7 +141,6 @@ public class InstallmentTests(InstallmentFixture fixture) : IClassFixture<Instal
     [Fact]
     public async Task Faltam_conta_as_parcelas_depois_de_hoje()
     {
-        // Três no passado, a de hoje e duas no futuro: faltam 2.
         var plan = await CreateAsync(new { description = "Sofá", total = 600m, count = 6, firstDate = Iso(Today.AddMonths(-3)) });
 
         var listed = (await ListAsync()).Single(p => p.GetProperty("id").GetInt32() == plan.GetProperty("id").GetInt32());

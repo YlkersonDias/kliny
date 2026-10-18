@@ -21,8 +21,6 @@ function systemPrefersDark() {
   return window.matchMedia(DARK_QUERY).matches
 }
 
-// O index.html já aplicou o tema antes do React; aqui ele acompanha a escolha na tela, a mudança
-// do sistema operacional (em "Sistema") e a escolha feita em outra aba.
 export function ThemeProvider({ children }: { children: ReactNode }) {
   const [preference, setPreferenceState] = useState(readThemePreference)
   const prefersDark = useSyncExternalStore(subscribeSystemTheme, systemPrefersDark)
@@ -32,8 +30,7 @@ export function ThemeProvider({ children }: { children: ReactNode }) {
     const root = document.documentElement
     applyThemeColor(theme)
     if (root.dataset.theme === theme) return
-    // Sem transição durante a troca: botões e links com transition-colors mudariam em 150 ms
-    // enquanto o fundo muda na hora, e a tela passaria por combinações sem contraste.
+    // Sem transição durante a troca: com transition-colors, a tela passaria por combinações sem contraste.
     root.dataset.themeSwitching = ''
     root.dataset.theme = theme
     void root.offsetHeight // aplica as cores novas antes de religar as transições

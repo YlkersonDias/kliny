@@ -12,12 +12,10 @@ public class AuthService(
     AppDbContext db, ITokenService tokenService, ILoginThrottle loginThrottle, IGoogleTokenValidator googleValidator,
     ISecurityNotifier notifier) : IAuthService
 {
-    // Custo do BCrypt (2^11 rodadas), o mesmo no cadastro e no hash fixo abaixo.
     public const int BcryptWorkFactor = 11;
 
-    // S.6: com e-mail sem conta, o login confere a senha contra este hash, com o mesmo custo,
-    // para levar o mesmo tempo que um e-mail cadastrado. Sem isso, medir o tempo da resposta
-    // revelaria quais e-mails têm conta (regra 4). A senha dele é aleatória e descartada.
+    // Com e-mail sem conta, o login confere a senha contra este hash, de mesmo custo: o tempo da
+    // resposta não revela quais e-mails têm conta.
     internal static readonly string TimingHash =
         BCrypt.Net.BCrypt.HashPassword(Guid.NewGuid().ToString("N"), BcryptWorkFactor);
 
@@ -25,14 +23,13 @@ public class AuthService(
     {
         var email = NormalizeEmail(request.Email);
 
-        // E-mail bloqueado recusa até a senha certa; e-mail sem conta também é contado e bloqueado.
+        // Bloqueio por e-mail: conta também e-mail sem conta, para não revelar quem está cadastrado.
         if (loginThrottle.GetLockout(email) is { } retryAfter)
             throw new TooManyRequestsException(retryAfter);
 
         var user = await db.Users.AsNoTracking().FirstOrDefaultAsync(u => u.Email == email);
 
-        // Sempre um BCrypt: o hash do usuário, ou o fixo se o e-mail não tem conta ou a conta não
-        // tem senha (criada só pelo Google), que nunca entra por aqui.
+        // Sempre um BCrypt, mesmo sem conta ou sem senha (conta só do Google), para o tempo ser igual.
         var passwordMatches = BCrypt.Net.BCrypt.Verify(request.Password, user?.PasswordHash ?? TimingHash);
         if (user?.PasswordHash is null || !passwordMatches)
         {
@@ -52,16 +49,14 @@ public class AuthService(
 
     public async Task DeleteAccountAsync(int userId, string? password, string? googleCredential)
     {
-        // O token já foi validado (TokenVersionValidation), então o usuário existe.
         var user = await db.Users.AsNoTracking().FirstAsync(u => u.Id == userId);
 
-        // Mesmo bloqueio do login: com um token roubado, não dá para adivinhar a senha à vontade.
+        // Mesmo bloqueio do login: um token roubado não permite adivinhar a senha à vontade.
         if (loginThrottle.GetLockout(user.Email) is { } retryAfter)
             throw new TooManyRequestsException(retryAfter);
 
         if (user.PasswordHash is not null)
         {
-            // Conta com senha confirma com a senha, mesmo que tenha o Google vinculado.
             if (string.IsNullOrEmpty(password))
                 throw new BusinessRuleException(Messages.PasswordRequired);
             if (!BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
@@ -81,9 +76,7 @@ public class AuthService(
             }
         }
 
-        // As movimentações saem antes do usuário: a chave estrangeira cofre -> movimentação é
-        // RESTRICT, e a cascata a partir do usuário esbarraria nela. Categorias e cofres saem pela
-        // cascata do usuário. Tudo numa transação: ou some tudo, ou nada.
+        // Movimentações antes do usuário: a chave cofre -> movimentação é RESTRICT.
         await using var transaction = await db.Database.BeginTransactionAsync();
         await db.Transactions.Where(t => t.UserId == userId).ExecuteDeleteAsync();
         await db.Users.Where(u => u.Id == userId).ExecuteDeleteAsync();
@@ -98,14 +91,12 @@ public class AuthService(
         if (identity is null)
             return null;
 
-        // Já vinculada: entra pela conta do Google, mesmo que o e-mail dela tenha mudado.
         var linked = await db.Users.FirstOrDefaultAsync(u => u.GoogleSubject == identity.Subject);
         if (linked is not null)
             return BuildResponse(linked);
 
-        // Daqui em diante o e-mail decide (vincular ou criar), então o Google precisa ser a
-        // autoridade sobre ele. Os dois casos recusados dão a mesma resposta: não revela se o
-        // e-mail tem conta (regra 4), e ninguém cria conta com o e-mail de outra pessoa.
+        // Daqui em diante o e-mail decide, então o Google precisa ser a autoridade sobre ele. As recusas
+        // dão a mesma resposta, para não revelar se o e-mail tem conta.
         if (!identity.IsEmailAuthoritative)
             return null;
 
@@ -113,12 +104,11 @@ public class AuthService(
         var existing = await db.Users.FirstOrDefaultAsync(u => u.Email == email);
         if (existing is not null)
         {
-            // Já tem outra conta do Google vinculada: não troca sozinho.
             if (existing.GoogleSubject is not null)
                 return null;
             existing.GoogleSubject = identity.Subject;
             var (response, saved) = await SaveGoogleUserAsync(existing, identity.Subject);
-            // Só quem gravou o vínculo avisa: no empate com outro login simultâneo, um aviso só.
+            // No empate com outro login simultâneo, só quem gravou o vínculo avisa.
             if (saved)
                 notifier.GoogleLinked(existing);
             return response;
@@ -130,16 +120,13 @@ public class AuthService(
             Name = name.Length > 100 ? name[..100] : name,
             Email = email,
             GoogleSubject = identity.Subject,
-            // Conta nova pelo Google também nasce com as categorias padrão.
             Categories = DefaultCategories.Create(),
         };
         db.Users.Add(user);
         return (await SaveGoogleUserAsync(user, identity.Subject)).Response;
     }
 
-    // Dois logins simultâneos com a mesma conta do Google podem tentar gravar juntos: quem perde
-    // esbarra no índice único (do e-mail ou do Google) e entra pela conta que o outro gravou.
-    // Saved: se foi esta requisição que gravou.
+    // Dois logins simultâneos: quem perde no índice único entra pela conta que o outro gravou.
     private async Task<(AuthResponse? Response, bool Saved)> SaveGoogleUserAsync(User user, string subject)
     {
         try
@@ -168,8 +155,7 @@ public class AuthService(
         if (await db.Users.AnyAsync(u => u.GoogleSubject == identity.Subject))
             throw new ConflictException(Messages.GoogleAlreadyLinked);
 
-        // A pessoa já está logada no Kliny e acabou de provar que é dona da conta do Google:
-        // aqui o e-mail da conta Google pode ser outro, e não precisa ser autoridade.
+        // A pessoa já provou as duas contas: aqui o Google não precisa ser autoridade sobre o e-mail.
         user.GoogleSubject = identity.Subject;
         try
         {
@@ -186,10 +172,9 @@ public class AuthService(
     public async Task<UserResponse> UnlinkGoogleAsync(int userId)
     {
         var user = await db.Users.FirstAsync(u => u.Id == userId);
-        // Sem senha, desvincular deixaria a conta sem nenhuma forma de entrar.
+        // Sem senha, desvincular deixaria a conta sem forma de entrar.
         if (user.PasswordHash is null)
             throw new BusinessRuleException(Messages.GoogleUnlinkNeedsPassword);
-        // Sem conta Google vinculada, nada muda e não há o que avisar.
         if (user.GoogleSubject is null)
             return UserResponse.FromUser(user);
         user.GoogleSubject = null;
@@ -198,7 +183,7 @@ public class AuthService(
         return UserResponse.FromUser(user);
     }
 
-    // Um UPDATE só, sem ler antes: duas chamadas simultâneas incrementam as duas vezes.
+    // Um UPDATE só, sem ler antes: chamadas simultâneas incrementam as duas vezes.
     public Task RevokeAllTokensAsync(int userId) =>
         db.Users.Where(u => u.Id == userId)
             .ExecuteUpdateAsync(setters => setters.SetProperty(u => u.TokenVersion, u => u.TokenVersion + 1));

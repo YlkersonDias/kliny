@@ -9,8 +9,6 @@ import { Button } from '../ui/Button'
 import { buttonClass } from '../ui/buttonStyles'
 import { FormAlert } from '../ui/FormAlert'
 
-// Revisão e resultado da importação de extrato (8.3), iguais para OFX e CSV.
-
 export interface Loaded {
   fileName: string
   skipped: number
@@ -32,7 +30,6 @@ interface ReviewProps {
   onSelectAll: (selected: boolean) => void
   onSubmit: () => void
   onAnother: () => void
-  // Só no CSV: volta à escolha das colunas.
   onColumns?: () => void
 }
 

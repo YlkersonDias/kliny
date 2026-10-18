@@ -17,9 +17,7 @@ public class AuthController(
     IAuthService authService, IPasswordResetService passwordResetService, IRegistrationService registrationService,
     IOptions<GoogleOptions> googleOptions) : ControllerBase
 {
-    // Público: as únicas rotas sem login (o Program.cs exige login em todo o resto).
-    // Cadastro: responde sempre 202, tenha o e-mail conta ou não (regra 4). A conta só é criada
-    // pelo link do e-mail (register/complete), com a senha escolhida por quem o recebeu.
+    // Responde sempre 202, tenha o e-mail conta ou não: a conta só nasce pelo link do e-mail.
     [AllowAnonymous]
     [HttpPost("register")]
     [EnableRateLimiting(RateLimitingSetup.RegisterPolicy)]
@@ -32,8 +30,6 @@ public class AuthController(
         return Accepted();
     }
 
-    // Fim do cadastro pelo link: cria a conta e já entra nela. Mesmo limite por IP da recuperação de
-    // senha (quem tenta adivinhar tokens).
     [AllowAnonymous]
     [HttpPost("register/complete")]
     [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
@@ -46,7 +42,7 @@ public class AuthController(
         return CreatedAtAction(nameof(Me), response);
     }
 
-    // Por IP aqui; por e-mail no AuthService (LoginThrottle).
+    // Limite por IP aqui; por e-mail no AuthService.
     [AllowAnonymous]
     [HttpPost("login")]
     [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
@@ -62,8 +58,7 @@ public class AuthController(
             : Ok(response);
     }
 
-    // "Esqueci minha senha": responde sempre 204, exista a conta ou não (regra 4); o link sai por
-    // e-mail em segundo plano. Limite por IP próprio, além do limite por conta no service.
+    // Responde sempre 204, exista a conta ou não.
     [AllowAnonymous]
     [HttpPost("forgot-password")]
     [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
@@ -76,7 +71,6 @@ public class AuthController(
         return NoContent();
     }
 
-    // Troca a senha pelo token do link. Link inválido, vencido ou já usado: 400, sempre a mesma mensagem.
     [AllowAnonymous]
     [HttpPost("reset-password")]
     [EnableRateLimiting(RateLimitingSetup.PasswordResetPolicy)]
@@ -89,8 +83,6 @@ public class AuthController(
         return NoContent();
     }
 
-    // Login com o Google: o frontend manda o comprovante (ID token) do Google Identity Services.
-    // Mesmo limite por IP do login; recusa sempre com a mesma mensagem (regra 4).
     [AllowAnonymous]
     [HttpPost("google")]
     [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
@@ -137,13 +129,11 @@ public class AuthController(
     [ProducesResponseType(StatusCodes.Status401Unauthorized)]
     public async Task<IActionResult> Me()
     {
-        // Token válido de um usuário que não existe mais é tratado como não autenticado.
         var user = await authService.GetUserAsync(User.GetUserId());
         return user is null ? Unauthorized() : Ok(user);
     }
 
-    // Exclui a conta e todos os dados do usuário, de forma irreversível. Exige a senha atual e tem o
-    // mesmo limite por IP do login. Depois disso, o token (e qualquer outro do usuário) responde 401.
+    // Exige a senha atual: um token roubado sozinho não apaga a conta.
     [Authorize]
     [HttpPost("delete-account")]
     [EnableRateLimiting(RateLimitingSetup.LoginPolicy)]
@@ -157,7 +147,6 @@ public class AuthController(
         return NoContent();
     }
 
-    // S.5: invalida todos os tokens do usuário, inclusive o desta requisição.
     [Authorize]
     [HttpPost("logout-all")]
     [ProducesResponseType(StatusCodes.Status204NoContent)]
