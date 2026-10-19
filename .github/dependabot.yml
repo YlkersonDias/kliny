@@ -27,6 +27,17 @@ updates:
         dependency-type: development
       npm-producao:
         dependency-type: production
+    ignore:
+      # Versões maiores das ferramentas mudam a configuração: migração à parte.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "eslint"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "@eslint/js"
+        update-types: ["version-update:semver-major"]
+      # Os tipos acompanham o Node da linha LTS (24).
+      - dependency-name: "@types/node"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: github-actions
     directory: "/"
