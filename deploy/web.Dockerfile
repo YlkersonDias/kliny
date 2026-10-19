@@ -7,7 +7,7 @@ RUN npm ci
 COPY frontend/ ./
 RUN npm run build && node scripts/check-csp.ts
 
-FROM nginxinc/nginx-unprivileged:1.29-alpine
+FROM nginxinc/nginx-unprivileged:1.31-alpine
 COPY deploy/nginx/default.conf /etc/nginx/conf.d/default.conf
 COPY deploy/nginx/security-headers.conf /etc/nginx/security-headers.conf
 COPY --from=build /src/dist /usr/share/nginx/html
