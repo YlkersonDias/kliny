@@ -323,13 +323,14 @@ public static class Messages
         "Termine o seu cadastro no Kliny",
         "Finish signing up for Kliny");
 
-    // {0}: nome; {1}: o link; {2}: horas de validade.
+    // Sem o nome: quem o digitou pode não ser a dona do e-mail.
+    // {0}: o link; {1}: horas de validade.
     public static string RegistrationBody => Text(
-        "Olá, {0}.\n\nPara terminar o seu cadastro no Kliny, abra este link e crie a sua senha:\n\n{1}\n\n"
-        + "O link vale por {2} horas e só pode ser usado uma vez.\n\n"
+        "Olá.\n\nPara terminar o seu cadastro no Kliny, abra este link e crie a sua senha:\n\n{0}\n\n"
+        + "O link vale por {1} horas e só pode ser usado uma vez.\n\n"
         + "Se você não pediu para criar uma conta, pode ignorar este e-mail: nenhuma conta é criada sem ele.\n\nKliny",
-        "Hello, {0}.\n\nTo finish signing up for Kliny, open this link and create your password:\n\n{1}\n\n"
-        + "The link is valid for {2} hours and can be used only once.\n\n"
+        "Hello.\n\nTo finish signing up for Kliny, open this link and create your password:\n\n{0}\n\n"
+        + "The link is valid for {1} hours and can be used only once.\n\n"
         + "If you did not ask to create an account, you can ignore this email: no account is created without it.\n\nKliny");
 
     public static string AccountExistsSubject => Text(

@@ -34,10 +34,10 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
         return response.StatusCode;
     }
 
-    private async Task<string> RequestTokenAsync(string email)
+    private async Task<string> RequestTokenAsync(string email, string name = "Ana")
     {
         var seen = Api.Emails.CountFor(email);
-        Assert.Equal(HttpStatusCode.Accepted, await RequestAsync(email));
+        Assert.Equal(HttpStatusCode.Accepted, await RequestAsync(email, name));
         var message = await Api.Emails.WaitForAsync(email, seen, Ct);
         return MySqlApi.RegistrationLink().Match(message.Text).Groups[1].Value;
     }
@@ -89,7 +89,8 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
         var token = await RequestTokenAsync(email);
         var message = Api.Emails.Sent.Last(m => m.To == email);
         Assert.Equal("Termine o seu cadastro no Kliny", message.Subject);
-        Assert.Contains("Olá, Ana.", message.Text);
+        Assert.StartsWith("Olá.", message.Text);
+        Assert.DoesNotContain("Ana", message.Text);
         Assert.Contains($"https://kliny.test/criar-conta#{token}", message.Text);
         Assert.Contains("24 horas", message.Text);
 
@@ -107,6 +108,22 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
             Assert.Equal(HttpStatusCode.OK, me.StatusCode);
         Assert.Equal(HttpStatusCode.OK, await LoginAsync(email, Password));
         Assert.Equal(1, await UsersWithAsync(email));
+    }
+
+    [Fact]
+    public async Task Nome_digitado_nao_vai_no_e_mail_mas_fica_na_conta()
+    {
+        var email = NewEmail("golpe");
+        const string name = "Sua conta foi bloqueada, ligue 0800";
+        var token = await RequestTokenAsync(email, name);
+        var message = Api.Emails.Sent.Last(m => m.To == email);
+        Assert.DoesNotContain("bloqueada", message.Subject);
+        Assert.DoesNotContain("bloqueada", message.Text);
+        Assert.DoesNotContain("0800", message.Text);
+
+        var (status, body) = await CompleteAsync(token);
+        Assert.Equal(HttpStatusCode.Created, status);
+        Assert.Equal(name, body.GetProperty("user").GetProperty("name").GetString());
     }
 
     [Fact]
@@ -259,6 +276,8 @@ public class RegistrationTests(RegistrationFixture fixture) : IClassFixture<Regi
 
         var message = await Api.Emails.WaitForAsync(email, 0, Ct);
         Assert.Equal("Finish signing up for Kliny", message.Subject);
+        Assert.StartsWith("Hello.", message.Text);
+        Assert.DoesNotContain("Ann", message.Text);
         Assert.Contains("24 hours", message.Text);
     }
 }
