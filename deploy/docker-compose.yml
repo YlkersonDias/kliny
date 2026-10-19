@@ -85,7 +85,7 @@ services:
   # Só com o perfil "tunnel": docker compose --profile tunnel up -d
   cloudflared:
     <<: *hardening
-    image: cloudflare/cloudflared:2026.10.0
+    image: cloudflare/cloudflared:2026.10.1
     profiles: [tunnel]
     command: tunnel --no-autoupdate run
     cap_drop: [ALL]
