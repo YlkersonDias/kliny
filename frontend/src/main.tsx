@@ -38,8 +38,8 @@ createRoot(document.getElementById('root')!).render(
             <LanguageProvider>
               <App />
             </LanguageProvider>
-            <UpdatePrompt />
           </AuthProvider>
+          <UpdatePrompt />
         </QueryClientProvider>
       </BrowserRouter>
     </ThemeProvider>

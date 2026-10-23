@@ -6,7 +6,7 @@ export interface Session {
   user: User
 }
 
-const STORAGE_KEY = 'auth.session'
+export const SESSION_STORAGE_KEY = 'auth.session'
 
 // Cópia em memória: continua valendo se o navegador bloquear o localStorage.
 let current: Session | null = null
@@ -26,11 +26,19 @@ function isSession(value: unknown): value is Session {
 }
 
 // JSON corrompido, formato inesperado ou token vencido são descartados.
+export function parseSession(raw: string | null): Session | null {
+  if (raw === null) return null
+  try {
+    const parsed: unknown = JSON.parse(raw)
+    return isSession(parsed) && !isExpired(parsed) ? parsed : null
+  } catch {
+    return null
+  }
+}
+
 export function loadSession(): Session | null {
   try {
-    const raw = localStorage.getItem(STORAGE_KEY)
-    const parsed: unknown = raw === null ? null : JSON.parse(raw)
-    current = isSession(parsed) && !isExpired(parsed) ? parsed : null
+    current = parseSession(localStorage.getItem(SESSION_STORAGE_KEY))
   } catch {
     current = null
   }
@@ -38,10 +46,15 @@ export function loadSession(): Session | null {
   return current
 }
 
+// Sessão que outra aba gravou: o localStorage já está certo, só falta a cópia em memória.
+export function adoptSession(session: Session): void {
+  current = session
+}
+
 export function saveSession(session: Session): void {
   current = session
   try {
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(session))
+    localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify(session))
   } catch {
     // Sem localStorage (bloqueado ou cheio): só não lembra.
   }
@@ -50,7 +63,7 @@ export function saveSession(session: Session): void {
 export function clearSession(): void {
   current = null
   try {
-    localStorage.removeItem(STORAGE_KEY)
+    localStorage.removeItem(SESSION_STORAGE_KEY)
   } catch {
     // Sem localStorage (bloqueado ou cheio): só não lembra.
   }

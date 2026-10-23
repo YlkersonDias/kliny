@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
+import { Fragment, useCallback, useEffect, useMemo, useState, type ReactNode } from 'react'
 import { useQueryClient } from '@tanstack/react-query'
 import * as authApi from '../api/auth'
 import i18n from '../i18n'
@@ -6,8 +6,11 @@ import { setUnauthorizedHandler } from '../api/client'
 import type { AuthResponse, LoginRequest, User } from '../api/types'
 import { disableGoogleAutoSelect } from '../lib/googleIdentity'
 import { clearSimulatorForm } from '../lib/simulatorStore'
+import { sessionChange } from '../lib/sessionSync'
 import { AuthContext, type AuthContextValue } from './AuthContext'
-import { clearSession, getCurrentSession, loadSession, saveSession, type Session } from './session'
+import {
+  SESSION_STORAGE_KEY, adoptSession, clearSession, getCurrentSession, loadSession, parseSession, saveSession, type Session,
+} from './session'
 
 // setTimeout aceita no máximo ~24,8 dias; acima disso dispara na hora.
 const MAX_TIMEOUT = 2_147_483_647
@@ -17,6 +20,8 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [session, setSession] = useState<Session | null>(loadSession)
   const [isValidating, setIsValidating] = useState(() => session !== null)
   const [notice, setNotice] = useState<string | null>(null)
+  // Muda quando outra aba troca de conta: a tela é remontada sem nada da conta anterior.
+  const [screenKey, setScreenKey] = useState(0)
 
   const endSession = useCallback((message: string | null) => {
     clearSession()
@@ -61,6 +66,27 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     const timer = setTimeout(expire, delay)
     return () => clearTimeout(timer)
   }, [session, expire])
+
+  // Sair ou entrar numa aba vale para todas: a tela nunca fica com a conta que saiu.
+  useEffect(() => {
+    function handleStorage(event: StorageEvent) {
+      // key null: o localStorage inteiro foi limpo.
+      if (event.key !== SESSION_STORAGE_KEY && event.key !== null) return
+      const next = parseSession(event.key === null ? null : event.newValue)
+      const change = sessionChange(getCurrentSession(), next)
+      if (change === 'signedOut') {
+        endSession(i18n.t('auth:signedOutInOtherTab'))
+      } else if (next !== null && change !== 'none') {
+        if (change !== 'refreshed') queryClient.clear()
+        if (change === 'switched') setScreenKey((key) => key + 1)
+        adoptSession(next)
+        setSession(next)
+        setNotice(null)
+      }
+    }
+    window.addEventListener('storage', handleStorage)
+    return () => window.removeEventListener('storage', handleStorage)
+  }, [endSession, queryClient])
 
   const startSession = useCallback((response: AuthResponse) => {
     queryClient.clear()
@@ -115,5 +141,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     deleteAccount,
   }), [session, isValidating, notice, signIn, completeSignUp, signInWithGoogle, updateUser, signOut, signOutEverywhere, deleteAccount])
 
-  return <AuthContext value={value}>{children}</AuthContext>
+  return (
+    <AuthContext value={value}>
+      <Fragment key={screenKey}>{children}</Fragment>
+    </AuthContext>
+  )
 }

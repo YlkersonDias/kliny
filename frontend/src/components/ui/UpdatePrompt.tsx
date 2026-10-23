@@ -3,7 +3,7 @@ import { useRegisterSW } from 'virtual:pwa-register/react'
 import { Button } from './Button'
 
 // Nunca recarrega sozinho: a pessoa pode estar no meio de um formulário. Fica fora do
-// LanguageProvider, que remonta a tela, para registrar o service worker uma vez só.
+// LanguageProvider e do AuthProvider, que remontam a tela, para registrar o service worker uma vez só.
 export function UpdatePrompt() {
   const { t } = useTranslation()
   const { needRefresh: [needRefresh, setNeedRefresh], updateServiceWorker } = useRegisterSW()
