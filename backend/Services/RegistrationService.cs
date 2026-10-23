@@ -65,7 +65,7 @@ public class RegistrationService(
 
         // O token vai depois do "#", fora dos logs do nginx e da Cloudflare.
         Enqueue(new EmailMessage(normalized, Messages.RegistrationSubject,
-            string.Format(Messages.RegistrationBody, cleanName, $"{appUrl}/criar-conta#{token}", (int)Lifetime.TotalHours)));
+            string.Format(Messages.RegistrationBody, $"{appUrl}/criar-conta#{token}", (int)Lifetime.TotalHours)));
     }
 
     public async Task<AuthResponse> CompleteAsync(string token, string password)
