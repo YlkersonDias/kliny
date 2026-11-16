@@ -2,7 +2,7 @@
 #   api      → a API, como usuário sem privilégios (app), na porta 8080.
 #   migrate  → só aplica as migrations, com o kliny_migrator, e termina.
 
-FROM mcr.microsoft.com/dotnet/sdk:10.0 AS build
+FROM mcr.microsoft.com/dotnet/sdk:11.0 AS build
 WORKDIR /src
 COPY global.json Kliny.sln ./
 COPY backend/Kliny.Api.csproj backend/
@@ -17,14 +17,14 @@ ENV PATH="${PATH}:/root/.dotnet/tools"
 RUN Jwt__Key="$(head -c 48 /dev/urandom | base64)" \
     dotnet ef migrations bundle --project backend/Kliny.Api.csproj -o /out/migrate/efbundle
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS api
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS api
 WORKDIR /app
 COPY --from=build /out/api .
 USER $APP_UID
 EXPOSE 8080
 ENTRYPOINT ["dotnet", "Kliny.Api.dll"]
 
-FROM mcr.microsoft.com/dotnet/aspnet:10.0 AS migrate
+FROM mcr.microsoft.com/dotnet/aspnet:11.0 AS migrate
 WORKDIR /app
 COPY --from=build /out/migrate/efbundle .
 COPY --from=build /out/api/appsettings.json .
