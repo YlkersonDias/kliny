@@ -114,12 +114,12 @@ powershell -ExecutionPolicy Bypass -File .\restaurar-backup.ps1 -Arquivo kliny-A
 
 ```powershell
 git pull
-docker compose --profile migrate build
+docker compose --profile migrate build --pull
 docker compose --profile migrate run --rm migrate
 docker compose --profile tunnel up -d
 ```
 
-**Os quatro, nesta ordem.** O `build` remonta as imagens da API, do site **e das migrations**: sem ele, o `migrate` usa a imagem antiga e não aplica a migration nova (aconteceu na publicação da v1.2.0, corrigido na hora).
+**Os quatro, nesta ordem.** O `build` remonta as imagens da API, do site **e das migrations**: sem ele, o `migrate` usa a imagem antiga e não aplica a migration nova (aconteceu na publicação da v1.2.0, corrigido na hora). O `--pull` baixa a versão mais nova das imagens base (.NET, Node e nginx): sem ele, o Docker reaproveita a que já estava no PC, e o servidor fica sem as correções de segurança delas (na v1.14.8, a API subiu com o .NET 10.0.12 de semanas antes).
 
 Para publicar uma versão marcada em vez do `main` atualizado, troque o `git pull` por `git fetch --tags` e `git checkout vX.Y.Z`. Para voltar a uma versão anterior, o mesmo, com a versão anterior. A release de cada versão diz se ela tem migration: uma migration que só acrescenta (tabela ou coluna opcional) não atrapalha o código anterior; uma que remove ou muda algo precisa do `Down` aplicado com o `kliny_migrator`, com backup antes.
 
