@@ -15,6 +15,9 @@ updates:
         update-types: ["version-update:semver-major"]
       - dependency-name: "Pomelo.EntityFrameworkCore.MySql"
         update-types: ["version-update:semver-major"]
+      # O projeto fica no .NET 10 (LTS).
+      - dependency-name: "Microsoft.AspNetCore*"
+        update-types: ["version-update:semver-major"]
 
   - package-ecosystem: npm
     directory: "/frontend"
@@ -59,6 +62,11 @@ updates:
     ignore:
       # O Node fica na linha LTS (24).
       - dependency-name: "node"
+        update-types: ["version-update:semver-major"]
+      # O .NET fica na linha LTS (10).
+      - dependency-name: "dotnet/sdk"
+        update-types: ["version-update:semver-major"]
+      - dependency-name: "dotnet/aspnet"
         update-types: ["version-update:semver-major"]
 
   - package-ecosystem: docker-compose
